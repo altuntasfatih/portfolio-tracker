@@ -1,0 +1,9 @@
+defmodule Util do
+  def round_ceil(number) when is_integer(number) do
+    (number / 1) |> round_ceil()
+  end
+
+  def round_ceil(number) when is_float(number) do
+    Float.ceil(number, 2)
+  end
+end
