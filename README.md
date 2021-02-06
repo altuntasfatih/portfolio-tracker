@@ -1,6 +1,6 @@
 # StockListener
 
-** It will be stock bot that follow stock prices and send notification by custom threshold(Most probably it will works as telegram bot)   **
+## It will be stock bot that follow stocks' prices and send notification by custom threshold(most probably it will works as telegram bot) 
 
 
 
