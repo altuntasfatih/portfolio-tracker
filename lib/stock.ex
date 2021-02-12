@@ -10,13 +10,16 @@ defmodule Stock do
             rate: 0.0,
             target_price: 0
 
-  def new(id, name, stock_count, cost_per_stock) do
+  def new(id, name, stock_count, current_price, target_price) do
     %Stock{
       id: id,
       name: name,
       count: stock_count,
-      total_cost: (cost_per_stock * stock_count) |> round_ceil
+      current_price: current_price,
+      target_price: target_price,
+      total_cost: (current_price * stock_count) |> round_ceil
     }
+    |> calculate(current_price)
   end
 
   def calculate(%Stock{} = stock, current_price) do
@@ -28,5 +31,11 @@ defmodule Stock do
         current_worth: current_worth,
         rate: ((current_worth - stock.total_cost) / stock.total_cost * 100) |> round_ceil
     }
+  end
+
+  defimpl String.Chars, for: Stock do
+    def to_string(stock) do
+      IO.inspect(stock)
+    end
   end
 end
