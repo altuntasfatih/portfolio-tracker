@@ -22,8 +22,8 @@ defmodule StockListener do
   end
 
   @impl true
-  def handle_cast({:update_stocks,stocks},state) do
-    {:noreply, StockPortfolio.update_stocks(state,stocks)}
+  def handle_cast({:update_stocks, stocks}, state) do
+    {:noreply, StockPortfolio.update_stocks(state, stocks)}
   end
 
   @impl true
@@ -39,7 +39,7 @@ defmodule StockListener do
   @impl true
   def handle_info(:update_portfolio, %StockPortfolio{stocks: stocks} = state) do
     Logger.info("Update portfolio -> #{state}")
-    {:noreply, StockPortfolio.update_stocks(update_stock_value(stocks))}
+    {:noreply, StockPortfolio.update_stocks(state, update_stock_value(stocks))}
   end
 
   @impl true

@@ -12,6 +12,7 @@ defmodule StockClient do
     case HTTPoison.post(@url, "", headers) do
       {:ok, response} ->
         {:ok, StockPricesResponse.parse(response.body)}
+
       err ->
         err
     end

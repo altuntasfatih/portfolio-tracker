@@ -31,17 +31,17 @@ defmodule StockListenerTest do
     assert add(pid, stock) == :ok
     assert add(pid, stock2) == :ok
 
-    stock= stock |> Stock.calculate(19.33)
-    stock2= stock2 |> Stock.calculate(102.60)
+    stock = stock |> Stock.calculate(19.33)
+    stock2 = stock2 |> Stock.calculate(102.60)
 
-    assert update_stocks(pid,[stock2,stock]) == :ok
+    assert update_stocks(pid, [stock2, stock]) == :ok
 
     assert get(pid) == %{
-               @portfolio |
-               stocks: [stock, stock2],
+             @portfolio
+             | stocks: [stock, stock2],
                total_cost: 2303.42,
                total_worth: 2301.78,
-               rate: -0.07,
+               rate: -0.07
            }
   end
 
