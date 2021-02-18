@@ -9,7 +9,7 @@ defmodule StockListener.Application do
   def start(_type, _args) do
     children = [
       # Starts a worker by calling: StockListener.Worker.start_link(arg)
-      # {StockListener.Worker, arg}
+      {StockListener.Telegram.Pooler, -1}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

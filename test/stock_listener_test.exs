@@ -45,12 +45,24 @@ defmodule StockListenerTest do
            }
   end
 
+  test "it_should_update_stock_prices", %{pid: pid} do
+    stock = Stock.new("AVISA", "AvivaSA", 66, 18.20, 25.00)
+    stock2 = Stock.new("TUPRS", "Turkiye Petrol ", 10, 110.22, 149.00)
+
+    current_prices = [%{name: "AVISA", price: 19.33}, %{name: "TUPRS", price: 102.60}]
+
+    assert StockListener.update_stock_prices([stock2, stock], current_prices) == [
+             Stock.calculate(stock2, 102.60),
+             Stock.calculate(stock, 19.33)
+           ]
+  end
+
   def get(pid) do
     GenServer.call(pid, :get)
   end
 
   def add(pid, new_stock) do
-    GenServer.cast(pid, {:add, new_stock})
+    GenServer.cast(pid, {:add_stock, new_stock})
   end
 
   def update_stocks(pid, stocks) do
