@@ -1,4 +1,4 @@
-defmodule StockListener.Message do
+defmodule StockListener.Telegram.MessageProcessor do
   require Logger
 
   @pattern " "
