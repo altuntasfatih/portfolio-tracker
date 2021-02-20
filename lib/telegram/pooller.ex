@@ -17,29 +17,22 @@ defmodule StockListener.Telegram.Pooler do
   def handle_info(:get_messages, offset) do
     {:ok, update} = Nadia.get_updates(offset: offset, limit: 1)
     call_itself()
-    {:noreply, process(update)}
+    {:noreply, process(update, offset)}
   end
 
-  def process([]) do
-  end
+  def process([], offset), do: offset
+  def process([u], _), do: process(u)
+  def process(%{message: nil, update_id: id}), do: id + 1
 
-  def process([u]) do
-    message = u.message
-
+  def process(%{message: message, update_id: id}) do
     process_message(message)
-    |> send_reply(message.chat.id)
+    |> send_reply(message.from.id)
 
-    u.update_id + 1
+    id + 1
   end
 
-  defp send_reply("", _) do
-  end
+  defp send_reply("", _), do: :ok
+  defp send_reply(message, from), do: {:ok, _} = Nadia.send_message(from, message)
 
-  defp send_reply(message, from) do
-    {:ok, _} = Nadia.send_message(from, message)
-  end
-
-  defp call_itself() do
-    Process.send_after(self(), :get_messages, @interval)
-  end
+  defp call_itself(), do: Process.send_after(self(), :get_messages, @interval)
 end

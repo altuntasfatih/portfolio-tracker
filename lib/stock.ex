@@ -35,7 +35,14 @@ defmodule Stock do
 
   defimpl String.Chars, for: Stock do
     def to_string(stock) do
-      IO.inspect(stock)
+      "
+      name -> #{stock.name}
+      count: #{stock.count}
+      total_cost: #{stock.total_cost}
+      current_price: #{stock.current_price}
+      current_worth: #{stock.current_worth}
+      rate: #{stock.rate}
+      "
     end
   end
 end

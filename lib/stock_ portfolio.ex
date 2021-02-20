@@ -32,10 +32,26 @@ defmodule StockPortfolio do
   end
 
   defimpl String.Chars, for: StockPortfolio do
+    @spec to_string(
+            atom
+            | %{
+                :id => any,
+                :rate => any,
+                :stocks => any,
+                :total_cost => any,
+                :total_worth => any,
+                optional(any) => any
+              }
+          ) :: <<_::64, _::_*8>>
     def to_string(portfolio) do
-      "%{id: #{portfolio.id}, total_cost: #{portfolio.total_cost}, total_worth: #{
-        portfolio.total_worth
-      }, rate: #{portfolio.rate} }"
+      stocks = Enum.join(portfolio.stocks, ",")
+      "
+        Portfolio -> #{portfolio.id}
+        total_cost: #{portfolio.total_cost}
+        total_worth: #{portfolio.total_worth}
+        rate: #{portfolio.rate}
+        stocks: #{stocks}
+      "
     end
   end
 end

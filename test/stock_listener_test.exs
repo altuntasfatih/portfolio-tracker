@@ -45,7 +45,7 @@ defmodule StockListenerTest do
            }
   end
 
-  test "it_should_update_stock_prices", %{pid: pid} do
+  test "it_should_update_stock_prices", _ do
     stock = Stock.new("AVISA", "AvivaSA", 66, 18.20, 25.00)
     stock2 = Stock.new("TUPRS", "Turkiye Petrol ", 10, 110.22, 149.00)
 
