@@ -87,7 +87,7 @@ defmodule StockListener do
         callback.(pid)
 
       _ ->
-        "There is no lister for you, if you want to create it , type \"start\" before any action"
+        "There is no listener for you, if you want to create it , type \"start\" before any action"
     end
   end
 
