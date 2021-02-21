@@ -1,7 +1,16 @@
 defmodule StockListener.Telegram.MessageProcessor do
   require Logger
 
-  @type instructions :: :get | :start | :current | :add
+  @type instructions :: :get | :start | :current | :add | :help
+  @help_reply "
+/start    -> it start new stock lister for you. \n
+/get      -> it gets your stock portfolio. \n
+/add      -> it adds stock to your portfolio,
+          e.g. /add id name count price target_price
+          (id must be same with exchanges id/name) \n
+/current  -> it calculates your portfolio with live prices. \n
+/help     -> help()."
+
   @pattern " "
 
   def process_message(message) do
@@ -42,6 +51,8 @@ defmodule StockListener.Telegram.MessageProcessor do
   end
 
   def process_message(:add, args, _from) when length(args) != 5, do: {:error, :missing_parameter}
+
+  def process_message(:help, _args, _from), do: {:ok, @help_reply}
 
   def process_message(_, _, _), do: {:error, :instruction_not_found}
 

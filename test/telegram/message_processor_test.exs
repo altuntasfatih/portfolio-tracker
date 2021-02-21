@@ -2,8 +2,6 @@ defmodule Telegram.MessageProcessorTest do
   use ExUnit.Case
   import StockListener.Telegram.MessageProcessor
 
-  @id 1
-
   test "it_should_start_listener" do
     assert process_message(create_message("/start")) == "Stock listener was created for you"
   end
@@ -37,11 +35,15 @@ defmodule Telegram.MessageProcessorTest do
              "There is no stock listener for you, You should create first"
   end
 
+  test "it_should_return_help_manual" do
+    refute process_message(create_message("/help")) == ""
+  end
+
   # todo add test for current instruction
 
   def start() do
     assert process_message(create_message("/start")) == "Stock listener was created for you"
   end
 
-  def create_message(message), do: %{text: message, from: %{id: @id}}
+  def create_message(message), do: %{text: message, from: %{id: 1}}
 end
