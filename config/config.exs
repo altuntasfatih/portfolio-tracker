@@ -5,4 +5,4 @@ config :nadia,
 
 config :stock_listener, :stock_api, StockListener.StockApi
 
-import_config "#{config_env()}.exs"
+import_config "#{Mix.env()}.exs"
