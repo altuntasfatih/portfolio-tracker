@@ -87,7 +87,7 @@ defmodule StockListener do
         callback.(pid)
 
       _ ->
-        "There is no listener for you, if you want to create it , type \"start\" before any action"
+        {:error, :listener_not_found}
     end
   end
 

@@ -2,34 +2,45 @@ defmodule Telegram.MessageProcessorTest do
   use ExUnit.Case
   import StockListener.Telegram.MessageProcessor
 
-  test "it_should_process_start_instruction" do
-    assert process_message(create_message("start")) == "Stock listener was created for you"
+  @id 1
+
+  test "it_should_start_listener" do
+    assert process_message(create_message("/start")) == "Stock listener was created for you"
   end
 
-  test "it_should_process_add_instruction" do
+  test "it_should_return_listener_already_started" do
     start()
-    assert process_message(create_message("add VAKBN VAKIF_BANK 250 4.5 5")) == :ok
+
+    assert process_message(create_message("/start")) ==
+             "Your stock listener have already been created"
+  end
+
+  test "it_should_add_stock" do
+    start()
+    assert process_message(create_message("/add VAKBN VAKIF_BANK 250 4.5 5")) == :ok
   end
 
   test "it_should_return_parse_error_when_add_args_is_invalid" do
     start()
-    assert process_message(create_message("add VAKBN VAKIF_BANK x x as")) == "Parse error"
+
+    assert process_message(create_message("/add VAKBN VAKIF_BANK x x as")) ==
+             "Argumet/Arguments formats are invalid"
   end
 
   test "it_should_return_args_missing_when_add_args_is_invalid" do
     start()
-    assert process_message(create_message("add")) == "Arg is missing"
+    assert process_message(create_message("/add")) == "Argumet/Arguments are missing"
   end
 
-  test "it_should_not_process_when_listener_not_started" do
-    assert process_message(create_message("get")) ==
-             "There is no listener for you, if you want to create it , type \"start\" before any action"
+  test "it_should_not_process_message_when_listener_not_started" do
+    assert process_message(create_message("/get")) ==
+             "There is no stock listener for you, You should create first"
   end
 
-  #todo add test for current instruction
+  # todo add test for current instruction
 
   def start() do
-    assert process_message(create_message("start")) == "Stock listener was created for you"
+    assert process_message(create_message("/start")) == "Stock listener was created for you"
   end
 
   def create_message(message), do: %{text: message, from: %{id: @id}}
