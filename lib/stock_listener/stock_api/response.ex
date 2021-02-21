@@ -1,7 +1,9 @@
-defmodule StockPricesResponse do
+defmodule StockListener.StockApi.StockPricesResponse do
+  alias StockListener.StockApi.StockPricesResponse
   @derive [Poison.Decoder]
   defstruct success: false, result: []
 
+  @spec parse(binary) :: list
   def parse(body) when is_binary(body) do
     Poison.decode!(body, as: %StockPricesResponse{})
     |> get_stocks()

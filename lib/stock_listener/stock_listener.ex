@@ -2,6 +2,7 @@ defmodule StockListener do
   @moduledoc """
   Documentation for `StockListener`.
   """
+  alias StockListener.StockApi
   use GenServer
   require Logger
 
@@ -61,7 +62,7 @@ defmodule StockListener do
   end
 
   defp update_stock_prices(stocks) do
-    {:ok, current_prices} = StockClient.stock_prices()
+    {:ok, current_prices} = StockApi.stock_prices()
     update_stock_prices(stocks, current_prices)
   end
 

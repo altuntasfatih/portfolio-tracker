@@ -1,7 +1,11 @@
-defmodule StockClient do
+defmodule StockListener.CollectionApi do
+  @behaviour StockListener.StockApi
+  alias StockListener.StockApi.StockPricesResponse
+
   @token "apikey 1hMoXHboCriCLsuorHwr0t:54DcwpMehYTRBUvfDQRfFz"
   @url "https://api.collectapi.com/economy/liveBorsa"
 
+  @spec stock_prices :: {:error, HTTPoison.Error.t()} | {:ok, list}
   def stock_prices() do
     headers = [
       authorization: @token,
