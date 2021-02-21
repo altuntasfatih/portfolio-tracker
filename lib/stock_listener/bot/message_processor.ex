@@ -1,4 +1,4 @@
-defmodule StockListener.Telegram.MessageProcessor do
+defmodule Bot.MessageProcessor do
   require Logger
 
   @type instructions :: :get | :start | :current | :add | :help

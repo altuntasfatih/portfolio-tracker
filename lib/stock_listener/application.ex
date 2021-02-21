@@ -8,8 +8,8 @@ defmodule StockListener.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      # Starts a worker by calling: StockListener.Worker.start_link(arg)
-      {StockListener.Telegram.Pooler, -1}
+      # -1 is offset get last message
+      {Bot.Pooler, -1}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

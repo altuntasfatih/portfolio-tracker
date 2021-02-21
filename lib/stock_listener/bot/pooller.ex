@@ -1,6 +1,6 @@
-defmodule StockListener.Telegram.Pooler do
+defmodule Bot.Pooler do
   use GenServer
-  import StockListener.Telegram.MessageProcessor
+  import Bot.MessageProcessor
 
   @interval 1000
   def start_link(offset) do

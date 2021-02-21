@@ -1,6 +1,6 @@
 defmodule Telegram.MessageProcessorTest do
   use ExUnit.Case
-  import StockListener.Telegram.MessageProcessor
+  import Bot.MessageProcessor
 
   test "it_should_start_listener" do
     assert process_message(create_message("/start")) == "Stock listener was created for you"
