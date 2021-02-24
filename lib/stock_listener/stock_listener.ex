@@ -36,6 +36,11 @@ defmodule StockListener do
   end
 
   @impl true
+  def handle_cast({:delete_stock, stock_id}, state) do
+    {:noreply, StockPortfolio.delete_stock(state, stock_id)}
+  end
+
+  @impl true
   def handle_cast(:update_prices, state), do: handle_info(:update_prices, state)
 
   @impl true
@@ -78,9 +83,11 @@ defmodule StockListener do
     do: via_tuple(id, &GenServer.cast(&1, {:update_stocks, stocks}))
 
   def current(id) do
-    :ok = update_prices(id)
-    get(id)
+    update_prices(id)
   end
+
+  def delete_stock(id, stock_id),
+    do: via_tuple(id, &GenServer.cast(&1, {:delete_stock, stock_id}))
 
   def via_tuple(id, callback) do
     case :global.whereis_name({id, __MODULE__}) do
@@ -97,7 +104,7 @@ defmodule StockListener do
       id: __MODULE__,
       start: {__MODULE__, :start_link, [opts]},
       type: :worker,
-      restart: :transient,
+      restart: :permanent,
       shutdown: 500
     }
   end

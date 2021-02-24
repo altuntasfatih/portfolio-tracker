@@ -1,15 +1,17 @@
 defmodule Bot.MessageProcessor do
   require Logger
 
-  @type instructions :: :get | :start | :current | :add | :help
+  @type instructions :: :get | :start | :current | :add | :delete | :help
   @help_reply "
-/start    -> it start new stock lister for you. \n
-/get      -> it gets your stock portfolio. \n
-/add      -> it adds stock to your portfolio,
-          e.g. /add id name count price target_price
-          (id must be same with exchanges id/name) \n
-/current  -> it calculates your portfolio with live prices. \n
-/help     -> help()."
+/start     -> it start new stock lister for you. \n
+/get       -> it gets your stock portfolio. \n
+/add       -> it adds stock to your portfolio,
+           e.g. /add id name count price target_price
+           (id must be same with exchanges id/name) \n
+/delete    -> it deletes stock from portfolie,
+            e.g. /delete id \n
+/current   -> it calculates your portfolio with live prices. \n
+/help      -> help()."
 
   @pattern " "
 
@@ -61,6 +63,11 @@ defmodule Bot.MessageProcessor do
   end
 
   def process_message(:add, args, _from) when length(args) != 5, do: {:error, :missing_parameter}
+
+  def process_message(:delete, [stock_id], from),
+    do: StockListener.delete_stock(from.id, stock_id)
+
+  def process_message(:delete, _, _), do: {:error, :missing_parameter}
 
   def process_message(:help, _args, _from), do: {:ok, @help_reply}
 

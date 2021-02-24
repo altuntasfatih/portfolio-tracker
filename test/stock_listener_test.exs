@@ -26,6 +26,14 @@ defmodule StockListenerTest do
            }
   end
 
+  test "it_should_delete_stock_from_portfolio", %{pid: pid} do
+    stock = Stock.new("AVISA", "avivasa", 66, 18.20, 25.00)
+    assert add(pid, stock) == :ok
+    assert delete(pid, stock.id) == :ok
+
+    assert get(pid) == @portfolio
+  end
+
   test "it_should_update_portfolio", %{pid: pid} do
     stock = Stock.new("AVISA", "AvivaSA", 66, 18.20, 25.00)
     stock2 = Stock.new("TUPRS", "Turkiye Petrol ", 10, 110.22, 149.00)
@@ -87,6 +95,10 @@ defmodule StockListenerTest do
 
   def add(pid, new_stock) do
     GenServer.cast(pid, {:add_stock, new_stock})
+  end
+
+  def delete(pid, stock_id) do
+    GenServer.cast(pid, {:delete_stock, stock_id})
   end
 
   def update_prices(pid) do

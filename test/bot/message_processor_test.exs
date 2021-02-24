@@ -18,6 +18,11 @@ defmodule Telegram.MessageProcessorTest do
     assert process_message(create_message("/add VAKBN VAKIF_BANK 250 4.5 5")) == :ok
   end
 
+  test "it_should_delete_stock" do
+    start()
+    assert process_message(create_message("/delete VAKBN")) == :ok
+  end
+
   test "it_should_return_parse_error_when_add_args_is_invalid" do
     start()
 

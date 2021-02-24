@@ -11,6 +11,11 @@ defmodule StockPortfolio do
     |> calculate()
   end
 
+  def delete_stock(%StockPortfolio{} = portfolio, stock_id) do
+    Map.put(portfolio, :stocks, Enum.filter(portfolio.stocks, &(&1.id != stock_id)))
+    |> calculate()
+  end
+
   def update_stocks(%StockPortfolio{} = portfolio, new_stocks) do
     Map.put(portfolio, :stocks, new_stocks)
     |> calculate()
@@ -44,14 +49,12 @@ defmodule StockPortfolio do
               }
           ) :: <<_::64, _::_*8>>
     def to_string(portfolio) do
-      stocks = Enum.join(portfolio.stocks, ",")
-      "
-        Portfolio -> #{portfolio.id}
-        total_cost: #{portfolio.total_cost}
-        total_worth: #{portfolio.total_worth}
-        rate: #{portfolio.rate}
-        stocks: #{stocks}
-      "
+      stocks = Enum.join(portfolio.stocks, ",\n")
+      "Portfolio -> #{portfolio.id}
+       total_cost: #{portfolio.total_cost}
+       total_worth: #{portfolio.total_worth}
+       rate: #{portfolio.rate}
+       stocks: \n #{stocks}"
     end
   end
 end
