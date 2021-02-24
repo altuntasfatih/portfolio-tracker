@@ -39,7 +39,73 @@ defmodule Telegram.MessageProcessorTest do
     refute process_message(create_message("/help")) == ""
   end
 
-  # todo add test for current instruction
+  test "it_should_return_not_support" do
+    assert process_message(create_message("not supported message")) ==
+             "Instruction does not exist"
+  end
+
+  test "it_should_only_support_text_message" do
+    assert process_message(image_message()) ==
+             "Instruction does not exist"
+  end
+
+  def image_message() do
+    %{
+      audio: nil,
+      caption: nil,
+      channel_chat_created: nil,
+      chat: %{
+        first_name: "Fatih",
+        id: 124_101_565,
+        last_name: nil,
+        photo: nil,
+        title: nil,
+        type: "private",
+        username: nil
+      },
+      contact: nil,
+      date: 1_614_186_146,
+      delete_chat_photo: nil,
+      document: nil,
+      edit_date: nil,
+      entities: nil,
+      forward_date: nil,
+      forward_from: nil,
+      forward_from_chat: nil,
+      from: %{
+        first_name: "Fatih",
+        id: 124_101_565,
+        last_name: nil,
+        username: nil
+      },
+      group_chat_created: nil,
+      left_chat_member: nil,
+      location: nil,
+      message_id: 317,
+      migrate_from_chat_id: nil,
+      migrate_to_chat_id: nil,
+      new_chat_member: nil,
+      new_chat_photo: [],
+      new_chat_title: nil,
+      photo: [
+        %{
+          file_id:
+            "AgACAgQAAxkBAAIBPWA2hqJcFWbtqrd94qcgdR1EJpfaAAKbtjEbv46xUQ5gpcO-8PEOjob5KF0AAwEAAwIAA3kAA1ITBAABHgQ",
+          file_size: 120_613,
+          height: 1280,
+          width: 804
+        }
+      ],
+      pinned_message: nil,
+      reply_to_message: nil,
+      sticker: nil,
+      supergroup_chat_created: nil,
+      text: nil,
+      venue: nil,
+      video: nil,
+      voice: nil
+    }
+  end
 
   def start() do
     assert process_message(create_message("/start")) == "Stock listener was created for you"

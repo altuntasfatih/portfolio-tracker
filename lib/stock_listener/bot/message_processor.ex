@@ -14,17 +14,27 @@ defmodule Bot.MessageProcessor do
   @pattern " "
 
   def process_message(message) do
-    [instruction | args] =
-      String.trim(message.text)
-      |> String.split(@pattern)
-      |> Enum.filter(fn x -> x != "" end)
+    case preprocess_text(message.text) do
+      [instruction | args] ->
+        print(instruction, args)
 
-    print(instruction, args)
+        String.slice(instruction, 1..-1)
+        |> String.to_atom()
+        |> process_message(args, message.from)
+        |> prepare_reply
 
-    String.slice(instruction, 1..-1)
-    |> String.to_atom()
-    |> process_message(args, message.from)
-    |> prepare_reply
+      _ ->
+        prepare_reply({:error, :instruction_not_found})
+    end
+  end
+
+  @spec preprocess_text(binary) :: list
+  defp preprocess_text(nil), do: []
+
+  defp preprocess_text(text) do
+    String.trim(text)
+    |> String.split(@pattern)
+    |> Enum.filter(fn x -> x != "" end)
   end
 
   @spec process_message(instructions, list, any) :: any
