@@ -9,6 +9,7 @@ defmodule Bot.Pooler do
 
   @impl true
   def init(offset) do
+
     call_itself()
     {:ok, offset}
   end
