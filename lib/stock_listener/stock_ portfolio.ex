@@ -1,6 +1,6 @@
 defmodule StockPortfolio do
   import Util
-  defstruct id: "", stocks: [], total_cost: 0.0, total_worth: 0.0, rate: 0.0
+  defstruct id: "", stocks: [], total_cost: 0.0, total_worth: 0.0, rate: 0.0, update_time: nil
 
   def new(id) do
     %StockPortfolio{id: id}
@@ -19,6 +19,7 @@ defmodule StockPortfolio do
   def update_stocks(%StockPortfolio{} = portfolio, new_stocks) do
     Map.put(portfolio, :stocks, new_stocks)
     |> calculate()
+    |> Map.put(:update_time, NaiveDateTime.utc_now())
   end
 
   defp calculate(%StockPortfolio{} = portfolio) do
@@ -54,6 +55,7 @@ defmodule StockPortfolio do
        total_cost: #{portfolio.total_cost}
        total_worth: #{portfolio.total_worth}
        rate: #{portfolio.rate}
+       update_time: #{portfolio.update_time}
        stocks: \n #{stocks}"
     end
   end

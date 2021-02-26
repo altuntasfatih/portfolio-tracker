@@ -6,12 +6,22 @@ defmodule StockListener do
   use GenServer
   require Logger
 
+  @backup_path "./backup/"
+
   def start_link(%StockPortfolio{} = state) do
     GenServer.start_link(__MODULE__, state, name: {:global, {state.id, __MODULE__}})
   end
 
   def start_link(id) do
-    start_link(StockPortfolio.new(id))
+    load_create_state(id)
+    |> start_link()
+  end
+
+  defp load_create_state(id) do
+    case File.read(@backup_path <> "#{id}") do
+      {:ok, binary} -> :erlang.binary_to_term(binary)
+      _ -> StockPortfolio.new(id)
+    end
   end
 
   @impl true
@@ -42,6 +52,18 @@ defmodule StockListener do
 
   @impl true
   def handle_cast(:update_prices, state), do: handle_info(:update_prices, state)
+
+  @impl true
+  def handle_info(:take_backup, state) do
+    binary = :erlang.term_to_binary(state)
+
+    case File.write(@backup_path <> "#{state.id}", binary) do
+      :ok -> Logger.info("State was succefully back up")
+      {:error, err} -> Logger.error("Back up failed err -> #{err}")
+    end
+
+    {:noreply, state}
+  end
 
   @impl true
   def handle_info(:update_prices, %StockPortfolio{stocks: []} = state) do
@@ -86,13 +108,17 @@ defmodule StockListener do
     update_prices(id)
   end
 
+  defp take_backup(pid), do: Process.send_after(pid, :take_backup, 1000)
+
   def delete_stock(id, stock_id),
     do: via_tuple(id, &GenServer.cast(&1, {:delete_stock, stock_id}))
 
   def via_tuple(id, callback) do
     case :global.whereis_name({id, __MODULE__}) do
       pid when is_pid(pid) ->
-        callback.(pid)
+        resp = callback.(pid)
+        take_backup(pid)
+        resp
 
       _ ->
         {:error, :listener_not_found}
