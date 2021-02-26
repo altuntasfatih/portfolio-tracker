@@ -45,13 +45,12 @@ defmodule StockListenerTest do
 
     assert update_stocks(pid, [stock2, stock]) == :ok
 
-    assert get(pid) == %{
-             @portfolio
-             | stocks: [stock, stock2],
-               total_cost: 2303.42,
-               total_worth: 2301.78,
-               rate: -0.07
-           }
+    portfolio = get(pid)
+    assert portfolio.stocks == [stock, stock2]
+    assert portfolio.total_cost == 2303.42
+    assert portfolio.total_worth == 2301.78
+    assert portfolio.rate == -0.07
+    assert portfolio.update_time != nil
   end
 
   test "it_should_update_stock_prices", _ do
@@ -80,13 +79,12 @@ defmodule StockListenerTest do
 
     assert update_prices(pid) == :ok
 
-    assert get(pid) == %{
-             @portfolio
-             | stocks: [Stock.calculate(stock2, 5), Stock.calculate(stock, 15.00)],
-               total_cost: 125.0,
-               total_worth: 175.0,
-               rate: 40.0
-           }
+    portfolio = get(pid)
+    assert portfolio.stocks == [Stock.calculate(stock2, 5), Stock.calculate(stock, 15.00)]
+    assert portfolio.total_cost == 125.0
+    assert portfolio.total_worth == 175.0
+    assert portfolio.rate == 40.0
+    assert portfolio.update_time != nil
   end
 
   def get(pid) do
