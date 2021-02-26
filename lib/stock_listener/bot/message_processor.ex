@@ -3,7 +3,7 @@ defmodule Bot.MessageProcessor do
 
   @type instructions :: :get | :start | :current | :add | :delete | :help
   @help_reply "
-/start     -> it start new stock lister for you. \n
+/start     -> it starts new stock lister for you. \n
 /get       -> it gets your stock portfolio. \n
 /add       -> it adds stock to your portfolio,
            e.g. /add id name count price target_price
