@@ -3,15 +3,15 @@ defmodule Bot.MessageProcessor do
 
   @type instructions :: :get | :start | :current | :add | :delete | :help
   @help_reply "
-/start     -> it starts new stock lister for you. \n
-/get       -> it gets your stock portfolio. \n
-/add       -> it adds stock to your portfolio,
-           e.g. /add id name count price target_price
-           (id must be same with exchanges id/name) \n
-/delete    -> it deletes stock from portfolie,
-            e.g. /delete id \n
-/current   -> it calculates your portfolio with live prices. \n
-/help      -> help()."
+*\/start*   -> it starts new stock lister for you.
+*\/get*     -> it gets your stock portfolio.
+*\/add*     -> it adds stock to your portfolio,
+                e.g. \/add id name count price targetPrice
+                (id must be same with exchangesId)
+*\/delete*  -> it deletes stock from portfolie,
+                e.g. \/delete id
+*\/current* -> it calculates your portfolio with live prices.
+*\/help*    -> help."
 
   @pattern " "
 
