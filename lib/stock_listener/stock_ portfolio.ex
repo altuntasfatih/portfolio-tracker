@@ -50,13 +50,14 @@ defmodule StockPortfolio do
               }
           ) :: <<_::64, _::_*8>>
     def to_string(portfolio) do
-      stocks = Enum.join(portfolio.stocks, ",\n")
-      "Portfolio -> #{portfolio.id}
-       total_cost: #{portfolio.total_cost}
-       total_worth: #{portfolio.total_worth}
-       rate: #{portfolio.rate}
-       update_time: #{portfolio.update_time}
-       stocks: \n #{stocks}"
+      stocks = Enum.join(portfolio.stocks, "\n -------------------------------------")
+      "Portfolio Identity : #{portfolio.id}
+       Total Cost : #{portfolio.total_cost}
+       Total Worth : #{portfolio.total_worth}
+       Update Time : #{portfolio.update_time}
+       Rate : #{portfolio.rate}
+       Stocks ->
+       #{stocks}"
     end
   end
 end
