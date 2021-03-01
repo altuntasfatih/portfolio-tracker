@@ -1,4 +1,4 @@
 import Config
 
 config :nadia,
-  token: "Empty"
+  token: "1601630543:AAENMZ2mVa4qjAMZzZt2-SdKzQzYYRDtVs8"

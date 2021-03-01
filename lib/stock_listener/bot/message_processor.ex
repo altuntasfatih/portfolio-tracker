@@ -2,19 +2,10 @@ defmodule Bot.MessageProcessor do
   require Logger
 
   @type instructions :: :get | :start | :current | :add | :delete | :help
-  @help_reply "
-*\/start*   -> it starts new stock lister for you.
-*\/get*     -> it gets your stock portfolio.
-*\/add*     -> it adds stock to your portfolio,
-                e.g. \/add id name count price targetPrice
-                (id must be same with exchangesId)
-*\/delete*  -> it deletes stock from portfolie,
-                e.g. \/delete id
-*\/current* -> it calculates your portfolio with live prices.
-*\/help*    -> help."
+
+  @help_file "./resource/help.md"
 
   @pattern " "
-
   def process_message(message) do
     case preprocess_text(message.text) do
       [instruction | args] ->
@@ -69,7 +60,7 @@ defmodule Bot.MessageProcessor do
 
   def process_message(:delete, _, _), do: {:error, :missing_parameter}
 
-  def process_message(:help, _args, _from), do: {:ok, @help_reply}
+  def process_message(:help, _args, _from), do: File.read(@help_file)
 
   def process_message(_, _, _), do: {:error, :instruction_not_found}
 
