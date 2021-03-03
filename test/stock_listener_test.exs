@@ -1,12 +1,12 @@
-defmodule StockListenerTest do
+defmodule StockListener.ServerTest do
   use ExUnit.Case
-  doctest StockListener
+  alias StockListener.Server
 
   @portfolio %StockPortfolio{id: "1", rate: 0.0, stocks: [], total_cost: 0.0, total_worth: 0.0}
 
   setup do
     {:ok, _} = StockListener.MockStockApi.start_link()
-    {:ok, pid} = GenServer.start_link(StockListener, @portfolio)
+    {:ok, pid} = GenServer.start_link(Server, @portfolio)
     {:ok, pid: pid}
   end
 
@@ -59,7 +59,7 @@ defmodule StockListenerTest do
 
     current_prices = [%{name: "AVISA", price: 19.33}, %{name: "TUPRS", price: 102.60}]
 
-    assert StockListener.update_stock_prices([stock2, stock], current_prices) == [
+    assert Server.update_stock_prices([stock2, stock], current_prices) == [
              Stock.calculate(stock2, 102.60),
              Stock.calculate(stock, 19.33)
            ]

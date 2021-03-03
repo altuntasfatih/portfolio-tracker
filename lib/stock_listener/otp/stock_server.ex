@@ -1,4 +1,4 @@
-defmodule StockListener do
+defmodule StockListener.Server do
   @moduledoc """
   Documentation for `StockListener`.
   """

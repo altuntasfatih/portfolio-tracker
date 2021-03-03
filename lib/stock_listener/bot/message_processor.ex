@@ -1,5 +1,7 @@
 defmodule Bot.MessageProcessor do
   require Logger
+  alias StockListener.MySupervisor
+  alias StockListener.Server
 
   @type instructions :: :get | :start | :current | :add | :delete | :help
 
@@ -32,22 +34,22 @@ defmodule Bot.MessageProcessor do
 
   @spec process_message(instructions, list, any) :: any
   def process_message(:start, _args, from) do
-    case StockListener.start_link(from.id) do
+    case MySupervisor.start_listener(from.id) do
       {:ok, _pid} -> {:ok, :listener_started}
       {:error, {:already_started, _pid}} -> {:error, :listener_already_started}
     end
   end
 
-  def process_message(:get, _args, from), do: StockListener.get(from.id)
+  def process_message(:get, _args, from), do: Server.get(from.id)
 
-  def process_message(:current, _args, from), do: StockListener.current(from.id)
+  def process_message(:current, _args, from), do: Server.current(from.id)
 
   def process_message(:add, [id, name, count, price, target_price], from) do
     with {count, _} <- Integer.parse(count),
          {price, _} <- Float.parse(price),
          {target_price, _} <- Float.parse(target_price) do
       Stock.new(id, name, count, price, target_price)
-      |> StockListener.add_stock(from.id)
+      |> Server.add_stock(from.id)
     else
       _ -> {:error, :args_parse_error}
     end
@@ -56,7 +58,7 @@ defmodule Bot.MessageProcessor do
   def process_message(:add, args, _from) when length(args) != 5, do: {:error, :missing_parameter}
 
   def process_message(:delete, [stock_id], from),
-    do: StockListener.delete_stock(from.id, stock_id)
+    do: Server.delete_stock(from.id, stock_id)
 
   def process_message(:delete, _, _), do: {:error, :missing_parameter}
 
