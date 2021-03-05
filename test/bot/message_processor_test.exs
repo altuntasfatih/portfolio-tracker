@@ -1,6 +1,12 @@
 defmodule Telegram.MessageProcessorTest do
   use ExUnit.Case
   import Bot.MessageProcessor
+  alias StockListener.MySupervisor
+
+  setup do
+    on_exit(fn -> MySupervisor.termine_all() end)
+  end
+
 
   test "it_should_start_listener" do
     assert process_message(create_message("/start")) == "Stock listener was created for you"

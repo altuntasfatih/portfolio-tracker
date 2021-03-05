@@ -29,7 +29,7 @@ defmodule StockPortfolio do
 
       %StockPortfolio{
         acc
-        | stocks: [s | acc.stocks],
+        | stocks: [s | acc.stocks] |> Enum.sort(&(&1.rate >= &2.rate)),
           total_cost: cost,
           total_worth: worth,
           rate: ((worth - cost) / cost * 100) |> round_ceil

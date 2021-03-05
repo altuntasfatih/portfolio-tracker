@@ -80,7 +80,7 @@ defmodule StockListener.ServerTest do
     assert update_prices(pid) == :ok
 
     portfolio = get(pid)
-    assert portfolio.stocks == [Stock.calculate(stock2, 5), Stock.calculate(stock, 15.00)]
+    assert portfolio.stocks == [Stock.calculate(stock, 15.00), Stock.calculate(stock2, 5)]
     assert portfolio.total_cost == 125.0
     assert portfolio.total_worth == 175.0
     assert portfolio.rate == 40.0

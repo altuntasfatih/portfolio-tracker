@@ -25,4 +25,14 @@ defmodule StockListener.MySupervisor do
   def count_children do
     DynamicSupervisor.count_children(__MODULE__)
   end
+
+  @spec termine_child(pid) :: :ok | {:error, :not_found}
+  def termine_child(pid) do
+    DynamicSupervisor.terminate_child(__MODULE__, pid)
+  end
+
+  def termine_all() do
+    children()
+    |> Enum.map(fn {_, pid, _, _} -> termine_child(pid) end)
+  end
 end
