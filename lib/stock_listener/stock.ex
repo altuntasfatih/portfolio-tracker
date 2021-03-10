@@ -39,7 +39,7 @@ defmodule Stock do
       "
       Stock name : #{stock.id}
       Stock count : #{stock.count}
-      Purchase price : #{stock.count}
+      Purchase price : #{stock.purchase_price}
       Total cost : #{stock.total_cost}
       Current price : #{stock.current_price}
       Current worth : #{stock.current_worth}

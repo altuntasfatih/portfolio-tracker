@@ -62,7 +62,10 @@ defmodule Bot.MessageProcessor do
 
   def process_message(:delete, _, _), do: {:error, :missing_parameter}
 
-  def process_message(:help, _args, _from), do: File.read(@help_file)
+  def process_message(:help, _args, _from) do
+    {:ok, content} = File.read(@help_file)
+    {:ok, {content, [parse_mode: :markdown]}}
+  end
 
   def process_message(_, _, _), do: {:error, :instruction_not_found}
 
