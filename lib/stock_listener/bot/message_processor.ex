@@ -3,7 +3,7 @@ defmodule Bot.MessageProcessor do
   alias StockListener.MySupervisor
   alias StockListener.Server
 
-  @type instructions :: :get | :start | :current | :add | :delete | :help
+  @type instructions :: :get | :start | :live | :add | :delete | :help
 
   @help_file "./resource/help.md"
 
@@ -42,7 +42,7 @@ defmodule Bot.MessageProcessor do
 
   def process_message(:get, _args, from), do: Server.get(from.id)
 
-  def process_message(:current, _args, from), do: Server.current(from.id)
+  def process_message(:live, _args, from), do: Server.get_live(from.id)
 
   def process_message(:add, [id, name, count, price, target_price], from) do
     with {count, _} <- Integer.parse(count),

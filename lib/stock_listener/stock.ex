@@ -44,7 +44,10 @@ defmodule Stock do
       Current price : #{stock.current_price}
       Current worth : #{stock.current_worth}
       Target  price : #{stock.target_price}
-      Rate : #{stock.rate}"
+      Rate : #{rate(stock.rate)}"
     end
+
+    def rate(r) when r < 0, do: "#{r} 🔴 "
+    def rate(r) when r >= 0, do: "#{r} 🟢 "
   end
 end

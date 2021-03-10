@@ -98,14 +98,16 @@ defmodule StockListener.Server do
 
   def get(id), do: via_tuple(id, &GenServer.call(&1, :get))
 
+
   def add_stock(%Stock{} = stock, id), do: via_tuple(id, &GenServer.cast(&1, {:add_stock, stock}))
   def update_prices(id), do: via_tuple(id, &GenServer.cast(&1, :update_prices))
 
   def update_stocks(stocks, id) when is_list(stocks),
     do: via_tuple(id, &GenServer.cast(&1, {:update_stocks, stocks}))
 
-  def current(id) do
-    update_prices(id)
+  def get_live(id) do
+    :ok = update_prices(id)
+    get(id)
   end
 
   defp take_backup(pid), do: Process.send_after(pid, :take_backup, 1000)

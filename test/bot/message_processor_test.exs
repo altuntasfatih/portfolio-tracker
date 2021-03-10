@@ -20,6 +20,7 @@ defmodule Telegram.MessageProcessorTest do
   end
 
   test "it_should_add_stock" do
+
     start()
     assert process_message(create_message("/add VAKBN VAKIF_BANK 250 4.5 5")) == :ok
   end

@@ -14,4 +14,5 @@ defmodule Util do
   def round_(number) when is_float(number) do
     Float.round(number, 2)
   end
+
 end

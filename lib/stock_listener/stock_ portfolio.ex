@@ -55,9 +55,12 @@ defmodule StockPortfolio do
        Total Cost : #{portfolio.total_cost}
        Total Worth : #{portfolio.total_worth}
        Update Time : #{portfolio.update_time}
-       Rate : #{portfolio.rate}
+       Rate : #{rate(portfolio.rate)}
        Stocks ->
        #{stocks}"
     end
+
+    def rate(r) when r < 0, do: "#{r} 🔴 "
+    def rate(r) when r >= 0, do: "#{r} 🟢 "
   end
 end
