@@ -36,15 +36,11 @@ defmodule Stock do
 
   defimpl String.Chars, for: Stock do
     def to_string(stock) do
-      "
-      Stock name : #{stock.id}
-      Stock count : #{stock.count}
-      Purchase price : #{stock.purchase_price}
-      Total cost : #{stock.total_cost}
-      Current price : #{stock.current_price}
-      Current worth : #{stock.current_worth}
-      Target  price : #{stock.target_price}
-      Rate : #{rate(stock.rate)}"
+      "Stock name : #{stock.id} \nCount : #{stock.count} \nPurchase price : #{
+        stock.purchase_price
+      } \nTotal cost : #{stock.total_cost} \nCurrent price : #{stock.current_price} \nCurrent worth : #{
+        stock.current_worth
+      } \nTarget price : #{stock.target_price} \nRate : #{rate(stock.rate)}"
     end
 
     def rate(r) when r < 0, do: "#{r} 🔴 "

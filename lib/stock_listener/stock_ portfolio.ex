@@ -1,18 +1,23 @@
 defmodule StockPortfolio do
   import Util
-  defstruct id: "", stocks: [], total_cost: 0.0, total_worth: 0.0, rate: 0.0, update_time: nil
+  defstruct id: "", stocks: %{}, total_cost: 0.0, total_worth: 0.0, rate: 0.0, update_time: nil
 
   def new(id) do
     %StockPortfolio{id: id}
   end
 
+  def get_stocks(%StockPortfolio{stocks: stocks}) do
+    Map.values(stocks)
+    |> Enum.sort(&(&1.rate >= &2.rate))
+  end
+
   def add_stock(%StockPortfolio{} = portfolio, %Stock{} = new_stock) do
-    Map.put(portfolio, :stocks, [new_stock | portfolio.stocks])
+    Map.put(portfolio, :stocks, Map.put(portfolio.stocks, new_stock.id, new_stock))
     |> calculate()
   end
 
   def delete_stock(%StockPortfolio{} = portfolio, stock_id) do
-    Map.put(portfolio, :stocks, Enum.filter(portfolio.stocks, &(&1.id != stock_id)))
+    Map.put(portfolio, :stocks, Map.delete(portfolio.stocks, stock_id))
     |> calculate()
   end
 
@@ -22,19 +27,21 @@ defmodule StockPortfolio do
     |> Map.put(:update_time, NaiveDateTime.utc_now())
   end
 
-  defp calculate(%StockPortfolio{} = portfolio) do
-    Enum.reduce(portfolio.stocks, %StockPortfolio{id: portfolio.id}, fn s, acc ->
+  defp calculate(%StockPortfolio{stocks: stocks, id: id, update_time: time}) do
+    Map.values(stocks)
+    |> Enum.reduce(new(id), fn s, acc ->
       cost = (acc.total_cost + s.total_cost) |> round_()
       worth = (acc.total_worth + s.current_worth) |> round_()
 
       %StockPortfolio{
         acc
-        | stocks: [s | acc.stocks] |> Enum.sort(&(&1.rate >= &2.rate)),
-          total_cost: cost,
+        | total_cost: cost,
           total_worth: worth,
           rate: ((worth - cost) / cost * 100) |> round_ceil
       }
     end)
+    |> Map.put(:stocks, stocks)
+    |> Map.put(:update_time, time)
   end
 
   defimpl String.Chars, for: StockPortfolio do
@@ -50,14 +57,13 @@ defmodule StockPortfolio do
               }
           ) :: <<_::64, _::_*8>>
     def to_string(portfolio) do
-      stocks = Enum.join(portfolio.stocks, "\n -------------------------------------")
-      "Portfolio Identity : #{portfolio.id}
-       Total Cost : #{portfolio.total_cost}
-       Total Worth : #{portfolio.total_worth}
-       Update Time : #{portfolio.update_time}
-       Rate : #{rate(portfolio.rate)}
-       Stocks ->
-       #{stocks}"
+      stocks = Enum.join(Map.values(portfolio.stocks), " \n------------------------------------- \n")
+
+      "Portfolio Identity : #{portfolio.id} \nTotal Cost : #{portfolio.total_cost} \nTotal Worth : #{
+        portfolio.total_worth
+      } \nUpdate Time : #{portfolio.update_time} \nRate : #{rate(portfolio.rate)} \n------------------------------------- \n#{
+        stocks
+      } "
     end
 
     def rate(r) when r < 0, do: "#{r} 🔴 "

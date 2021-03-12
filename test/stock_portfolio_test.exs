@@ -5,7 +5,7 @@ defmodule StockPortfolioTest do
   test "it_should_create_stock_portfolio" do
     assert StockPortfolio.new(@id) == %StockPortfolio{
              id: @id,
-             stocks: [],
+             stocks: %{},
              total_worth: 0,
              total_cost: 0,
              rate: 0
@@ -14,10 +14,10 @@ defmodule StockPortfolioTest do
 
   test "it_should_calculate_stock_portfolio" do
     portfolio = StockPortfolio.new(@id)
-    stock = Stock.new("A", "1", 66, 18.20, 25.0) |> Stock.calculate(19.32)
-    stock2 = Stock.new("E", "2", 460, 14.47, 25.0) |> Stock.calculate(14.60)
-    stock3 = Stock.new("S", "3", 84, 14.28, 25.0) |> Stock.calculate(14.48)
-    stock4 = Stock.new("T", "4", 10, 110.22, 150.0) |> Stock.calculate(100.70)
+    stock = Stock.new("A", "A_company", 66, 18.20, 25.0) |> Stock.calculate(19.32)
+    stock2 = Stock.new("E", "E_company", 460, 14.47, 25.0) |> Stock.calculate(14.60)
+    stock3 = Stock.new("S", "S_company", 84, 14.28, 25.0) |> Stock.calculate(14.48)
+    stock4 = Stock.new("D", "D_company", 10, 110.22, 150.0) |> Stock.calculate(100.70)
 
     portfolio =
       StockPortfolio.add_stock(portfolio, stock)
@@ -32,11 +32,10 @@ defmodule StockPortfolioTest do
 
   test "it_should_sort_stocks_by_rate" do
     portfolio = StockPortfolio.new(@id)
-    stock = Map.put(Stock.new("A", "1", 66, 18.20, 25.0),:rate, 3.0)
-    stock2 = Map.put(Stock.new("E", "2", 460, 14.47, 25.0),:rate, 0.0)
-    stock3 =  Map.put(Stock.new("S", "3", 84, 14.28, 25.0),:rate, -10.0)
-    stock4 =  Map.put(Stock.new("S", "3", 84, 14.28, 25.0),:rate, 7.0)
-
+    stock = Map.put(Stock.new("A", "A_company", 66, 18.20, 25.0), :rate, 3.0)
+    stock2 = Map.put(Stock.new("E", "E_company", 460, 14.47, 25.0), :rate, 0.0)
+    stock3 = Map.put(Stock.new("S", "S_company", 84, 14.28, 25.0), :rate, -10.0)
+    stock4 = Map.put(Stock.new("D", "D_company", 84, 14.28, 25.0), :rate, 7.0)
 
     portfolio =
       StockPortfolio.add_stock(portfolio, stock)
@@ -44,8 +43,6 @@ defmodule StockPortfolioTest do
       |> StockPortfolio.add_stock(stock3)
       |> StockPortfolio.add_stock(stock4)
 
-
-    assert portfolio.stocks == [stock4,stock,stock2,stock3]
+    assert StockPortfolio.get_stocks(portfolio) == [stock4, stock, stock2, stock3]
   end
-
 end

@@ -31,7 +31,6 @@ defmodule StockListener.Server do
 
   @impl true
   def handle_call(:get, _from, state) do
-    Logger.info("Get -> #{state}")
     {:reply, state, state}
   end
 
@@ -41,17 +40,22 @@ defmodule StockListener.Server do
   end
 
   @impl true
-  def handle_cast({:update_stocks, new_stocks}, state) do
-    {:noreply, StockPortfolio.update_stocks(state, new_stocks)}
-  end
-
-  @impl true
   def handle_cast({:delete_stock, stock_id}, state) do
     {:noreply, StockPortfolio.delete_stock(state, stock_id)}
   end
 
   @impl true
   def handle_cast(:update_prices, state), do: handle_info(:update_prices, state)
+
+  @impl true
+  def handle_info(:update_prices, %StockPortfolio{stocks: []} = state) do
+    {:noreply, state}
+  end
+
+  @impl true
+  def handle_info(:update_prices, %StockPortfolio{stocks: stocks} = state) do
+    {:noreply, StockPortfolio.update_stocks(state, update_stocks(stocks))}
+  end
 
   @impl true
   def handle_info(:take_backup, state) do
@@ -66,47 +70,35 @@ defmodule StockListener.Server do
   end
 
   @impl true
-  def handle_info(:update_prices, %StockPortfolio{stocks: []} = state) do
-    {:noreply, state}
-  end
-
-  @impl true
-  def handle_info(:update_prices, %StockPortfolio{stocks: stocks} = state) do
-    Logger.info("Update prices -> #{state}")
-    {:noreply, StockPortfolio.update_stocks(state, update_stock_prices(stocks))}
-  end
-
-  @impl true
   def handle_info(:timeout, _) do
     {:stop, :normal, []}
   end
 
-  def update_stock_prices(stocks, current_prices) do
+  def update_stocks(stocks, current_prices) when is_list(stocks) do
     Enum.map(stocks, fn s ->
       Enum.find(current_prices, fn x -> s.id == x.name end)
-      |> update_price(s)
+      |> update_stock_price(s)
     end)
   end
 
-  defp update_stock_prices(stocks) do
+  defp update_stocks(%{} = stocks) do
     {:ok, current_prices} = StockApi.stock_prices()
-    update_stock_prices(stocks, current_prices)
+
+    Map.values(stocks)
+    |> update_stocks(current_prices)
+    |> Enum.reduce(%{}, fn s, acc -> Map.put(acc, s.id, s) end)
   end
 
-  defp update_price(nil, stock), do: stock
-  defp update_price(c, stock), do: Stock.calculate(stock, c.price)
+  defp update_stock_price(nil, %Stock{} = stock), do: stock
+  defp update_stock_price(c, %Stock{} = stock), do: Stock.calculate(stock, c.price)
 
   def get(id), do: via_tuple(id, &GenServer.call(&1, :get))
 
-
   def add_stock(%Stock{} = stock, id), do: via_tuple(id, &GenServer.cast(&1, {:add_stock, stock}))
-  def update_prices(id), do: via_tuple(id, &GenServer.cast(&1, :update_prices))
-
-  def update_stocks(stocks, id) when is_list(stocks),
-    do: via_tuple(id, &GenServer.cast(&1, {:update_stocks, stocks}))
+  def update_stock_prices(id), do: via_tuple(id, &GenServer.cast(&1, :update_prices))
 
   def get_live(id) do
-    :ok = update_prices(id)
+    :ok = update_stock_prices(id)
     get(id)
   end
 

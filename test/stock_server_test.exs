@@ -2,7 +2,7 @@ defmodule StockListener.ServerTest do
   use ExUnit.Case
   alias StockListener.Server
 
-  @portfolio %StockPortfolio{id: "1", rate: 0.0, stocks: [], total_cost: 0.0, total_worth: 0.0}
+  @portfolio StockPortfolio.new("1")
 
   setup do
     {:ok, _} = StockListener.MockStockApi.start_link()
@@ -10,7 +10,7 @@ defmodule StockListener.ServerTest do
     {:ok, pid: pid}
   end
 
-  test "it_should_get_state_of_portfolio", %{pid: pid} do
+  test "it_should_get_portfolio", %{pid: pid} do
     assert get(pid) == @portfolio
   end
 
@@ -20,7 +20,9 @@ defmodule StockListener.ServerTest do
 
     assert get(pid) == %{
              @portfolio
-             | stocks: [stock],
+             | stocks: %{
+                 "AVISA" => stock
+               },
                total_cost: stock.total_cost,
                total_worth: stock.current_worth
            }
@@ -34,38 +36,7 @@ defmodule StockListener.ServerTest do
     assert get(pid) == @portfolio
   end
 
-  test "it_should_update_portfolio", %{pid: pid} do
-    stock = Stock.new("AVISA", "AvivaSA", 66, 18.20, 25.00)
-    stock2 = Stock.new("TUPRS", "Turkiye Petrol ", 10, 110.22, 149.00)
-    assert add(pid, stock) == :ok
-    assert add(pid, stock2) == :ok
-
-    stock = stock |> Stock.calculate(19.33)
-    stock2 = stock2 |> Stock.calculate(102.60)
-
-    assert update_stocks(pid, [stock2, stock]) == :ok
-
-    portfolio = get(pid)
-    assert portfolio.stocks == [stock, stock2]
-    assert portfolio.total_cost == 2303.42
-    assert portfolio.total_worth == 2301.78
-    assert portfolio.rate == -0.07
-    assert portfolio.update_time != nil
-  end
-
-  test "it_should_update_stock_prices", _ do
-    stock = Stock.new("AVISA", "AvivaSA", 66, 18.20, 25.00)
-    stock2 = Stock.new("TUPRS", "Turkiye Petrol ", 10, 110.22, 149.00)
-
-    current_prices = [%{name: "AVISA", price: 19.33}, %{name: "TUPRS", price: 102.60}]
-
-    assert Server.update_stock_prices([stock2, stock], current_prices) == [
-             Stock.calculate(stock2, 102.60),
-             Stock.calculate(stock, 19.33)
-           ]
-  end
-
-  test "it_should_update_stock_prices_live_prices", %{pid: pid} do
+  test "it_should_update_stocks_with_live_prices", %{pid: pid} do
     stock = Stock.new("AVISA", "AvivaSA", 10, 10, 20.00)
     stock2 = Stock.new("TUPRS", "Turkiye Petrol ", 5, 5.00, 7.00)
 
@@ -80,11 +51,28 @@ defmodule StockListener.ServerTest do
     assert update_prices(pid) == :ok
 
     portfolio = get(pid)
-    assert portfolio.stocks == [Stock.calculate(stock, 15.00), Stock.calculate(stock2, 5)]
+
+    assert portfolio.stocks == %{
+             "AVISA" => Stock.calculate(stock, 15.00),
+             "TUPRS" => Stock.calculate(stock2, 5)
+           }
+
     assert portfolio.total_cost == 125.0
     assert portfolio.total_worth == 175.0
     assert portfolio.rate == 40.0
     assert portfolio.update_time != nil
+  end
+
+  test "it_should_update_stocks_price", _ do
+    stock = Stock.new("AVISA", "AvivaSA", 66, 18.20, 25.00)
+    stock2 = Stock.new("TUPRS", "Turkiye Petrol ", 10, 110.22, 149.00)
+
+    current_prices = [%{name: "AVISA", price: 19.33}, %{name: "TUPRS", price: 102.60}]
+
+    assert Server.update_stocks([stock2, stock], current_prices) == [
+             Stock.calculate(stock2, 102.60),
+             Stock.calculate(stock, 19.33)
+           ]
   end
 
   def get(pid) do
@@ -101,9 +89,5 @@ defmodule StockListener.ServerTest do
 
   def update_prices(pid) do
     GenServer.cast(pid, :update_prices)
-  end
-
-  def update_stocks(pid, stocks) do
-    GenServer.cast(pid, {:update_stocks, stocks})
   end
 end
