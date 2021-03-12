@@ -45,6 +45,7 @@ defmodule StockPortfolio do
   end
 
   defimpl String.Chars, for: StockPortfolio do
+
     @spec to_string(
             atom
             | %{
@@ -57,7 +58,11 @@ defmodule StockPortfolio do
               }
           ) :: <<_::64, _::_*8>>
     def to_string(portfolio) do
-      stocks = Enum.join(Map.values(portfolio.stocks), " \n------------------------------------- \n")
+      stocks =
+        Enum.join(
+          StockPortfolio.get_stocks(portfolio),
+          " \n------------------------------------- \n"
+        )
 
       "Portfolio Identity : #{portfolio.id} \nTotal Cost : #{portfolio.total_cost} \nTotal Worth : #{
         portfolio.total_worth
