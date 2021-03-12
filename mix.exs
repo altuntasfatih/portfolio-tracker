@@ -24,7 +24,9 @@ defmodule StockListener.MixProject do
     [
       {:httpoison, "~> 1.7.0"},
       {:nadia, "~> 0.7.0"},
-      {:jason, "~> 1.2"}
+      {:jason, "~> 1.2"},
+      {:tzdata, "~> 1.1"}
+
     ]
   end
 end

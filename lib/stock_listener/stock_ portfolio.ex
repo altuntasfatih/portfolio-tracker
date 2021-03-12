@@ -24,7 +24,7 @@ defmodule StockPortfolio do
   def update_stocks(%StockPortfolio{} = portfolio, new_stocks) do
     Map.put(portfolio, :stocks, new_stocks)
     |> calculate()
-    |> Map.put(:update_time, NaiveDateTime.utc_now())
+    |> Map.put(:update_time, current_time())
   end
 
   defp calculate(%StockPortfolio{stocks: stocks, id: id, update_time: time}) do
@@ -45,7 +45,6 @@ defmodule StockPortfolio do
   end
 
   defimpl String.Chars, for: StockPortfolio do
-
     @spec to_string(
             atom
             | %{

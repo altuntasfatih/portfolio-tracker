@@ -15,4 +15,10 @@ defmodule Util do
     Float.round(number, 2)
   end
 
+  def current_time() do
+    {:ok, date} = DateTime.now("Europe/Istanbul")
+
+    DateTime.truncate(date, :second)
+    |> DateTime.to_iso8601()
+  end
 end
