@@ -1,9 +1,9 @@
-defmodule StockListener.MixProject do
+defmodule PortfolioTracker.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :stock_listener,
+      app: :portfolio_tracker,
       version: "0.1.0",
       elixir: "~> 1.11",
       start_permanent: Mix.env() == :prod,
@@ -15,7 +15,7 @@ defmodule StockListener.MixProject do
   def application do
     [
       extra_applications: [:logger],
-      mod: {StockListener.Application, []}
+      mod: {PortfolioTracker.Application, []}
     ]
   end
 

@@ -1,62 +1,85 @@
 defmodule Telegram.MessageProcessorTest do
   use ExUnit.Case
   import Bot.MessageProcessor
-  alias StockListener.MySupervisor
+  alias PortfolioTracker.CustomSupervisor
+
+  @id 1
 
   setup do
-    on_exit(fn -> MySupervisor.termine_all() end)
+    {:ok, _} = PortfolioTracker.MockStockApi.start_link()
+    on_exit(fn -> CustomSupervisor.termine_all() end)
   end
 
-
-  test "it_should_start_listener" do
-    assert process_message(create_message("/start")) == "Stock listener was created for you"
+  test "it_should_process_create_instruction" do
+    assert process_message(create_message("/create")) == "Portfolio tracker was created for you"
   end
 
-  test "it_should_return_listener_already_started" do
+  test "it_should_process_create_instruction_when_tracker_already_created" do
+    start()
+    assert process_message(create_message("/create")) ==
+             "Your portfolio tracker have already created"
+  end
+
+  test "it_should_process_destroy_instruction" do
+    start()
+    assert process_message(create_message("/destroy")) == :ok
+  end
+
+  test "it_should_process_add_instruction" do
+    start()
+    assert process_message(create_message("/add_stock VAKBN VAKIF_BANK 250 4.5 5")) == :ok
+  end
+
+  test "it_should_process_delete_instruction" do
+    start()
+    assert process_message(create_message("/delete_stock VAKBN")) == :ok
+  end
+
+  test "it_should_process_live_instruction" do
+    start()
+    refute process_message(create_message("/live")).update_time == nil
+  end
+
+  test "it_should_process_get_instruction" do
     start()
 
-    assert process_message(create_message("/start")) ==
-             "Your stock listener have already been created"
+    assert process_message(create_message("/get")) == %Portfolio{
+             id: @id,
+             rate: 0.0,
+             stocks: %{},
+             total_cost: 0.0,
+             total_worth: 0.0,
+             update_time: nil
+           }
   end
 
-  test "it_should_add_stock" do
-
-    start()
-    assert process_message(create_message("/add VAKBN VAKIF_BANK 250 4.5 5")) == :ok
-  end
-
-  test "it_should_delete_stock" do
-    start()
-    assert process_message(create_message("/delete VAKBN")) == :ok
-  end
-
-  test "it_should_return_parse_error_when_add_args_is_invalid" do
+  test "it_should_process_add_instruction_when_args_is_invalid" do
     start()
 
-    assert process_message(create_message("/add VAKBN VAKIF_BANK x x as")) ==
+    assert process_message(create_message("/add_stock VAKBN VAKIF_BANK x x as")) ==
              "Argumet/Arguments formats are invalid"
   end
 
-  test "it_should_return_args_missing_when_add_args_is_invalid" do
+  test "it_should_process_add_instruction_when_args_is_missing" do
     start()
-    assert process_message(create_message("/add")) == "Argumet/Arguments are missing"
+    assert process_message(create_message("/add_stock")) == "Argumet/Arguments are missing"
   end
 
-  test "it_should_not_process_message_when_listener_not_started" do
+  test "it_should_not_process_instruction_when_tracker_not_created" do
     assert process_message(create_message("/get")) ==
-             "There is no stock listener for you, You should create first"
+             "There is no portfolio tracker for you, You should create firstly"
   end
 
-  test "it_should_return_help_manual" do
+  test "it_should_process_help_instruction" do
     refute process_message(create_message("/help")) == ""
   end
 
-  test "it_should_return_not_support" do
-    assert process_message(create_message("not supported message")) ==
+  test "it_should_not_process_when_instruction_not_found" do
+    assert process_message(create_message("not supported instruction")) ==
              "Instruction does not exist"
   end
 
-  test "it_should_only_support_text_message" do
+  test "it_should_only_support_text_instruction" do
     assert process_message(image_message()) ==
              "Instruction does not exist"
   end
@@ -120,8 +143,8 @@ defmodule Telegram.MessageProcessorTest do
   end
 
   def start() do
-    assert process_message(create_message("/start")) == "Stock listener was created for you"
+    assert process_message(create_message("/create")) == "Portfolio tracker was created for you"
   end
 
-  def create_message(message), do: %{text: message, from: %{id: 1}}
+  def create_message(message), do: %{text: message, from: %{id: @id}}
 end

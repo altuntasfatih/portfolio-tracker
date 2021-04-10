@@ -1,5 +1,5 @@
-defmodule StockListener.StockApi.StockPricesResponse do
-  alias StockListener.StockApi.StockPricesResponse
+defmodule PortfolioTracker.StockApi.StockPricesResponse do
+  alias PortfolioTracker.StockApi.StockPricesResponse
   defstruct success: false, result: []
 
   @spec parse(binary) :: list

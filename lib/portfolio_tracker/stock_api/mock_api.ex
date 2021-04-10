@@ -1,5 +1,5 @@
-defmodule StockListener.MockStockApi do
-  @behaviour StockListener.StockApi
+defmodule PortfolioTracker.MockStockApi do
+  @behaviour PortfolioTracker.StockApi
 
   def start_link do
     Agent.start_link(fn -> [] end, name: __MODULE__)
@@ -20,7 +20,7 @@ defmodule StockListener.MockStockApi do
     end)
   end
 
-  def stock_prices() do
+  def get_live_prices() do
     {:ok, pop()}
   end
 end

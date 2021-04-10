@@ -1,14 +1,14 @@
-defmodule StockListener.Server do
+defmodule PortfolioTracker.Server do
   @moduledoc """
-  Documentation for `StockListener`.
+  Documentation for `PortfolioTracker`.
   """
-  alias StockListener.StockApi
+  alias PortfolioTracker.StockApi
   use GenServer
   require Logger
 
   @backup_path "./backup/"
 
-  def start_link(%StockPortfolio{} = state) do
+  def start_link(%Portfolio{} = state) do
     GenServer.start_link(__MODULE__, state, name: {:global, {state.id, __MODULE__}})
   end
 
@@ -20,7 +20,7 @@ defmodule StockListener.Server do
   defp load_create_state(id) do
     case File.read(@backup_path <> "#{id}") do
       {:ok, binary} -> :erlang.binary_to_term(binary)
-      _ -> StockPortfolio.new(id)
+      _ -> Portfolio.new(id)
     end
   end
 
@@ -35,26 +35,37 @@ defmodule StockListener.Server do
   end
 
   @impl true
+  def handle_call(:destroy, _from, state) do
+    {:stop, :normal, :ok, state}
+  end
+
+  @impl true
+  def handle_call(:live, _from, state) do
+    new_state = Portfolio.update(state, update_stocks_with_live(state.stocks))
+    {:reply, new_state, new_state}
+  end
+
+  @impl true
   def handle_cast({:add_stock, %Stock{} = stock}, state) do
-    {:noreply, StockPortfolio.add_stock(state, stock)}
+    {:noreply, Portfolio.add_stock(state, stock)}
   end
 
   @impl true
   def handle_cast({:delete_stock, stock_id}, state) do
-    {:noreply, StockPortfolio.delete_stock(state, stock_id)}
+    {:noreply, Portfolio.delete_stock(state, stock_id)}
   end
 
   @impl true
-  def handle_cast(:update_prices, state), do: handle_info(:update_prices, state)
+  def handle_cast(:update, state), do: handle_info(:update, state)
 
   @impl true
-  def handle_info(:update_prices, %StockPortfolio{stocks: []} = state) do
+  def handle_info(:update, %Portfolio{stocks: []} = state) do
     {:noreply, state}
   end
 
   @impl true
-  def handle_info(:update_prices, %StockPortfolio{stocks: stocks} = state) do
-    {:noreply, StockPortfolio.update_stocks(state, update_stocks(stocks))}
+  def handle_info(:update, %Portfolio{stocks: stocks} = state) do
+    {:noreply, Portfolio.update(state, update_stocks_with_live(stocks))}
   end
 
   @impl true
@@ -74,38 +85,37 @@ defmodule StockListener.Server do
     {:stop, :normal, []}
   end
 
-  def update_stocks(stocks, current_prices) when is_list(stocks) do
+  def update_stocks_with_live(stocks, current_prices) when is_list(stocks) do
     Enum.map(stocks, fn s ->
       Enum.find(current_prices, fn x -> s.id == x.name end)
-      |> update_stock_price(s)
+      |> calculate_stock(s)
     end)
   end
 
-  defp update_stocks(%{} = stocks) do
-    {:ok, current_prices} = StockApi.stock_prices()
+  defp update_stocks_with_live(%{} = stocks) do
+    {:ok, current_prices} = StockApi.get_live_prices()
 
     Map.values(stocks)
-    |> update_stocks(current_prices)
+    |> update_stocks_with_live(current_prices)
     |> Enum.reduce(%{}, fn s, acc -> Map.put(acc, s.id, s) end)
   end
 
-  defp update_stock_price(nil, %Stock{} = stock), do: stock
-  defp update_stock_price(c, %Stock{} = stock), do: Stock.calculate(stock, c.price)
+  defp calculate_stock(nil, %Stock{} = stock), do: stock
+  defp calculate_stock(c, %Stock{} = stock), do: Stock.calculate(stock, c.price)
+
+  defp take_backup(pid), do: Process.send_after(pid, :take_backup, 1000)
 
   def get(id), do: via_tuple(id, &GenServer.call(&1, :get))
 
   def add_stock(%Stock{} = stock, id), do: via_tuple(id, &GenServer.cast(&1, {:add_stock, stock}))
-  def update_stock_prices(id), do: via_tuple(id, &GenServer.cast(&1, :update_prices))
+  def update(id), do: via_tuple(id, &GenServer.cast(&1, :update))
 
-  def get_live(id) do
-    :ok = update_stock_prices(id)
-    get(id)
-  end
-
-  defp take_backup(pid), do: Process.send_after(pid, :take_backup, 1000)
+  def live(id), do: via_tuple(id, &GenServer.call(&1, :live))
 
   def delete_stock(id, stock_id),
     do: via_tuple(id, &GenServer.cast(&1, {:delete_stock, stock_id}))
+
+  def destroy(id), do: via_tuple(id, &GenServer.call(&1, :destroy))
 
   def via_tuple(id, callback) do
     case :global.whereis_name({id, __MODULE__}) do

@@ -1,3 +1,3 @@
 import Config
 
-config :stock_listener, :stock_api, StockListener.MockStockApi
+config :portfolio_tracker, :stock_api, PortfolioTracker.MockStockApi

@@ -1,11 +1,11 @@
-defmodule StockListener.ServerTest do
+defmodule PortfolioTracker.ServerTest do
   use ExUnit.Case
-  alias StockListener.Server
+  alias PortfolioTracker.Server
 
-  @portfolio StockPortfolio.new("1")
+  @portfolio Portfolio.new("1")
 
   setup do
-    {:ok, _} = StockListener.MockStockApi.start_link()
+    {:ok, _} = PortfolioTracker.MockStockApi.start_link()
     {:ok, pid} = GenServer.start_link(Server, @portfolio)
     {:ok, pid: pid}
   end
@@ -43,12 +43,12 @@ defmodule StockListener.ServerTest do
     assert add(pid, stock) == :ok
     assert add(pid, stock2) == :ok
 
-    StockListener.MockStockApi.push([
+    PortfolioTracker.MockStockApi.push([
       %{name: "AVISA", price: 15.00},
       %{name: "TUPRS", price: 5.00}
     ])
 
-    assert update_prices(pid) == :ok
+    assert update(pid) == :ok
 
     portfolio = get(pid)
 
@@ -69,7 +69,7 @@ defmodule StockListener.ServerTest do
 
     current_prices = [%{name: "AVISA", price: 19.33}, %{name: "TUPRS", price: 102.60}]
 
-    assert Server.update_stocks([stock2, stock], current_prices) == [
+    assert Server.update_stocks_with_live([stock2, stock], current_prices) == [
              Stock.calculate(stock2, 102.60),
              Stock.calculate(stock, 19.33)
            ]
@@ -87,7 +87,7 @@ defmodule StockListener.ServerTest do
     GenServer.cast(pid, {:delete_stock, stock_id})
   end
 
-  def update_prices(pid) do
-    GenServer.cast(pid, :update_prices)
+  def update(pid) do
+    GenServer.cast(pid, :update)
   end
 end

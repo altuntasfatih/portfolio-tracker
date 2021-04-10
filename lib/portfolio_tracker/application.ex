@@ -1,4 +1,4 @@
-defmodule StockListener.Application do
+defmodule PortfolioTracker.Application do
   # See https://hexdocs.pm/elixir/Application.html
   # for more information on OTP Applications
   @moduledoc false
@@ -8,14 +8,14 @@ defmodule StockListener.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      {StockListener.MySupervisor, :ok},
+      {PortfolioTracker.CustomSupervisor, :ok},
       # -1 is offset get last message
       {Bot.Pooler, -1}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
-    opts = [strategy: :one_for_one, name: StockListener.Supervisor]
+    opts = [strategy: :one_for_one, name: PortfolioTracker.Supervisor]
     Supervisor.start_link(children, opts)
   end
 end

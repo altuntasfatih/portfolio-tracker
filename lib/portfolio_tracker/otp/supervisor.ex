@@ -1,4 +1,4 @@
-defmodule StockListener.MySupervisor do
+defmodule PortfolioTracker.CustomSupervisor do
   use DynamicSupervisor
 
   def start_link(:ok) do
@@ -6,7 +6,7 @@ defmodule StockListener.MySupervisor do
   end
 
   def start_listener(id) do
-    child_spec = {StockListener.Server, id}
+    child_spec = {PortfolioTracker.Server, id}
     DynamicSupervisor.start_child(__MODULE__, child_spec)
   end
 

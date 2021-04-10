@@ -1,39 +1,40 @@
-defmodule StockPortfolio do
+defmodule Portfolio do
   import Util
   defstruct id: "", stocks: %{}, total_cost: 0.0, total_worth: 0.0, rate: 0.0, update_time: nil
 
   def new(id) do
-    %StockPortfolio{id: id}
+    %Portfolio{id: id}
   end
 
-  def get_stocks(%StockPortfolio{stocks: stocks}) do
+  def get_stocks(%Portfolio{stocks: stocks}) do
     Map.values(stocks)
     |> Enum.sort(&(&1.rate >= &2.rate))
   end
 
-  def add_stock(%StockPortfolio{} = portfolio, %Stock{} = new_stock) do
+  def add_stock(%Portfolio{} = portfolio, %Stock{} = new_stock) do
     Map.put(portfolio, :stocks, Map.put(portfolio.stocks, new_stock.id, new_stock))
     |> calculate()
   end
 
-  def delete_stock(%StockPortfolio{} = portfolio, stock_id) do
+  def delete_stock(%Portfolio{} = portfolio, stock_id) do
     Map.put(portfolio, :stocks, Map.delete(portfolio.stocks, stock_id))
     |> calculate()
   end
 
-  def update_stocks(%StockPortfolio{} = portfolio, new_stocks) do
+
+  def update(%Portfolio{} = portfolio, new_stocks)  do
     Map.put(portfolio, :stocks, new_stocks)
     |> calculate()
     |> Map.put(:update_time, current_time())
   end
 
-  defp calculate(%StockPortfolio{stocks: stocks, id: id, update_time: time}) do
+  defp calculate(%Portfolio{stocks: stocks, id: id, update_time: time}) do
     Map.values(stocks)
     |> Enum.reduce(new(id), fn s, acc ->
       cost = (acc.total_cost + s.total_cost) |> round_()
       worth = (acc.total_worth + s.current_worth) |> round_()
 
-      %StockPortfolio{
+      %Portfolio{
         acc
         | total_cost: cost,
           total_worth: worth,
@@ -44,7 +45,7 @@ defmodule StockPortfolio do
     |> Map.put(:update_time, time)
   end
 
-  defimpl String.Chars, for: StockPortfolio do
+  defimpl String.Chars, for: Portfolio do
     @spec to_string(
             atom
             | %{
@@ -59,7 +60,7 @@ defmodule StockPortfolio do
     def to_string(portfolio) do
       stocks =
         Enum.join(
-          StockPortfolio.get_stocks(portfolio),
+          Portfolio.get_stocks(portfolio),
           " \n------------------------------------- \n"
         )
 
