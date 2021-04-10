@@ -14,8 +14,10 @@ defmodule PortfolioTracker.StockApi do
 end
 ```
   
+## Bot
+Try It (https://t.me/foter_portfolio_tracker_bot)
 
-#### Bot commads 
+### Commads 
 
 *  /create        -> it creates a stock portfolio for you.
 *  /get           -> it gets your stock portfolio.
