@@ -1,4 +1,4 @@
-# PortfolioTracker
+# Portfolio Tracker
 
 ### It is a telegram bot that follow stocks' prices according to your portfolio.
 It supports only BIST(Borsa Istanbul). But you can add a new behavior for stock api then it runs according to it.  
