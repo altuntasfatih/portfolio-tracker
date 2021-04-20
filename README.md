@@ -15,7 +15,7 @@ end
 ```
   
 ## Bot
-Try It (https://t.me/foter_portfolio_tracker_bot)
+[Try It ](https://t.me/foter_portfolio_tracker_bot)
 
 ### Commads 
 
