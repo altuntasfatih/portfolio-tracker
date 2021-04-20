@@ -8,16 +8,14 @@ defmodule Stock do
             total_cost: 0.0,
             current_price: 0.0,
             current_worth: 0,
-            rate: 0.0,
-            target_price: 0
+            rate: 0.0
 
-  def new(id, name, stock_count, purchase_price, target_price) do
+  def new(id, name, stock_count, purchase_price) do
     %Stock{
       id: id,
       name: name,
       count: stock_count,
       purchase_price: purchase_price,
-      target_price: target_price,
       total_cost: (purchase_price * stock_count) |> round_ceil
     }
     |> calculate(purchase_price)
@@ -34,16 +32,15 @@ defmodule Stock do
     }
   end
 
-  defimpl String.Chars, for: Stock do
-    def to_string(stock) do
-      "Stock name : #{stock.id} \nCount : #{stock.count} \nPurchase price : #{
-        stock.purchase_price
-      } \nTotal cost : #{stock.total_cost} \nCurrent price : #{stock.current_price} \nCurrent worth : #{
-        stock.current_worth
-      } \nTarget price : #{stock.target_price} \nRate : #{rate(stock.rate)}"
-    end
+  def to_string(%Stock{} = stock) do
+    "Name: #{stock.id} \nWorth: #{stock.current_worth} \nRate: #{rate(stock.rate)}"
+  end
 
-    def rate(r) when r < 0, do: "#{r} 🔴 "
-    def rate(r) when r >= 0, do: "#{r} 🟢 "
+  def detailed_to_string(%Stock{} = stock) do
+    "Name: #{stock.id} \nCount: #{stock.count} \nPurchase price: #{stock.purchase_price} \nCost: #{
+      stock.total_cost
+    } \nCurrent price: #{stock.current_price} \nWorth: #{stock.current_worth} \nRate: #{
+      rate(stock.rate)
+    }"
   end
 end

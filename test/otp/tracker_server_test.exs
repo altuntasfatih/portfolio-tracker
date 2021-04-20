@@ -15,7 +15,7 @@ defmodule PortfolioTracker.ServerTest do
   end
 
   test "it_should_add_stock_to_portfolio", %{pid: pid} do
-    stock = Stock.new("AVISA", "avivasa", 66, 18.20, 25.00)
+    stock = Stock.new("AVISA", "avivasa", 66, 18.20)
     assert add(pid, stock) == :ok
 
     assert get(pid) == %{
@@ -29,7 +29,7 @@ defmodule PortfolioTracker.ServerTest do
   end
 
   test "it_should_delete_stock_from_portfolio", %{pid: pid} do
-    stock = Stock.new("AVISA", "avivasa", 66, 18.20, 25.00)
+    stock = Stock.new("AVISA", "avivasa", 66, 18.20)
     assert add(pid, stock) == :ok
     assert delete(pid, stock.id) == :ok
 
@@ -37,8 +37,8 @@ defmodule PortfolioTracker.ServerTest do
   end
 
   test "it_should_update_stocks_with_live_prices", %{pid: pid} do
-    stock = Stock.new("AVISA", "AvivaSA", 10, 10, 20.00)
-    stock2 = Stock.new("TUPRS", "Turkiye Petrol ", 5, 5.00, 7.00)
+    stock = Stock.new("AVISA", "AvivaSA", 10, 10)
+    stock2 = Stock.new("TUPRS", "Turkiye Petrol ", 5, 5.00)
 
     assert add(pid, stock) == :ok
     assert add(pid, stock2) == :ok
@@ -64,8 +64,8 @@ defmodule PortfolioTracker.ServerTest do
   end
 
   test "it_should_update_stocks_price", _ do
-    stock = Stock.new("AVISA", "AvivaSA", 66, 18.20, 25.00)
-    stock2 = Stock.new("TUPRS", "Turkiye Petrol ", 10, 110.22, 149.00)
+    stock = Stock.new("AVISA", "AvivaSA", 66, 18.20)
+    stock2 = Stock.new("TUPRS", "Turkiye Petrol ", 10, 110.22)
 
     current_prices = [%{name: "AVISA", price: 19.33}, %{name: "TUPRS", price: 102.60}]
 

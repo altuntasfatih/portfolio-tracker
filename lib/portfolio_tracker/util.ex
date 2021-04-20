@@ -21,4 +21,7 @@ defmodule Util do
     DateTime.truncate(date, :second)
     |> DateTime.to_iso8601()
   end
+
+  def rate(r) when r < 0, do: "#{r} 🔴 "
+  def rate(r) when r >= 0, do: "#{r} 🟢 "
 end

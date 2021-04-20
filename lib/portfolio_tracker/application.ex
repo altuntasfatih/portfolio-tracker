@@ -13,8 +13,6 @@ defmodule PortfolioTracker.Application do
       {Bot.Pooler, -1}
     ]
 
-    # See https://hexdocs.pm/elixir/Supervisor.html
-    # for other strategies and supported options
     opts = [strategy: :one_for_one, name: PortfolioTracker.Supervisor]
     Supervisor.start_link(children, opts)
   end

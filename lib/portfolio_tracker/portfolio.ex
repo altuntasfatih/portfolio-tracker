@@ -2,6 +2,8 @@ defmodule Portfolio do
   import Util
   defstruct id: "", stocks: %{}, total_cost: 0.0, total_worth: 0.0, rate: 0.0, update_time: nil
 
+  @line_break " \n------------------------------------- \n"
+
   def new(id) do
     %Portfolio{id: id}
   end
@@ -21,8 +23,7 @@ defmodule Portfolio do
     |> calculate()
   end
 
-
-  def update(%Portfolio{} = portfolio, new_stocks)  do
+  def update(%Portfolio{} = portfolio, new_stocks) do
     Map.put(portfolio, :stocks, new_stocks)
     |> calculate()
     |> Map.put(:update_time, current_time())
@@ -45,33 +46,25 @@ defmodule Portfolio do
     |> Map.put(:update_time, time)
   end
 
-  defimpl String.Chars, for: Portfolio do
-    @spec to_string(
-            atom
-            | %{
-                :id => any,
-                :rate => any,
-                :stocks => any,
-                :total_cost => any,
-                :total_worth => any,
-                optional(any) => any
-              }
-          ) :: <<_::64, _::_*8>>
-    def to_string(portfolio) do
-      stocks =
-        Enum.join(
-          Portfolio.get_stocks(portfolio),
-          " \n------------------------------------- \n"
-        )
+  def to_string(%Portfolio{} = portfolio) do
+    stocks =
+      Enum.reduce(get_stocks(portfolio), "", fn s, acc ->
+        acc <> @line_break <> Stock.to_string(s)
+      end)
 
-      "Portfolio Identity : #{portfolio.id} \nTotal Cost : #{portfolio.total_cost} \nTotal Worth : #{
-        portfolio.total_worth
-      } \nUpdate Time : #{portfolio.update_time} \nRate : #{rate(portfolio.rate)} \n------------------------------------- \n#{
-        stocks
-      } "
-    end
+    "Worth: #{portfolio.total_worth} \nUpdate Time: #{portfolio.update_time} \nRate: #{
+      rate(portfolio.rate)
+    } #{stocks}"
+  end
 
-    def rate(r) when r < 0, do: "#{r} 🔴 "
-    def rate(r) when r >= 0, do: "#{r} 🟢 "
+  def detailed_to_string(%Portfolio{} = portfolio) do
+    stocks =
+      Enum.reduce(get_stocks(portfolio), "", fn s, acc ->
+        acc <> @line_break <> Stock.detailed_to_string(s)
+      end)
+
+    "Portfolio Id: #{portfolio.id} \nCost: #{portfolio.total_cost} \nWorth: #{
+      portfolio.total_worth
+    } \nUpdate Time: #{portfolio.update_time} \nRate: #{rate(portfolio.rate)} #{stocks} "
   end
 end

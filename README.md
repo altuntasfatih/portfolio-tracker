@@ -20,11 +20,12 @@ Try It (https://t.me/foter_portfolio_tracker_bot)
 ### Commads 
 
 *  /create        -> it creates a stock portfolio for you.
-*  /get           -> it gets your stock portfolio.
+*  /get           -> it returns your stock portfolio.
+*  /get_detail    -> it returns your stock portfolio with detail.
 *  /live          -> it calculates your potfolio with live stocks prices.
 *  /destroy       -> it deletes your stock portfolo.
 *  /add_stock     -> it adds stock to your portfolio,
-                  e.g. /add_stock stock_id name count price targetPrice
+                  e.g. /add_stock stock_id name count price
                   (stock_id must be same with exchange identifier)
 *  /delete_stock  -> it deletes stock from portfolie,
                   e.g. /delete_stock stock_id

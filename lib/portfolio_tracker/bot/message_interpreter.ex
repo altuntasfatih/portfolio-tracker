@@ -1,9 +1,10 @@
-defmodule Bot.MessageProcessor do
+defmodule Bot.MessageInterpreter do
   require Logger
   alias PortfolioTracker.CustomSupervisor
   alias PortfolioTracker.Server
 
-  @type instructions :: :create | :get | :live | :destroy | :add_stock | :delete_stock | :help
+  @type instructions ::
+          :create | :get | :get_detail | :live | :destroy | :add_stock | :delete_stock | :help
 
   @help_file "./resource/help.md"
 
@@ -40,24 +41,27 @@ defmodule Bot.MessageProcessor do
     end
   end
 
-  def process_message(:get, _args, from), do: Server.get(from.id)
+  def process_message(:get, _args, from),
+    do: get_server(from.id, fn p -> Portfolio.to_string(p) end)
+
+  def process_message(:get_detail, _args, from),
+    do: get_server(from.id, fn p -> Portfolio.detailed_to_string(p) end)
 
   def process_message(:destroy, _args, from), do: Server.destroy(from.id)
 
   def process_message(:live, _args, from), do: Server.live(from.id)
 
-  def process_message(:add_stock, [id, name, count, price, target_price], from) do
+  def process_message(:add_stock, [id, name, count, price], from) do
     with {count, _} <- Integer.parse(count),
-         {price, _} <- Float.parse(price),
-         {target_price, _} <- Float.parse(target_price) do
-      Stock.new(id, name, count, price, target_price)
+         {price, _} <- Float.parse(price) do
+      Stock.new(id, name, count, price)
       |> Server.add_stock(from.id)
     else
       _ -> {:error, :args_parse_error}
     end
   end
 
-  def process_message(:add_stock, args, _from) when length(args) != 5,
+  def process_message(:add_stock, args, _from) when length(args) != 4,
     do: {:error, :missing_parameter}
 
   def process_message(:delete_stock, [stock_id], from),
@@ -74,7 +78,6 @@ defmodule Bot.MessageProcessor do
 
   defp prepare_reply({:error, :listener_not_found}),
     do: "There is no portfolio tracker for you, You should create firstly"
-
 
   defp prepare_reply({:error, :portfolio_already_created}),
     do: "Your portfolio tracker have already created"
@@ -101,5 +104,12 @@ defmodule Bot.MessageProcessor do
   defp print(message, args) do
     ("Incoming message -> " <> message <> ", " <> "args -> " <> Enum.join(args, ", "))
     |> Logger.info()
+  end
+
+  defp get_server(id, response) do
+    case Server.get(id) do
+      {:error, err} -> {:error, err}
+      r -> {:ok, response.(r)}
+    end
   end
 end

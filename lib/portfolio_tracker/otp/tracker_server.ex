@@ -31,7 +31,7 @@ defmodule PortfolioTracker.Server do
 
   @impl true
   def handle_call(:get, _from, state) do
-    {:reply, state, state}
+    {:reply,state, state}
   end
 
   @impl true

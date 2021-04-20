@@ -1,6 +1,6 @@
 defmodule Bot.Pooler do
   use GenServer
-  import Bot.MessageProcessor
+  import Bot.MessageInterpreter
 
   @interval 1000
   def start_link(offset) do
