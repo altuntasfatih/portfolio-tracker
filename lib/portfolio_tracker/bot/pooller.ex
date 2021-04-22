@@ -34,9 +34,9 @@ defmodule Bot.Pooler do
   defp send_reply("", _), do: :ok
 
   defp send_reply({message, args}, from),
-    do: {:ok, _} = Nadia.send_message(from, message,args)
-  defp send_reply(message, from), do: {:ok, _} = Nadia.send_message(from, message)
+    do: {:ok, _} = Nadia.send_message(from, message, args)
 
+  defp send_reply(message, from), do: {:ok, _} = Nadia.send_message(from, message)
 
   defp call_itself(), do: Process.send_after(self(), :get_messages, @interval)
 end

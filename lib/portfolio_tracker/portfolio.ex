@@ -1,6 +1,12 @@
 defmodule Portfolio do
   import Util
-  defstruct id: "", stocks: %{}, total_cost: 0.0, total_worth: 0.0, rate: 0.0, update_time: nil
+
+  defstruct id: "",
+            stocks: %{},
+            total_cost: 0.0,
+            total_worth: 0.0,
+            rate: 0.0,
+            update_time: nil
 
   @line_break " \n------------------------------------- \n"
 
@@ -46,25 +52,20 @@ defmodule Portfolio do
     |> Map.put(:update_time, time)
   end
 
-  def to_string(%Portfolio{} = portfolio) do
-    stocks =
-      Enum.reduce(get_stocks(portfolio), "", fn s, acc ->
-        acc <> @line_break <> Stock.to_string(s)
-      end)
-
-    "Worth: #{portfolio.total_worth} \nUpdate Time: #{portfolio.update_time} \nRate: #{
-      rate(portfolio.rate)
-    } #{stocks}"
+  def to_string(%Portfolio{} = p) do
+    "Your Portfolio  \nWorth: #{p.total_worth} \nUpdate Time: #{p.update_time} \nRate: #{
+      rate(p.rate)
+    }"
   end
 
-  def detailed_to_string(%Portfolio{} = portfolio) do
+  def detailed_to_string(%Portfolio{} = p) do
     stocks =
-      Enum.reduce(get_stocks(portfolio), "", fn s, acc ->
+      Enum.reduce(get_stocks(p), "", fn s, acc ->
         acc <> @line_break <> Stock.detailed_to_string(s)
       end)
 
-    "Portfolio Id: #{portfolio.id} \nCost: #{portfolio.total_cost} \nWorth: #{
-      portfolio.total_worth
-    } \nUpdate Time: #{portfolio.update_time} \nRate: #{rate(portfolio.rate)} #{stocks} "
+    "Your Portfolio \nCost: #{p.total_cost} \nWorth: #{p.total_worth} \nUpdate Time: #{
+      p.update_time
+    } \nRate: #{rate(p.rate)} #{stocks}"
   end
 end

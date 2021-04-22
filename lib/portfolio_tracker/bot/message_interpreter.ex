@@ -42,14 +42,15 @@ defmodule Bot.MessageInterpreter do
   end
 
   def process_message(:get, _args, from),
-    do: get_server(from.id, fn p -> Portfolio.to_string(p) end)
+    do: encode_portfolio(Server.get(from.id), fn p -> Portfolio.to_string(p) end)
 
   def process_message(:get_detail, _args, from),
-    do: get_server(from.id, fn p -> Portfolio.detailed_to_string(p) end)
+    do: encode_portfolio(Server.get(from.id), fn p -> Portfolio.detailed_to_string(p) end)
+
+  def process_message(:live, _args, from),
+    do: encode_portfolio(Server.live(from.id), fn p -> Portfolio.detailed_to_string(p) end)
 
   def process_message(:destroy, _args, from), do: Server.destroy(from.id)
-
-  def process_message(:live, _args, from), do: Server.live(from.id)
 
   def process_message(:add_stock, [id, name, count, price], from) do
     with {count, _} <- Integer.parse(count),
@@ -106,10 +107,6 @@ defmodule Bot.MessageInterpreter do
     |> Logger.info()
   end
 
-  defp get_server(id, response) do
-    case Server.get(id) do
-      {:error, err} -> {:error, err}
-      r -> {:ok, response.(r)}
-    end
-  end
+  defp encode_portfolio({:error, err}, _), do: {:error, err}
+  defp encode_portfolio(%Portfolio{} = p, encoder), do: {:ok, encoder.(p)}
 end

@@ -52,7 +52,7 @@ defmodule PortfolioTest do
       |> Portfolio.add_stock(Map.put(Stock.new("A", "A_company", 66, 18.20), :rate, 3.0))
 
     assert Portfolio.to_string(portfolio) ==
-             "Worth: 1201.21 \nUpdate Time:  \nRate: 0.0 🟢   \n------------------------------------- \nName: A \nWorth: 1201.21 \nRate: 3.0 🟢 "
+             "Your Portfolio  \nWorth: 1201.21 \nUpdate Time:  \nRate: 0.0 🟢 "
   end
 
   test "it_should_return_detailed_string_represantation_of_portfolio" do
@@ -61,6 +61,6 @@ defmodule PortfolioTest do
       |> Portfolio.add_stock(Map.put(Stock.new("A", "A_company", 66, 18.20), :rate, 3.0))
 
     assert Portfolio.detailed_to_string(portfolio) ==
-             "Portfolio Id: Fatih \nCost: 1201.21 \nWorth: 1201.21 \nUpdate Time:  \nRate: 0.0 🟢   \n------------------------------------- \nName: A \nCount: 66 \nPurchase price: 18.2 \nCost: 1201.21 \nCurrent price: 18.2 \nWorth: 1201.21 \nRate: 3.0 🟢  "
+             "Your Portfolio \nCost: 1201.21 \nWorth: 1201.21 \nUpdate Time:  \nRate: 0.0 🟢   \n------------------------------------- \nName: A \nCount: 66 \nPurchase price: 18.2 \nCost: 1201.21 \nCurrent price: 18.2 \nWorth: 1201.21 \nRate: 3.0 🟢 "
   end
 end

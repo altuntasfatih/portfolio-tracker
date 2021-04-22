@@ -2,7 +2,7 @@ defmodule PortfolioTracker.Server do
   @moduledoc """
   Documentation for `PortfolioTracker`.
   """
-  alias PortfolioTracker.StockApi
+  alias PortfolioTracker.ExchangeApi
   use GenServer
   require Logger
 
@@ -31,7 +31,7 @@ defmodule PortfolioTracker.Server do
 
   @impl true
   def handle_call(:get, _from, state) do
-    {:reply,state, state}
+    {:reply, state, state}
   end
 
   @impl true
@@ -93,7 +93,7 @@ defmodule PortfolioTracker.Server do
   end
 
   defp update_stocks_with_live(%{} = stocks) do
-    {:ok, current_prices} = StockApi.get_live_prices()
+    {:ok, current_prices} = ExchangeApi.get_live_prices()
 
     Map.values(stocks)
     |> update_stocks_with_live(current_prices)

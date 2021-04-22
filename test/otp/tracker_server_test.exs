@@ -5,7 +5,7 @@ defmodule PortfolioTracker.ServerTest do
   @portfolio Portfolio.new("1")
 
   setup do
-    {:ok, _} = PortfolioTracker.MockStockApi.start_link()
+    {:ok, _} = PortfolioTracker.MockExchangeApi.start_link()
     {:ok, pid} = GenServer.start_link(Server, @portfolio)
     {:ok, pid: pid}
   end
@@ -43,7 +43,7 @@ defmodule PortfolioTracker.ServerTest do
     assert add(pid, stock) == :ok
     assert add(pid, stock2) == :ok
 
-    PortfolioTracker.MockStockApi.push([
+    PortfolioTracker.MockExchangeApi.push([
       %{name: "AVISA", price: 15.00},
       %{name: "TUPRS", price: 5.00}
     ])

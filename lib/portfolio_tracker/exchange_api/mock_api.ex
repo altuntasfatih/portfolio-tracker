@@ -1,5 +1,5 @@
-defmodule PortfolioTracker.MockStockApi do
-  @behaviour PortfolioTracker.StockApi
+defmodule PortfolioTracker.MockExchangeApi do
+  @behaviour PortfolioTracker.ExchangeApi
 
   def start_link do
     Agent.start_link(fn -> [] end, name: __MODULE__)
