@@ -4,7 +4,15 @@ defmodule Bot.MessageInterpreter do
   alias PortfolioTracker.Server
 
   @type instructions ::
-          :create | :get | :get_detail | :live | :destroy | :add_stock | :delete_stock | :help
+          :create
+          | :get
+          | :get_detail
+          | :live
+          | :destroy
+          | :add_stock
+          | :set_alert
+          | :delete_stock
+          | :help
 
   @help_file "./resource/help.md"
 
@@ -64,6 +72,16 @@ defmodule Bot.MessageInterpreter do
 
   def process_message(:add_stock, args, _from) when length(args) != 4,
     do: {:error, :missing_parameter}
+
+  def process_message(:set_alert, [stock_id, target_price], from) do
+    with {target_price, _} <- Float.parse(target_price) do
+      Server.set_alert(stock_id, target_price, from.id)
+    else
+      _ -> {:error, :args_parse_error}
+    end
+  end
+
+  def process_message(:set_alert, _, _), do: {:error, :missing_parameter}
 
   def process_message(:delete_stock, [stock_id], from),
     do: Server.delete_stock(from.id, stock_id)

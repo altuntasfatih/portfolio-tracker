@@ -8,7 +8,8 @@ defmodule Stock do
             total_cost: 0.0,
             current_price: 0.0,
             current_worth: 0,
-            rate: 0.0
+            rate: 0.0,
+            alert: []
 
   def new(id, name, stock_count, purchase_price) do
     %Stock{
@@ -29,6 +30,13 @@ defmodule Stock do
       | current_price: purchase_price,
         current_worth: current_worth,
         rate: ((current_worth - stock.total_cost) / stock.total_cost * 100) |> round_ceil
+    }
+  end
+
+  def add_alert(%Stock{alert: current_alerts} = stock, %Alert{} = alert) do
+    %Stock{
+      stock
+      | alert: [alert | current_alerts] |> Enum.reverse()
     }
   end
 

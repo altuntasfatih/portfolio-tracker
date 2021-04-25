@@ -108,6 +108,10 @@ defmodule PortfolioTracker.Server do
   def get(id), do: via_tuple(id, &GenServer.call(&1, :get))
 
   def add_stock(%Stock{} = stock, id), do: via_tuple(id, &GenServer.cast(&1, {:add_stock, stock}))
+
+  def set_alert(stock_id, target_price, id),
+    do: via_tuple(id, &GenServer.cast(&1, {:set_alert, stock_id, target_price}))
+
   def update(id), do: via_tuple(id, &GenServer.cast(&1, :update))
 
   def live(id), do: via_tuple(id, &GenServer.call(&1, :live))
