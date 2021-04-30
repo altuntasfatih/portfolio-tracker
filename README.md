@@ -35,7 +35,6 @@ import_config "dev.secret.exs"
 ### How to use
 1. Firstly you should create a portfolio.
 
-
 2. Then you can add or remove any number of stocks to your portfolio.
 
 3. Also you can add custom alerts to your portfolio.
@@ -47,18 +46,19 @@ import_config "dev.secret.exs"
 
 ### Bot Instaructions
 
-*  /create        -> it creates a stock portfolio for you.
-*  /get           -> it returns your stock portfolio.
-*  /get_detail    -> it returns your stock portfolio with detail.
-*  /live          -> it calculates your potfolio with live stocks prices.
-*  /destroy       -> it deletes your stock portfolo.
-*  /add_stock     -> it adds stock to your portfolio,
-                  e.g. /add_stock stock_id name count price
-                  (stock_id must be same with exchange identifier)
-*  /set_alert     -> it creates a alert for a stock. When it hits target, it sends notification to you.
-                  e.g. /set_alert type stock_id target_price
-                  (type -> upper_limit or lower_limit)
-*  /delete_stock  -> it deletes stock from portfolie,
-                  e.g. /delete_stock stock_id
+*  /create        -> It creates a stock portfolio for you.
+*  /get           -> It returns your stock portfolio.
+*  /get_detail    -> It returns your stock portfolio with detail.
+*  /live          -> It calculates your potfolio with live stocks prices.
+*  /destroy       -> It deletes your stock portfolo.
+*  /add_stock     -> It adds stock to your portfolio,
+                    e.g. /add_stock stock_id name count price
+                    (stock_id must be same with exchange identifier)
+*  /delete_stock  -> It deletes stock from portfolie,
+                    e.g. /delete_stock stock_id
+*  /set_alert     -> It creates a alert for a stock. When it hits target, it send notification to you.
+                    e.g. /set_alert type stock_id target_price
+                    (type -> upper_limit or lower_limit)        
+*  /get_alerts    -> It returns active alerts for your portfolio.                       
 *  /help           -> help.
 

@@ -85,7 +85,7 @@ defmodule Bot.MessageInterpreter do
 
   def process_message(:set_alert, _, _), do: {:error, :missing_parameter}
 
-  def process_message(:get_alerts, _args, from), do: Server.get_alerts(from.id)
+  def process_message(:get_alerts, _args, from), do: Server.get_alerts(from.id) |> Enum.join("\n")
 
   def process_message(:delete_stock, [stock_id], from),
     do: Server.delete_stock(from.id, stock_id)

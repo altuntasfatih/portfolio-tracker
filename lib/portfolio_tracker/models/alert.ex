@@ -32,7 +32,7 @@ defmodule Alert do
 
   defimpl String.Chars, for: Alert do
     def to_string(alert) do
-      "#{alert.id} -> #{Atom.to_string(alert.type)} on #{alert.price}"
+      "For #{alert.stock_id} #{Atom.to_string(alert.type)} on #{alert.price} "
     end
   end
 end
