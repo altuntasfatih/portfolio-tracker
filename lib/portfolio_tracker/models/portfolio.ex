@@ -6,7 +6,8 @@ defmodule Portfolio do
             total_cost: 0.0,
             total_worth: 0.0,
             rate: 0.0,
-            update_time: nil
+            update_time: nil,
+            alerts: []
 
   @line_break " \n------------------------------------- \n"
 
@@ -27,6 +28,13 @@ defmodule Portfolio do
   def delete_stock(%Portfolio{} = portfolio, stock_id) do
     Map.put(portfolio, :stocks, Map.delete(portfolio.stocks, stock_id))
     |> calculate()
+  end
+
+  def add_alert(%Portfolio{alerts: current_alerts} = p, %Alert{} = alert) do
+    %Portfolio{
+      p
+      | alerts: [alert | current_alerts] |> Enum.reverse()
+    }
   end
 
   def update(%Portfolio{} = portfolio, new_stocks) do

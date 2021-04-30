@@ -11,6 +11,7 @@ defmodule Bot.MessageInterpreter do
           | :destroy
           | :add_stock
           | :set_alert
+          | :get_alerts
           | :delete_stock
           | :help
 
@@ -70,18 +71,21 @@ defmodule Bot.MessageInterpreter do
     end
   end
 
-  def process_message(:add_stock, args, _from) when length(args) != 4,
-    do: {:error, :missing_parameter}
+  def process_message(:add_stock, _args, _from), do: {:error, :missing_parameter}
 
-  def process_message(:set_alert, [stock_id, target_price], from) do
-    with {target_price, _} <- Float.parse(target_price) do
-      Server.set_alert(stock_id, target_price, from.id)
+  def process_message(:set_alert, [type, stock_id, target_price], from) do
+    with {target_price, _} <- Float.parse(target_price),
+         type <- String.to_atom(type) do
+      Alert.new(type, stock_id, target_price)
+      |> Server.set_alert(from.id)
     else
       _ -> {:error, :args_parse_error}
     end
   end
 
   def process_message(:set_alert, _, _), do: {:error, :missing_parameter}
+
+  def process_message(:get_alerts, _args, from), do: Server.get_alerts(from.id)
 
   def process_message(:delete_stock, [stock_id], from),
     do: Server.delete_stock(from.id, stock_id)

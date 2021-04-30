@@ -27,8 +27,9 @@ end
 *  /add_stock     -> it adds stock to your portfolio,
                   e.g. /add_stock stock_id name count price
                   (stock_id must be same with exchange identifier)
-* /set_alert      -> it creates a alert for stock price in your portfolio. When it hits target, it send notification to you.
-                  e.g. /set_alert stock_id target_price              
+*  /set_alert     -> it creates a alert for a stock. When it hits target, it sends notification to you.
+                  e.g. /set_alert type stock_id target_price
+                  (type -> upper_limit or lower_limit)
 *  /delete_stock  -> it deletes stock from portfolie,
                   e.g. /delete_stock stock_id
 *  /help           -> help.

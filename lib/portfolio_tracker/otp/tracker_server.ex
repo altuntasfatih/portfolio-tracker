@@ -35,6 +35,11 @@ defmodule PortfolioTracker.Server do
   end
 
   @impl true
+  def handle_call(:get_alerts, _from, state) do
+    {:reply, state.alerts, state}
+  end
+
+  @impl true
   def handle_call(:destroy, _from, state) do
     {:stop, :normal, :ok, state}
   end
@@ -43,6 +48,11 @@ defmodule PortfolioTracker.Server do
   def handle_call(:live, _from, state) do
     new_state = Portfolio.update(state, update_stocks_with_live(state.stocks))
     {:reply, new_state, new_state}
+  end
+
+  @impl true
+  def handle_cast({:set_alert, %Alert{} = alert}, state) do
+    {:noreply, Portfolio.add_alert(state, alert)}
   end
 
   @impl true
@@ -109,8 +119,10 @@ defmodule PortfolioTracker.Server do
 
   def add_stock(%Stock{} = stock, id), do: via_tuple(id, &GenServer.cast(&1, {:add_stock, stock}))
 
-  def set_alert(stock_id, target_price, id),
-    do: via_tuple(id, &GenServer.cast(&1, {:set_alert, stock_id, target_price}))
+  def set_alert(%Alert{} = alert, id),
+    do: via_tuple(id, &GenServer.cast(&1, {:set_alert, alert}))
+
+  def get_alerts(id), do: via_tuple(id, &GenServer.call(&1, :get_alerts))
 
   def update(id), do: via_tuple(id, &GenServer.cast(&1, :update))
 
