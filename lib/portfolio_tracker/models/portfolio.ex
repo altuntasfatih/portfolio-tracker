@@ -43,21 +43,25 @@ defmodule Portfolio do
     |> Map.put(:update_time, current_time())
   end
 
-  defp calculate(%Portfolio{stocks: stocks, id: id, update_time: time}) do
-    Map.values(stocks)
-    |> Enum.reduce(new(id), fn s, acc ->
-      cost = (acc.total_cost + s.total_cost) |> round_()
-      worth = (acc.total_worth + s.current_worth) |> round_()
+  defp calculate(%Portfolio{stocks: stocks} = p) do
+    {cost, worth, rate} = Map.values(stocks) |> calculate()
 
-      %Portfolio{
-        acc
-        | total_cost: cost,
-          total_worth: worth,
-          rate: ((worth - cost) / cost * 100) |> round_ceil
-      }
+    %Portfolio{
+      p
+      | total_cost: cost,
+        total_worth: worth,
+        rate: rate
+    }
+  end
+
+  defp calculate(stocks) when is_list(stocks) do
+    Enum.reduce(stocks, {0, 0, 0}, fn s, {cost, worth, _rate} ->
+      cost = (cost + s.total_cost) |> round_()
+      worth = (worth + s.current_worth) |> round_()
+      rate = ((worth - cost) / cost * 100) |> round_ceil
+
+      {cost, worth, rate}
     end)
-    |> Map.put(:stocks, stocks)
-    |> Map.put(:update_time, time)
   end
 
   def to_string(%Portfolio{} = p) do
