@@ -30,6 +30,13 @@ defmodule Portfolio do
     |> calculate()
   end
 
+  def remove_alert(%Portfolio{alerts: current_alerts} = p, stock_id) do
+    %Portfolio{
+      p
+      | alerts: current_alerts |> Enum.filter(&(&1.stock_id != stock_id))
+    }
+  end
+
   def add_alert(%Portfolio{alerts: current_alerts} = p, %Alert{} = alert) do
     %Portfolio{
       p

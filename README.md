@@ -58,7 +58,9 @@ import_config "dev.secret.exs"
                     e.g. /delete_stock stock_id
 *  /set_alert     -> It creates a alert for a stock. When it hits target, it send notification to you.
                     e.g. /set_alert type stock_id target_price
-                    (type -> upper_limit or lower_limit)        
+                    (type -> upper_limit or lower_limit)   
+*  /remove_alert  -> It removes a alert for your portfolio.  
+                     e.g. /remove_alert stock_id                     
 *  /get_alerts    -> It returns active alerts for your portfolio.                       
-*  /help           -> help.
+*  /help          -> help.
 
