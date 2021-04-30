@@ -28,25 +28,22 @@ import_config "dev.secret.exs"
 
 
 ## Bot
-[Try It ](https://t.me/foter_portfolio_tracker_bot)
+[<img width="398" alt="Screen Shot 2021-04-30 at 22 30 11" src="https://user-images.githubusercontent.com/13722649/116748942-daaa8280-aa08-11eb-8502-43f1bda81e2d.png">](https://t.me/foter_portfolio_tracker_bot)
+
+[Try It](https://t.me/foter_portfolio_tracker_bot)
 
 ### How to use
 1. Firstly you should create a portfolio.
-    /create
+
 
 2. Then you can add or remove any number of stocks to your portfolio.
-    /add_stock stock_id name count price
-    /delete stock_id
 
 3. Also you can add custom alerts to your portfolio.
-    /set_alert upper_limit AVISA 20.00
 
 4. You can learn current value of stocks.
-   /live
 
 5. You can get detail of your portfolio.<br>
-   /get_detail<br>
-   /get
+
 
 ### Bot Instaructions
 
