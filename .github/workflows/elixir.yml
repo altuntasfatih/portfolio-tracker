@@ -7,6 +7,7 @@ on:
     branches: [ main ]
 
 env:
+  experimental-otp: true
   MIX_ENV: test
   
 jobs:
