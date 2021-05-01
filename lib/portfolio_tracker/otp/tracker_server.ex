@@ -66,6 +66,11 @@ defmodule PortfolioTracker.Server do
   end
 
   @impl true
+  def handle_cast({:remove_alert, stock_id}, state) do
+    {:noreply, Portfolio.remove_alert(state, stock_id)}
+  end
+
+  @impl true
   def handle_cast(:update, state), do: handle_info(:update, state)
 
   @impl true
@@ -127,6 +132,9 @@ defmodule PortfolioTracker.Server do
   def update(id), do: via_tuple(id, &GenServer.cast(&1, :update))
 
   def live(id), do: via_tuple(id, &GenServer.call(&1, :live))
+
+  def remove_alert(id, stock_id),
+    do: via_tuple(id, &GenServer.cast(&1, {:remove_alert, stock_id}))
 
   def delete_stock(id, stock_id),
     do: via_tuple(id, &GenServer.cast(&1, {:delete_stock, stock_id}))

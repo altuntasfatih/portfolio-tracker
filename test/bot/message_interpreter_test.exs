@@ -36,9 +36,9 @@ defmodule Telegram.MessageInterpreterTest do
     assert process_message(create_message("/delete_stock VAKBN")) == :ok
   end
 
-  #test "it_should_process_live_instruction" do
+  # test "it_should_process_live_instruction" do
   #  assert process_message(create_message("/live")) == " "
-  #end
+  # end
 
   test "it_should_process_get_instruction" do
     start()
@@ -76,6 +76,19 @@ defmodule Telegram.MessageInterpreterTest do
   test "it_should_only_support_text_instruction" do
     assert process_message(image_message()) ==
              "Instruction does not exist"
+  end
+
+  test "it_should_process_remove_alert_instruction" do
+    start()
+    assert process_message(create_message("/set_alert upper_limit TOASO 42.67")) == :ok
+    assert process_message(create_message("/remove_alert TOASO")) == :ok
+    assert process_message(create_message("/get_alerts ")) == ""
+  end
+
+  test "it_should_process_set_alert_and_get_alerts" do
+    start()
+    assert process_message(create_message("/set_alert upper_limit TOASO 42.67")) == :ok
+    assert process_message(create_message("/get_alerts ")) == "For TOASO upper_limit on 42.67 "
   end
 
   def image_message() do

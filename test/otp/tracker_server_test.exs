@@ -82,6 +82,13 @@ defmodule PortfolioTracker.ServerTest do
     assert get_alerts(pid) == [alert]
   end
 
+  test "it_should_delete_alert", %{pid: pid} do
+    alert = Alert.new(:lower_limit, "AVISA", 16.0)
+    assert set_alert(pid, alert) == :ok
+    assert remove_alert(pid, alert.stock_id) == :ok
+    assert get_alerts(pid) == []
+  end
+
   def get(pid) do
     GenServer.call(pid, :get)
   end
@@ -100,6 +107,10 @@ defmodule PortfolioTracker.ServerTest do
 
   def delete(pid, stock_id) do
     GenServer.cast(pid, {:delete_stock, stock_id})
+  end
+
+  def remove_alert(pid, stock_id) do
+    GenServer.cast(pid, {:remove_alert, stock_id})
   end
 
   def update(pid) do

@@ -12,4 +12,6 @@
                     e.g. /delete\_stock stockId
 */set_alert*    It creates a alert for a stock. When it hits target, it sends notification to you.
                     e.g. /set\_alert type stockId targetPrice
+*/remove_alert* It removes a alert for your portfolio.
+                    e.g. /remove\_alert stockId
 */get_alerts*  It returns active alerts for your portfolio.

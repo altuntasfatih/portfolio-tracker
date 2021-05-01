@@ -70,4 +70,11 @@ defmodule PortfolioTest do
 
     assert Portfolio.add_alert(portfolio, alert).alerts == [alert]
   end
+
+  test "it_should_remove_alert" do
+    alert = Alert.new(:upper_limit, "A", 20.0)
+    portfolio = Portfolio.new(@id) |> Portfolio.add_alert(alert)
+
+    assert Portfolio.remove_alert(portfolio, alert.stock_id).alerts == []
+  end
 end
