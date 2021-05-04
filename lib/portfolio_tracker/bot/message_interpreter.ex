@@ -14,6 +14,7 @@ defmodule Bot.MessageInterpreter do
           | :remove_alert
           | :get_alerts
           | :delete_stock
+          | :start
           | :help
 
   @help_file "./resource/help.md"
@@ -101,6 +102,8 @@ defmodule Bot.MessageInterpreter do
     {:ok, content} = File.read(@help_file)
     {:ok, {content, [parse_mode: :markdown]}}
   end
+
+  def process_message(:start, args, from), do: process_message(:help, args, from)
 
   def process_message(_, _, _), do: {:error, :instruction_not_found}
 

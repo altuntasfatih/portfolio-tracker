@@ -68,6 +68,10 @@ defmodule Telegram.MessageInterpreterTest do
     refute process_message(create_message("/help")) == ""
   end
 
+  test "it_should_process_start_instruction" do
+    assert process_message(create_message("/help")) == process_message(create_message("/start"))
+  end
+
   test "it_should_not_process_when_instruction_not_found" do
     assert process_message(create_message("not supported instruction")) ==
              "Instruction does not exist"
