@@ -46,21 +46,21 @@ import_config "dev.secret.exs"
 
 ### Bot Instaructions
 
-*  /create        -> It creates a stock portfolio for you.
-*  /get           -> It returns your stock portfolio.
-*  /get_detail    -> It returns your stock portfolio with detail.
-*  /live          -> It calculates your potfolio with live stocks prices.
-*  /destroy       -> It deletes your stock portfolo.
-*  /add_stock     -> It adds stock to your portfolio,
-                    e.g. `/add_stock stock_id name count price`
-                    (stock_id must be same with exchange identifier)
-*  /delete_stock  -> It deletes stock from portfolie,
-                    e.g. `/delete_stock stock_id`
-*  /set_alert     -> It creates a alert for a stock. When it hits target, it send notification to you.
-                    e.g. `/set_alert type stock_id target_price`
-                    (type -> upper_limit or lower_limit)   
-*  /remove_alert  -> It removes a alert for your portfolio.  
-                     e.g. `/remove_alert stock_id`                     
-*  /get_alerts    -> It returns active alerts for your portfolio.   
-*  /start         -> Alias `/help `                   
-*  /help          -> Help().
+*  `/create`        -> It creates a stock portfolio for you.
+*  `/get`           -> It returns your stock portfolio.
+*  `/get_detail`    -> It returns your stock portfolio with detail.
+*  `/live`          -> It calculates your potfolio with live stocks prices.
+*  `/destroy`       -> It deletes your stock portfolo.
+*  `/add_stock`     -> It adds stock to your portfolio,
+                       e.g. `/add_stock stock_id name count price`
+                       (stock_id must be same with exchange identifier)
+*  `/delete_stock`  -> It deletes stock from portfolie,
+                       e.g. `/delete_stock stock_id`
+*  `/set_alert`     -> It creates a alert for a stock. When it hits target, it send notification to you.
+                       e.g. `/set_alert type stock_id target_price`
+                       (type -> upper_limit or lower_limit)   
+*  `/remove_alert`  -> It removes a alert for your portfolio.  
+                       e.g. `/remove_alert stock_id`                     
+*  `/get_alerts`    -> It returns active alerts for your portfolio.   
+*  `/start`         -> Alias `/help `                   
+*  `/help`          -> Help().
