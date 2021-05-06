@@ -55,6 +55,6 @@ import_config "dev.secret.exs"
 | `/add_stock`     | It adds stock to your portfolio.                                             | `/add_stock stock_id name count price` (stock_id must be same with exchange identifier)  |
 | `/delete_stock`  | It deletes stock from portfolie.                                             | `/delete_stock stock_id`        |
 | `/set_alert`     | It creates a alert for a stock. When it hits target, it send notification to you.| `/set_alert type stock_id target_price`  (type -> upper_limit or lower_limit)           |
-| `/get_alerts`    | It returns active alerts for your portfolio.                                 | `/get_alerts   |
+| `/get_alerts`    | It returns active alerts for your portfolio.                                 | `/get_alerts`   |
 | `/start`         | Alias for `/help `                                                           | `/live`        |
 | `/help`          | Help()                                                                       | `/help`        |
