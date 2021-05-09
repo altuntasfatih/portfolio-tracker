@@ -89,8 +89,8 @@ defmodule PortfolioTracker.Server do
   def handle_info(:check_alert, %Portfolio{alerts: alerts} = state) do
     {hit_list, not_hit_list} = check_alerts_condition(alerts)
 
-    #("Allert conditions hits -> " <> Enum.join(hit_list, "\n "))
-    #|> Pooler.send_message_to_user(state.id)
+    ("Alert conditions hits -> " <> Enum.join(hit_list, "\n "))
+    |> Pooler.send_message_to_user(state.id)
 
     {:noreply, %Portfolio{state | alerts: not_hit_list}}
   end

@@ -71,7 +71,6 @@ defmodule Portfolio do
     end)
   end
 
-
   def to_string(%Portfolio{} = p) do
     "Your Portfolio  \nWorth: #{p.total_worth} \nUpdate Time: #{p.update_time} \nRate: #{
       rate(p.rate)
