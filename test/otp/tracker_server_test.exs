@@ -78,15 +78,49 @@ defmodule PortfolioTracker.ServerTest do
   test "it_should_add_alert_for_stock", %{pid: pid} do
     alert = Alert.new(:lower_limit, "AVISA", 16.0)
     assert set_alert(pid, alert) == :ok
-
     assert get_alerts(pid) == [alert]
   end
 
   test "it_should_delete_alert", %{pid: pid} do
     alert = Alert.new(:lower_limit, "AVISA", 16.0)
     assert set_alert(pid, alert) == :ok
-    assert remove_alert(pid, alert.stock_id) == :ok
+    assert remove_alert(pid, alert.stock_name) == :ok
     assert get_alerts(pid) == []
+  end
+
+  test "it_should_check_alerts_condition", _ do
+    alert = Alert.new(:lower_limit, "AVISA", 16.0)
+    alert2 = Alert.new(:lower_limit, "TUPRS", 100.0)
+    alert3 = Alert.new(:upper_limit, "KRDMD", 50.0)
+
+    PortfolioTracker.MockExchangeApi.push([
+      %{name: "AVISA", price: 15.33},
+      %{name: "TUPRS", price: 120.60},
+      %{name: "KRDMD", price: 20.60},
+      %{name: "CANTE", price: 120.60}
+    ])
+
+    assert Server.check_alerts_condition([alert, alert2, alert3]) == {[alert], [alert2, alert3]}
+  end
+
+  test "it_should_handle_check_alerts_message", %{pid: pid} do
+    hit_alert = Alert.new(:lower_limit, "AVISA", 16.0)
+    not_hit_alert_ = Alert.new(:lower_limit, "TUPRS", 100.0)
+    not_hit_alert_2 = Alert.new(:upper_limit, "KRDMD", 50.0)
+
+    assert set_alert(pid, hit_alert) == :ok
+    assert set_alert(pid, not_hit_alert_) == :ok
+    assert set_alert(pid, not_hit_alert_2) == :ok
+
+    PortfolioTracker.MockExchangeApi.push([
+      %{name: "AVISA", price: 15.33},
+      %{name: "TUPRS", price: 120.60},
+      %{name: "KRDMD", price: 20.60},
+      %{name: "CANTE", price: 120.60}
+    ])
+
+    assert check_alerts(pid) == :ok
+    assert get_alerts(pid) == [not_hit_alert_, not_hit_alert_2]
   end
 
   def get(pid) do
@@ -101,16 +135,23 @@ defmodule PortfolioTracker.ServerTest do
     GenServer.cast(pid, {:set_alert, alert})
   end
 
+  def remove_alert(pid, stock_id) do
+    GenServer.cast(pid, {:remove_alert, stock_id})
+  end
+
+  def check_alerts(pid) do
+    case send(pid, :check_alert) do
+      :check_alert -> :ok
+      m -> m
+    end
+  end
+
   def get_alerts(pid) do
     GenServer.call(pid, :get_alerts)
   end
 
   def delete(pid, stock_id) do
     GenServer.cast(pid, {:delete_stock, stock_id})
-  end
-
-  def remove_alert(pid, stock_id) do
-    GenServer.cast(pid, {:remove_alert, stock_id})
   end
 
   def update(pid) do

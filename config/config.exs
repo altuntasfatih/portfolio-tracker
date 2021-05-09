@@ -2,6 +2,10 @@ import Config
 
 config :elixir, :time_zone_database, Tzdata.TimeZoneDatabase
 
+config :logger, :console,
+  format: "[$level][$time] $message [$metadata]\n",
+  metadata: [:pid, :file, :line]
+
 config :nadia,
   token: System.get_env("BOT_TOKEN")
 

@@ -1,8 +1,10 @@
 defmodule Bot.Pooler do
+  require Logger
   use GenServer
   import Bot.MessageInterpreter
 
   @interval 1000
+
   def start_link(offset) do
     GenServer.start_link(__MODULE__, offset, name: __MODULE__)
   end
@@ -14,14 +16,26 @@ defmodule Bot.Pooler do
   end
 
   @impl true
+  def handle_cast({:send_message, to, message}, state) do
+    {:ok, _} = Nadia.send_message(to, message)
+    {:noreply, state}
+  end
+
+  @impl true
   def handle_info(:get_messages, offset) do
     {:ok, update} = Nadia.get_updates(offset: offset, limit: 1)
     call_itself()
     {:noreply, process(update, offset)}
   end
 
+  def send_message_to_user(message, to) when is_binary(message) do
+    Logger.info("Send message to user: #{inspect(to)} message: #{inspect(message)}")
+    GenServer.cast(__MODULE__, {:send_message, to, message})
+  end
+
   def process([], offset), do: offset
   def process([u], _), do: process(u)
+
   def process(%{message: nil, update_id: id}), do: id + 1
 
   def process(%{message: message, update_id: id}) do
