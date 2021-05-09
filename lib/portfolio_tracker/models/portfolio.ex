@@ -30,10 +30,10 @@ defmodule Portfolio do
     |> calculate()
   end
 
-  def remove_alert(%Portfolio{alerts: current_alerts} = p, stock_id) do
+  def remove_alert(%Portfolio{alerts: current_alerts} = p, stock_name) do
     %Portfolio{
       p
-      | alerts: current_alerts |> Enum.filter(&(&1.stock_id != stock_id))
+      | alerts: current_alerts |> Enum.filter(&(&1.stock_name != stock_name))
     }
   end
 
@@ -70,6 +70,7 @@ defmodule Portfolio do
       {cost, worth, rate}
     end)
   end
+
 
   def to_string(%Portfolio{} = p) do
     "Your Portfolio  \nWorth: #{p.total_worth} \nUpdate Time: #{p.update_time} \nRate: #{

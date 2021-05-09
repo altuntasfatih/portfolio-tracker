@@ -3,7 +3,9 @@ defmodule PortfolioTracker.Server do
   Documentation for `PortfolioTracker`.
   """
   alias PortfolioTracker.ExchangeApi
+  alias Bot.Pooler
   use GenServer
+
   require Logger
 
   @backup_path "./backup/"
@@ -47,6 +49,7 @@ defmodule PortfolioTracker.Server do
   @impl true
   def handle_call(:live, _from, state) do
     new_state = Portfolio.update(state, update_stocks_with_live(state.stocks))
+    Process.send_after(self(), :check_alert, 10000)
     {:reply, new_state, new_state}
   end
 
@@ -83,6 +86,15 @@ defmodule PortfolioTracker.Server do
     {:noreply, Portfolio.update(state, update_stocks_with_live(stocks))}
   end
 
+  def handle_info(:check_alert, %Portfolio{alerts: alerts} = state) do
+    {hit_list, not_hit_list} = check_alerts_condition(alerts)
+
+    #("Allert conditions hits -> " <> Enum.join(hit_list, "\n "))
+    #|> Pooler.send_message_to_user(state.id)
+
+    {:noreply, %Portfolio{state | alerts: not_hit_list}}
+  end
+
   @impl true
   def handle_info(:take_backup, state) do
     binary = :erlang.term_to_binary(state)
@@ -98,6 +110,24 @@ defmodule PortfolioTracker.Server do
   @impl true
   def handle_info(:timeout, _) do
     {:stop, :normal, []}
+  end
+
+  def check_alerts_condition(alerts) do
+    {:ok, current_prices} =
+      Enum.map(alerts, fn alert -> alert.stock_name end) |> ExchangeApi.get_live_prices()
+
+    current_prices =
+      Enum.reduce(current_prices, %{}, fn p, acc ->
+        Map.put(acc, p.name, p.price)
+      end)
+
+    {hit_list, not_hit_list} =
+      alerts
+      |> Enum.split_with(fn alert ->
+        Alert.is_hit(alert, Map.get(current_prices, alert.stock_name))
+      end)
+
+    {hit_list, not_hit_list}
   end
 
   def update_stocks_with_live(stocks, current_prices) when is_list(stocks) do

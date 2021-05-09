@@ -23,4 +23,8 @@ defmodule PortfolioTracker.MockExchangeApi do
   def get_live_prices() do
     {:ok, pop()}
   end
+
+  def get_live_prices(_) do
+    {:ok, pop()}
+  end
 end
