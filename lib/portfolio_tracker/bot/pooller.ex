@@ -4,6 +4,7 @@ defmodule Bot.Pooler do
   import Bot.MessageInterpreter
 
   @interval 1000
+
   def start_link(offset) do
     GenServer.start_link(__MODULE__, offset, name: __MODULE__)
   end
