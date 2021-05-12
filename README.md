@@ -58,4 +58,4 @@ import_config "dev.secret.exs"
 
 4. You can learn current value of stocks.
 
-5. You can get detail of your portfolio.<br>
+5. You can get detail of your portfolio.

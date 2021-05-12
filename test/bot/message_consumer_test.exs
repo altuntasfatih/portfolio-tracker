@@ -86,7 +86,7 @@ defmodule Telegram.MessageConsumerTest do
     start()
     assert consume_message(create_message("/set_alert upper_limit TOASO 42.67")) == :ok
     assert consume_message(create_message("/remove_alert TOASO")) == :ok
-    assert consume_message(create_message("/get_alerts ")) == ""
+    assert consume_message(create_message("/get_alerts ")) == "Empty"
   end
 
   test "it_should_process_set_alert_and_get_alerts" do

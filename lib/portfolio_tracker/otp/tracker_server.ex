@@ -49,7 +49,8 @@ defmodule PortfolioTracker.Server do
   @impl true
   def handle_call(:live, _from, state) do
     new_state = Portfolio.update(state, update_stocks_with_live(state.stocks))
-    Process.send_after(self(), :check_alert, 10000)
+    # todo remove later
+    Process.send_after(self(), :check_alert, 1000)
     {:reply, new_state, new_state}
   end
 
@@ -92,7 +93,7 @@ defmodule PortfolioTracker.Server do
     {hit_list, not_hit_list} = check_alerts_condition(alerts)
 
     if not (hit_list == []) do
-      ("Alert conditions hits -> " <> Enum.join(hit_list, "\n "))
+      ("Alert conditions were triggered -> " <> Enum.join(hit_list, "\n "))
       |> Manager.send_message_user(state.id)
     end
 

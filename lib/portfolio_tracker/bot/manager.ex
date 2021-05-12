@@ -17,7 +17,7 @@ defmodule Bot.Manager do
 
   @impl true
   def handle_cast({:send_message, to, message}, state) do
-    {:ok, _} = send_message(to, message)
+    {:ok, _} = send_message(message,to)
     {:noreply, state}
   end
 

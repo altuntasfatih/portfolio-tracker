@@ -139,6 +139,7 @@ defmodule Bot.MessageConsumer do
 
   defp convert_data({:error, err}, _), do: {:error, err}
   defp convert_data({:ok, data}, func), do: {:ok, func.(data)}
+  defp convert_data([], _), do: {:ok, "Empty"}
   defp convert_data(data, func), do: {:ok, func.(data)}
 
   def send_reply(message, to) do
