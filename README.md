@@ -32,6 +32,16 @@ import_config "dev.secret.exs"
 
 [Try It](https://t.me/foter_portfolio_tracker_bot)
 
+
+### How to use
+1. Firstly you should create a portfolio.
+2. Then you can add or remove any number of stocks to your portfolio.
+3. Also you can add or remove custom alerts to your portfolio.
+4. You can learn current value of stocks.
+
+<img width="410" alt="Screen Shot 2021-05-12 at 19 38 35" src="https://user-images.githubusercontent.com/13722649/118012635-f0e60600-b359-11eb-969c-c0209764e21a.png">
+
+
 ### Bot Commands
 
 | Commands         | Explanation                                                                  | Example        |
@@ -47,15 +57,3 @@ import_config "dev.secret.exs"
 | `/start`         | Alias for `/help `                                                           | `/live`        |
 | `/help`          | Help()                                                                       | `/help`        |
 
-
-
-### How to use
-1. Firstly you should create a portfolio.
-  
-2. Then you can add or remove any number of stocks to your portfolio.
-
-3. Also you can add or remove custom alerts to your portfolio.
-
-4. You can learn current value of stocks.
-
-5. You can get detail of your portfolio.
