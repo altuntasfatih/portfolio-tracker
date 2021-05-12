@@ -3,7 +3,7 @@ defmodule PortfolioTracker.Server do
   Documentation for `PortfolioTracker`.
   """
   alias PortfolioTracker.ExchangeApi
-  alias Bot.Pooler
+  alias Bot.Manager
   use GenServer
 
   require Logger
@@ -86,11 +86,15 @@ defmodule PortfolioTracker.Server do
     {:noreply, Portfolio.update(state, update_stocks_with_live(stocks))}
   end
 
+  def handle_info(:check_alert, %Portfolio{alerts: []} = state), do: {:noreply, state}
+
   def handle_info(:check_alert, %Portfolio{alerts: alerts} = state) do
     {hit_list, not_hit_list} = check_alerts_condition(alerts)
 
-    ("Alert conditions hits -> " <> Enum.join(hit_list, "\n "))
-    |> Pooler.send_message_to_user(state.id)
+    if not (hit_list == []) do
+      ("Alert conditions hits -> " <> Enum.join(hit_list, "\n "))
+      |> Manager.send_message_user(state.id)
+    end
 
     {:noreply, %Portfolio{state | alerts: not_hit_list}}
   end
@@ -188,8 +192,7 @@ defmodule PortfolioTracker.Server do
       id: __MODULE__,
       start: {__MODULE__, :start_link, [opts]},
       type: :worker,
-      restart: :permanent,
-      shutdown: 500
+      restart: :transient
     }
   end
 end

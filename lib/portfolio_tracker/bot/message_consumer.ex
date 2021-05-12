@@ -1,7 +1,8 @@
-defmodule Bot.MessageInterpreter do
+defmodule Bot.MessageConsumer do
   require Logger
-  alias PortfolioTracker.CustomSupervisor
+  alias PortfolioTracker.ServerSupervisor
   alias PortfolioTracker.Server
+  alias Bot.Manager
 
   @type instructions ::
           :create
@@ -18,16 +19,16 @@ defmodule Bot.MessageInterpreter do
           | :help
 
   @help_file "./resource/help.md"
-
   @pattern " "
-  def process_message(message) do
-    case preprocess_text(message.text) do
-      [instruction | args] ->
-        print(instruction, args)
 
-        String.slice(instruction, 1..-1)
-        |> String.to_atom()
-        |> process_message(args, message.from)
+  @spec consume_message(atom | %{:text => binary, optional(any) => any}) :: any
+  def consume_message(message) do
+    case parse_message(message.text) do
+      [instruction | args] ->
+        log(instruction, args)
+
+        String.to_atom(instruction)
+        |> message_handler(args, message.from)
         |> prepare_reply
 
       _ ->
@@ -35,35 +36,33 @@ defmodule Bot.MessageInterpreter do
     end
   end
 
-  @spec preprocess_text(binary) :: list
-  defp preprocess_text(nil), do: []
-
-  defp preprocess_text(text) do
+  defp parse_message("/" <> text) do
     String.trim(text)
     |> String.split(@pattern)
     |> Enum.filter(fn x -> x != "" end)
   end
 
-  @spec process_message(instructions, list, any) :: any
-  def process_message(:create, _args, from) do
-    case CustomSupervisor.start_listener(from.id) do
+  defp parse_message(_), do: []
+
+  def message_handler(:create, _, from) do
+    case ServerSupervisor.start_server(from.id) do
       {:ok, _pid} -> {:ok, :portfolio_created}
       {:error, {:already_started, _pid}} -> {:error, :portfolio_already_created}
     end
   end
 
-  def process_message(:get, _args, from),
-    do: encode_portfolio(Server.get(from.id), fn p -> Portfolio.to_string(p) end)
+  def message_handler(:get, _, from),
+    do: convert_data(Server.get(from.id), fn p -> Portfolio.to_string(p) end)
 
-  def process_message(:get_detail, _args, from),
-    do: encode_portfolio(Server.get(from.id), fn p -> Portfolio.detailed_to_string(p) end)
+  def message_handler(:get_detail, _, from),
+    do: convert_data(Server.get(from.id), fn p -> Portfolio.detailed_to_string(p) end)
 
-  def process_message(:live, _args, from),
-    do: encode_portfolio(Server.live(from.id), fn p -> Portfolio.detailed_to_string(p) end)
+  def message_handler(:live, _, from),
+    do: convert_data(Server.live(from.id), fn p -> Portfolio.detailed_to_string(p) end)
 
-  def process_message(:destroy, _args, from), do: Server.destroy(from.id)
+  def message_handler(:destroy, _, from), do: Server.destroy(from.id)
 
-  def process_message(:add_stock, [id, name, count, price], from) do
+  def message_handler(:add_stock, [id, name, count, price], from) do
     with {count, _} <- Integer.parse(count),
          {price, _} <- Float.parse(price) do
       Stock.new(id, name, count, price)
@@ -73,9 +72,9 @@ defmodule Bot.MessageInterpreter do
     end
   end
 
-  def process_message(:add_stock, _args, _from), do: {:error, :missing_parameter}
+  def message_handler(:add_stock, _, _), do: {:error, :missing_parameter}
 
-  def process_message(:set_alert, [type, stock_id, target_price], from) do
+  def message_handler(:set_alert, [type, stock_id, target_price], from) do
     with {target_price, _} <- Float.parse(target_price),
          type <- String.to_atom(type) do
       Alert.new(type, stock_id, target_price)
@@ -85,27 +84,28 @@ defmodule Bot.MessageInterpreter do
     end
   end
 
-  def process_message(:set_alert, _, _), do: {:error, :missing_parameter}
+  def message_handler(:set_alert, _, _), do: {:error, :missing_parameter}
 
-  def process_message(:remove_alert, [stock_id], from), do: Server.remove_alert(from.id, stock_id)
+  def message_handler(:remove_alert, [stock_id], from), do: Server.remove_alert(from.id, stock_id)
 
-  def process_message(:remove_alert, _, _), do: {:error, :missing_parameter}
+  def message_handler(:remove_alert, _, _), do: {:error, :missing_parameter}
 
-  def process_message(:get_alerts, _args, from), do: Server.get_alerts(from.id) |> Enum.join("\n")
+  def message_handler(:get_alerts, _, from),
+    do: convert_data(Server.get_alerts(from.id), &Enum.join(&1))
 
-  def process_message(:delete_stock, [stock_id], from),
+  def message_handler(:delete_stock, [stock_id], from),
     do: Server.delete_stock(from.id, stock_id)
 
-  def process_message(:delete_stock, _, _), do: {:error, :missing_parameter}
+  def message_handler(:delete_stock, _, _), do: {:error, :missing_parameter}
 
-  def process_message(:help, _args, _from) do
+  def message_handler(:help, _, _) do
     {:ok, content} = File.read(@help_file)
     {:ok, {content, [parse_mode: :markdown]}}
   end
 
-  def process_message(:start, args, from), do: process_message(:help, args, from)
+  def message_handler(:start, args, from), do: message_handler(:help, args, from)
 
-  def process_message(_, _, _), do: {:error, :instruction_not_found}
+  def message_handler(_, _, _), do: {:error, :instruction_not_found}
 
   defp prepare_reply({:error, :listener_not_found}),
     do: "There is no portfolio tracker for you, You should create firstly"
@@ -127,16 +127,21 @@ defmodule Bot.MessageInterpreter do
   defp prepare_reply({:ok, reply}), do: reply
   defp prepare_reply(r), do: r
 
-  defp print(message, []) do
+  defp log(message, []) do
     ("Incoming message -> " <> message)
     |> Logger.info()
   end
 
-  defp print(message, args) do
+  defp log(message, args) do
     ("Incoming message -> " <> message <> ", " <> "args -> " <> Enum.join(args, ", "))
     |> Logger.info()
   end
 
-  defp encode_portfolio({:error, err}, _), do: {:error, err}
-  defp encode_portfolio(%Portfolio{} = p, encoder), do: {:ok, encoder.(p)}
+  defp convert_data({:error, err}, _), do: {:error, err}
+  defp convert_data({:ok, data}, func), do: {:ok, func.(data)}
+  defp convert_data(data, func), do: {:ok, func.(data)}
+
+  def send_reply(message, to) do
+    Manager.send_message_user(message, to)
+  end
 end

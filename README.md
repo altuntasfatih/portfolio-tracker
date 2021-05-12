@@ -1,6 +1,6 @@
 # Portfolio Tracker
 
-It is a telegram bot that follows stocks' prices according to your portfolio. Also it supports custom alert conditions for your stocks.When condition hit it sends a notification to your telegram acount.
+It is a telegram bot that follows stocks' prices according to your portfolio. Also it supports custom alert conditions for your thresholds. When condition hits, it sends a notification to your telegram acount.
 
 It supports only BIST(Borsa Istanbul). But you can add a new behavior for exchange api then it runs according to it.
 (Current exchange api is [collect_api](https://collectapi.com/tr/api/economy/altin-doviz-ve-borsa-api) free version :) )
@@ -32,18 +32,6 @@ import_config "dev.secret.exs"
 
 [Try It](https://t.me/foter_portfolio_tracker_bot)
 
-### How to use
-1. Firstly you should create a portfolio.
-
-2. Then you can add or remove any number of stocks to your portfolio.
-
-3. Also you can add custom alerts to your portfolio.
-
-4. You can learn current value of stocks.
-
-5. You can get detail of your portfolio.<br>
-
-
 ### Bot Commands
 
 | Commands         | Explanation                                                                  | Example        |
@@ -58,3 +46,16 @@ import_config "dev.secret.exs"
 | `/get_alerts`    | It returns active alerts for your portfolio.                                 | `/get_alerts`   |
 | `/start`         | Alias for `/help `                                                           | `/live`        |
 | `/help`          | Help()                                                                       | `/help`        |
+
+
+
+### How to use
+1. Firstly you should create a portfolio.
+  
+2. Then you can add or remove any number of stocks to your portfolio.
+
+3. Also you can add or remove custom alerts to your portfolio.
+
+4. You can learn current value of stocks.
+
+5. You can get detail of your portfolio.<br>
