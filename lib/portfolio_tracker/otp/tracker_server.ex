@@ -2,12 +2,11 @@ defmodule PortfolioTracker.Server do
   @moduledoc """
   Documentation for `PortfolioTracker`.
   """
-  alias PortfolioTracker.ExchangeApi
-  alias Bot.Manager
   use GenServer
-
   require Logger
+  alias Bot.Manager
 
+  @api Application.get_env(:portfolio_tracker, :exchange_api)
   @backup_path "./backup/"
 
   def start_link(%Portfolio{} = state) do
@@ -119,7 +118,7 @@ defmodule PortfolioTracker.Server do
 
   def check_alerts_condition(alerts) do
     {:ok, current_prices} =
-      Enum.map(alerts, fn alert -> alert.stock_name end) |> ExchangeApi.get_live_prices()
+      Enum.map(alerts, fn alert -> alert.stock_name end) |> @api.get_live_prices()
 
     current_prices =
       Enum.reduce(current_prices, %{}, fn p, acc ->
@@ -143,7 +142,7 @@ defmodule PortfolioTracker.Server do
   end
 
   defp update_stocks_with_live(%{} = stocks) do
-    {:ok, current_prices} = ExchangeApi.get_live_prices()
+    {:ok, current_prices} = @api.get_live_prices()
 
     Map.values(stocks)
     |> update_stocks_with_live(current_prices)

@@ -9,8 +9,17 @@ defmodule Portfolio do
             update_time: nil,
             alerts: []
 
-  @line_break " \n------------------------------------- \n"
+  @type t :: %Portfolio{
+          id: String.t(),
+          stocks: map(),
+          total_cost: float(),
+          total_worth: float(),
+          rate: float(),
+          update_time: any(),
+          alerts: [Alert.t()]
+        }
 
+  @line_break " \n------------------------------------- \n"
   def new(id) do
     %Portfolio{id: id}
   end

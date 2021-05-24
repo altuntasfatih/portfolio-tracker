@@ -10,6 +10,18 @@ defmodule Stock do
             current_worth: 0,
             rate: 0.0
 
+  @type t :: %Stock{
+          id: String.t(),
+          name: String.t(),
+          count: number(),
+          purchase_price: float(),
+          total_cost: float,
+          current_price: float,
+          current_worth: float,
+          rate: float
+        }
+
+  @spec new(String.t(), String.t(), number(), float()) :: Stock.t()
   def new(id, name, stock_count, purchase_price) do
     %Stock{
       id: id,
@@ -21,6 +33,7 @@ defmodule Stock do
     |> calculate(purchase_price)
   end
 
+  @spec calculate(Stock.t(), float()) :: Stock.t()
   def calculate(%Stock{} = stock, purchase_price) do
     current_worth = (stock.count * purchase_price) |> round_ceil
 

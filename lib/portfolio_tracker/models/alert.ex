@@ -4,6 +4,14 @@ defmodule Alert do
             price: 0.0,
             function: nil
 
+  @type t :: %Alert{
+          type: atom(),
+          stock_name: String.t(),
+          price: float(),
+          function: function()
+        }
+
+  @spec new(:lower_limit | :upper_limit, String.t(), float()) :: Alert.t()
   def new(:lower_limit, stock_name, price) do
     %Alert{
       type: :lower_limit,
@@ -26,6 +34,7 @@ defmodule Alert do
     }
   end
 
+  @spec is_hit(Alert.t(), float()) :: boolean()
   def is_hit(%Alert{} = alert, current_price) do
     alert.function.(current_price, alert.price)
   end
