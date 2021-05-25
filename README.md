@@ -8,11 +8,10 @@ It supports only BIST(Borsa Istanbul). But you can add a new behavior for exchan
 Behavior for Exchange Api
 ```
 defmodule PortfolioTracker.ExchangeApi do
-  @callback get_live_prices() :: {:ok, list} | any
+  alias PortfolioTracker.ExchangeApi.Models.StockInfo
 
-  def get_live_prices() do
-    Application.get_env(:portfolio_tracker, :exchange_api).get_live_prices()
-  end
+  @callback get_live_prices() :: {:ok, [StockInfo.t()]} | any
+  @callback get_live_prices(list()) :: {:ok, [StockInfo.t()]} | any
 end
 ```
 You can set config to decide which exchange api runs on which environment.
