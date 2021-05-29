@@ -1,6 +1,4 @@
 defmodule PortfolioTracker.Application do
-  # See https://hexdocs.pm/elixir/Application.html
-  # for more information on OTP Applications
   @moduledoc false
   use Application
 
@@ -19,7 +17,7 @@ defmodule PortfolioTracker.Application do
   end
 
   defp children_by_env(:test) do
-    [{PortfolioTracker.TrackerSupervisor, :ok}]
+    [{PortfolioTracker.Supervisor, :ok}]
   end
 
   defp children_by_env(_) do

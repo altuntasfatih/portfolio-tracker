@@ -21,12 +21,11 @@ defmodule PortfolioTracker.MessageHandler do
   @pattern " "
 
   def handle_message(%{from: from}=message) do
-    case parse_message(message.text) do
-      [instruction | args] ->
+    case parse(message.text) do
+      {instruction , args} ->
         log(instruction, args)
 
-        String.to_atom(instruction)
-        |> handle(args, from)
+        handle(instruction,args, from)
         |> prepare_reply
         |> send_reply(from)
 
@@ -35,33 +34,35 @@ defmodule PortfolioTracker.MessageHandler do
     end
   end
 
-  defp parse_message("/" <> text) do
+  def parse("/" <> text) do
     String.trim(text)
     |> String.split(@pattern)
     |> Enum.filter(fn x -> x != "" end)
+    |> parse
   end
 
-  defp parse_message(_), do: []
+  def parse([instruction | args]), do: {String.to_atom(instruction), args}
+  def parse(_), do: []
 
   @spec handle(instructions, any, any) :: any
-  defp handle(:create, _, from) do
+  def handle(:create, _, from) do
     case Supervisor.start(from.id) do
       {:ok, _pid} -> {:ok, :portfolio_created}
       {:error, {:already_started, _pid}} -> {:error, :portfolio_already_created}
     end
   end
 
-  defp handle(:get, _, from),
+  def handle(:get, _, from),
     do: convert_data(Tracker.get(from.id), fn p -> Portfolio.to_string(p) end)
 
-  defp handle(:get_detail, _, from),
+  def handle(:get_detail, _, from),
     do: convert_data(Tracker.get(from.id), fn p -> Portfolio.detailed_to_string(p) end)
 
-  defp handle(:live, _, from), do: Tracker.live(from.id)
+  def handle(:live, _, from), do: Tracker.live(from.id)
 
-  defp handle(:destroy, _, from), do: Tracker.destroy(from.id)
+  def handle(:destroy, _, from), do: Tracker.destroy(from.id)
 
-  defp handle(:add_stock, [id, name, count, price], from) do
+  def handle(:add_stock, [id, name, count, price], from) do
     with {count, _} <- Integer.parse(count),
          {price, _} <- Float.parse(price) do
       Stock.new(id, name, count, price)
@@ -71,9 +72,9 @@ defmodule PortfolioTracker.MessageHandler do
     end
   end
 
-  defp handle(:add_stock, _, _), do: {:error, :missing_parameter}
+  def handle(:add_stock, _, _), do: {:error, :missing_parameter}
 
-  defp handle(:set_alert, [type, stock_id, target_price], from) do
+  def handle(:set_alert, [type, stock_id, target_price], from) do
     with {target_price, _} <- Float.parse(target_price),
          type <- String.to_atom(type) do
       Alert.new(type, stock_id, target_price)
@@ -83,30 +84,30 @@ defmodule PortfolioTracker.MessageHandler do
     end
   end
 
-  defp handle(:set_alert, _, _), do: {:error, :missing_parameter}
+  def handle(:set_alert, _, _), do: {:error, :missing_parameter}
 
-  defp handle(:remove_alert, [stock_id], from), do: Tracker.remove_alert(from.id, stock_id)
+  def handle(:remove_alert, [stock_id], from), do: Tracker.remove_alert(from.id, stock_id)
 
-  defp handle(:remove_alert, _, _), do: {:error, :missing_parameter}
+  def handle(:remove_alert, _, _), do: {:error, :missing_parameter}
 
-  defp handle(:get_alerts, _, from),
+  def handle(:get_alerts, _, from),
     do: convert_data(Tracker.get_alerts(from.id), &Enum.join(&1))
 
-  defp handle(:delete_stock, [stock_id], from),
+  def handle(:delete_stock, [stock_id], from),
     do: Tracker.delete_stock(from.id, stock_id)
 
-  defp handle(:delete_stock, _, _), do: {:error, :missing_parameter}
+  def handle(:delete_stock, _, _), do: {:error, :missing_parameter}
 
-  defp handle(:help, _, _) do
+  def handle(:help, _, _) do
     {:ok, content} = File.read(@help_file)
     {:ok, {content, [parse_mode: :markdown]}}
   end
 
-  defp handle(:start, args, from), do: handle(:help, args, from)
+  def handle(:start, args, from), do: handle(:help, args, from)
 
-  defp handle(_, _, _), do: {:error, :instruction_not_found}
+  def handle(_, _, _), do: {:error, :instruction_not_found}
 
-  defp prepare_reply({:error, :listener_not_found}),
+  defp prepare_reply({:error, :portfolio_not_found}),
     do: "There is no portfolio tracker for you, You should create firstly"
 
   defp prepare_reply({:error, :portfolio_already_created}),

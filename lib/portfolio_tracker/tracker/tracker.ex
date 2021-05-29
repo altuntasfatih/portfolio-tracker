@@ -182,7 +182,7 @@ defmodule PortfolioTracker.Tracker do
         resp
 
       _ ->
-        {:error, :listener_not_found}
+        {:error, :portfolio_not_found}
     end
   end
 

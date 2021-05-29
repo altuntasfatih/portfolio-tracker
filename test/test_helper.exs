@@ -1,2 +1,2 @@
 ExUnit.start()
-ExUnit.configure(exclude: :ignore, trace: true)
+ExUnit.configure(exclude: :pending, trace: true)

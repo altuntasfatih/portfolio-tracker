@@ -1,12 +1,12 @@
 defmodule PortfolioTracker.ServerTest do
   use ExUnit.Case
-  alias PortfolioTracker.Server
+  alias PortfolioTracker.Tracker
 
   @portfolio Portfolio.new("1")
 
   setup do
     {:ok, _} = PortfolioTracker.MockExchangeApi.start_link()
-    {:ok, pid} = GenServer.start_link(Server, @portfolio)
+    {:ok, pid} = GenServer.start_link(Tracker, @portfolio)
     {:ok, pid: pid}
   end
 
@@ -69,7 +69,7 @@ defmodule PortfolioTracker.ServerTest do
 
     current_prices = [%{name: "AVISA", price: 19.33}, %{name: "TUPRS", price: 102.60}]
 
-    assert Server.update_stocks_with_live([stock2, stock], current_prices) == [
+    assert Tracker.update_stocks_with_live([stock2, stock], current_prices) == [
              Stock.calculate(stock2, 102.60),
              Stock.calculate(stock, 19.33)
            ]
@@ -100,9 +100,10 @@ defmodule PortfolioTracker.ServerTest do
       %{name: "CANTE", price: 120.60}
     ])
 
-    assert Server.check_alerts_condition([alert, alert2, alert3]) == {[alert], [alert2, alert3]}
+    assert Tracker.check_alerts_condition([alert, alert2, alert3]) == {[alert], [alert2, alert3]}
   end
 
+  @tag :pending
   test "it_should_handle_check_alerts_message", %{pid: pid} do
     hit_alert = Alert.new(:lower_limit, "AVISA", 16.0)
     not_hit_alert_ = Alert.new(:lower_limit, "TUPRS", 100.0)
