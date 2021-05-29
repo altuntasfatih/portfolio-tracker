@@ -1,8 +1,7 @@
-defmodule Bot.MessageConsumer do
+defmodule PortfolioTracker.MessageHandler do
   require Logger
-  alias PortfolioTracker.ServerSupervisor
-  alias PortfolioTracker.Server
-  alias Bot.Manager
+  alias PortfolioTracker.{Supervisor,Tracker}
+  alias PortfolioTracker.Bot.TelegramClient
 
   @type instructions ::
           :create
@@ -21,15 +20,15 @@ defmodule Bot.MessageConsumer do
   @help_file "./resource/help.md"
   @pattern " "
 
-  @spec consume_message(atom | %{:text => binary, optional(any) => any}) :: any
-  def consume_message(message) do
+  def handle_message(%{from: from}=message) do
     case parse_message(message.text) do
       [instruction | args] ->
         log(instruction, args)
 
         String.to_atom(instruction)
-        |> message_handler(args, message.from)
+        |> handle(args, from)
         |> prepare_reply
+        |> send_reply(from)
 
       _ ->
         prepare_reply({:error, :instruction_not_found})
@@ -44,68 +43,68 @@ defmodule Bot.MessageConsumer do
 
   defp parse_message(_), do: []
 
-  def message_handler(:create, _, from) do
-    case ServerSupervisor.start_server(from.id) do
+  @spec handle(instructions, any, any) :: any
+  defp handle(:create, _, from) do
+    case Supervisor.start(from.id) do
       {:ok, _pid} -> {:ok, :portfolio_created}
       {:error, {:already_started, _pid}} -> {:error, :portfolio_already_created}
     end
   end
 
-  def message_handler(:get, _, from),
-    do: convert_data(Server.get(from.id), fn p -> Portfolio.to_string(p) end)
+  defp handle(:get, _, from),
+    do: convert_data(Tracker.get(from.id), fn p -> Portfolio.to_string(p) end)
 
-  def message_handler(:get_detail, _, from),
-    do: convert_data(Server.get(from.id), fn p -> Portfolio.detailed_to_string(p) end)
+  defp handle(:get_detail, _, from),
+    do: convert_data(Tracker.get(from.id), fn p -> Portfolio.detailed_to_string(p) end)
 
-  def message_handler(:live, _, from),
-    do: convert_data(Server.live(from.id), fn p -> Portfolio.detailed_to_string(p) end)
+  defp handle(:live, _, from), do: Tracker.live(from.id)
 
-  def message_handler(:destroy, _, from), do: Server.destroy(from.id)
+  defp handle(:destroy, _, from), do: Tracker.destroy(from.id)
 
-  def message_handler(:add_stock, [id, name, count, price], from) do
+  defp handle(:add_stock, [id, name, count, price], from) do
     with {count, _} <- Integer.parse(count),
          {price, _} <- Float.parse(price) do
       Stock.new(id, name, count, price)
-      |> Server.add_stock(from.id)
+      |> Tracker.add_stock(from.id)
     else
       _ -> {:error, :args_parse_error}
     end
   end
 
-  def message_handler(:add_stock, _, _), do: {:error, :missing_parameter}
+  defp handle(:add_stock, _, _), do: {:error, :missing_parameter}
 
-  def message_handler(:set_alert, [type, stock_id, target_price], from) do
+  defp handle(:set_alert, [type, stock_id, target_price], from) do
     with {target_price, _} <- Float.parse(target_price),
          type <- String.to_atom(type) do
       Alert.new(type, stock_id, target_price)
-      |> Server.set_alert(from.id)
+      |> Tracker.set_alert(from.id)
     else
       _ -> {:error, :args_parse_error}
     end
   end
 
-  def message_handler(:set_alert, _, _), do: {:error, :missing_parameter}
+  defp handle(:set_alert, _, _), do: {:error, :missing_parameter}
 
-  def message_handler(:remove_alert, [stock_id], from), do: Server.remove_alert(from.id, stock_id)
+  defp handle(:remove_alert, [stock_id], from), do: Tracker.remove_alert(from.id, stock_id)
 
-  def message_handler(:remove_alert, _, _), do: {:error, :missing_parameter}
+  defp handle(:remove_alert, _, _), do: {:error, :missing_parameter}
 
-  def message_handler(:get_alerts, _, from),
-    do: convert_data(Server.get_alerts(from.id), &Enum.join(&1))
+  defp handle(:get_alerts, _, from),
+    do: convert_data(Tracker.get_alerts(from.id), &Enum.join(&1))
 
-  def message_handler(:delete_stock, [stock_id], from),
-    do: Server.delete_stock(from.id, stock_id)
+  defp handle(:delete_stock, [stock_id], from),
+    do: Tracker.delete_stock(from.id, stock_id)
 
-  def message_handler(:delete_stock, _, _), do: {:error, :missing_parameter}
+  defp handle(:delete_stock, _, _), do: {:error, :missing_parameter}
 
-  def message_handler(:help, _, _) do
+  defp handle(:help, _, _) do
     {:ok, content} = File.read(@help_file)
     {:ok, {content, [parse_mode: :markdown]}}
   end
 
-  def message_handler(:start, args, from), do: message_handler(:help, args, from)
+  defp handle(:start, args, from), do: handle(:help, args, from)
 
-  def message_handler(_, _, _), do: {:error, :instruction_not_found}
+  defp handle(_, _, _), do: {:error, :instruction_not_found}
 
   defp prepare_reply({:error, :listener_not_found}),
     do: "There is no portfolio tracker for you, You should create firstly"
@@ -142,7 +141,7 @@ defmodule Bot.MessageConsumer do
   defp convert_data([], _), do: {:ok, "Empty"}
   defp convert_data(data, func), do: {:ok, func.(data)}
 
-  def send_reply(message, to) do
-    Manager.send_message_user(message, to)
+  defp send_reply(message, to) do
+    TelegramClient.send(message, to)
   end
 end

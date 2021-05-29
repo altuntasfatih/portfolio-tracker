@@ -12,21 +12,20 @@ defmodule PortfolioTracker.Application do
       strategy: :one_for_one,
       max_restarts: 10,
       max_seconds: 20,
-      name: PortfolioTracker.Supervisor
+      name: PortfolioTracker.BaseSupervisor
     ]
 
     Supervisor.start_link(children_by_env(@env), opts)
   end
 
   defp children_by_env(:test) do
-    [{PortfolioTracker.ServerSupervisor, :ok}]
+    [{PortfolioTracker.TrackerSupervisor, :ok}]
   end
 
   defp children_by_env(_) do
     [
-      {PortfolioTracker.ServerSupervisor, :ok},
-      # -1 is offset get last message
-      {Bot.Manager, -1}
+      {PortfolioTracker.Supervisor, :ok},
+      {PortfolioTracker.Server, -1}  # -1 is offset get last message
     ]
   end
 end
