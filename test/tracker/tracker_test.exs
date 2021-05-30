@@ -1,20 +1,20 @@
 defmodule PortfolioTracker.ServerTest do
   use ExUnit.Case
-  alias PortfolioTracker.Server
+  alias PortfolioTracker.Tracker
 
   @portfolio Portfolio.new("1")
 
   setup do
     {:ok, _} = PortfolioTracker.MockExchangeApi.start_link()
-    {:ok, pid} = GenServer.start_link(Server, @portfolio)
+    {:ok, pid} = GenServer.start_link(Tracker, @portfolio)
     {:ok, pid: pid}
   end
 
-  test "it_should_get_portfolio", %{pid: pid} do
+  test "i tshould get portfolio", %{pid: pid} do
     assert get(pid) == @portfolio
   end
 
-  test "it_should_add_stock_to_portfolio", %{pid: pid} do
+  test "it should add stock to portfolio", %{pid: pid} do
     stock = Stock.new("AVISA", "avivasa", 66, 18.20)
     assert add(pid, stock) == :ok
 
@@ -28,7 +28,7 @@ defmodule PortfolioTracker.ServerTest do
            }
   end
 
-  test "it_should_delete_stock_from_portfolio", %{pid: pid} do
+  test "it should delete stock from portfolio", %{pid: pid} do
     stock = Stock.new("AVISA", "avivasa", 66, 18.20)
     assert add(pid, stock) == :ok
 
@@ -36,7 +36,7 @@ defmodule PortfolioTracker.ServerTest do
     assert get(pid) == @portfolio
   end
 
-  test "it_should_update_stocks_with_live_prices", %{pid: pid} do
+  test "it should update stocks with live prices", %{pid: pid} do
     stock = Stock.new("AVISA", "AvivaSA", 10, 10)
     stock2 = Stock.new("TUPRS", "Turkiye Petrol ", 5, 5.00)
 
@@ -63,32 +63,32 @@ defmodule PortfolioTracker.ServerTest do
     assert portfolio.update_time != nil
   end
 
-  test "it_should_update_stocks_price", _ do
+  test "it should update stocks price", _ do
     stock = Stock.new("AVISA", "AvivaSA", 66, 18.20)
     stock2 = Stock.new("TUPRS", "Turkiye Petrol ", 10, 110.22)
 
     current_prices = [%{name: "AVISA", price: 19.33}, %{name: "TUPRS", price: 102.60}]
 
-    assert Server.update_stocks_with_live([stock2, stock], current_prices) == [
+    assert Tracker.update_stocks_with_live([stock2, stock], current_prices) == [
              Stock.calculate(stock2, 102.60),
              Stock.calculate(stock, 19.33)
            ]
   end
 
-  test "it_should_add_alert_for_stock", %{pid: pid} do
+  test "it should add_alert for stock", %{pid: pid} do
     alert = Alert.new(:lower_limit, "AVISA", 16.0)
     assert set_alert(pid, alert) == :ok
     assert get_alerts(pid) == [alert]
   end
 
-  test "it_should_delete_alert", %{pid: pid} do
+  test "it should delete alert", %{pid: pid} do
     alert = Alert.new(:lower_limit, "AVISA", 16.0)
     assert set_alert(pid, alert) == :ok
     assert remove_alert(pid, alert.stock_name) == :ok
     assert get_alerts(pid) == []
   end
 
-  test "it_should_check_alerts_condition", _ do
+  test "it should check alerts condition", _ do
     alert = Alert.new(:lower_limit, "AVISA", 16.0)
     alert2 = Alert.new(:lower_limit, "TUPRS", 100.0)
     alert3 = Alert.new(:upper_limit, "KRDMD", 50.0)
@@ -100,10 +100,10 @@ defmodule PortfolioTracker.ServerTest do
       %{name: "CANTE", price: 120.60}
     ])
 
-    assert Server.check_alerts_condition([alert, alert2, alert3]) == {[alert], [alert2, alert3]}
+    assert Tracker.check_alerts_condition([alert, alert2, alert3]) == {[alert], [alert2, alert3]}
   end
 
-  test "it_should_handle_check_alerts_message", %{pid: pid} do
+  test "it should handle check alerts message", %{pid: pid} do
     hit_alert = Alert.new(:lower_limit, "AVISA", 16.0)
     not_hit_alert_ = Alert.new(:lower_limit, "TUPRS", 100.0)
     not_hit_alert_2 = Alert.new(:upper_limit, "KRDMD", 50.0)

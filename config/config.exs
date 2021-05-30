@@ -11,7 +11,12 @@ config :nadia,
 
 config :portfolio_tracker,
   exchange_api: PortfolioTracker.CollectApi,
+  bot_client: PortfolioTracker.Bot.TelegramClient,
   url: "https://api.collectapi.com/economy/liveBorsa",
   token: "apikey 1hMoXHboCriCLsuorHwr0t:54DcwpMehYTRBUvfDQRfFz"
+
+config :portfolio_tracker,
+  backup_path: "./backup/",
+  help_file: "./resource/help.md"
 
 import_config "#{Mix.env()}.exs"

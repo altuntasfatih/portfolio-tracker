@@ -1,12 +1,12 @@
-defmodule PortfolioTracker.ServerSupervisor do
+defmodule PortfolioTracker.Supervisor do
   use DynamicSupervisor
 
   def start_link(:ok) do
     DynamicSupervisor.start_link(__MODULE__, :ok, name: __MODULE__)
   end
 
-  def start_server(id) do
-    child_spec = {PortfolioTracker.Server, id}
+  def start(id) do
+    child_spec = {PortfolioTracker.Tracker, id}
     DynamicSupervisor.start_child(__MODULE__, child_spec)
   end
 

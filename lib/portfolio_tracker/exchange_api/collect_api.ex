@@ -27,8 +27,4 @@ defmodule PortfolioTracker.CollectApi do
     {:ok, current_prices} = get_live_prices()
     {:ok, Enum.filter(current_prices, fn s -> s.name in name_list end)}
   end
-
-  def get_attributes() do
-    {@token, @url}
-  end
 end

@@ -1,13 +1,13 @@
-defmodule PortfolioTracker.Server do
+defmodule PortfolioTracker.Tracker do
   @moduledoc """
   Documentation for `PortfolioTracker`.
   """
   use GenServer
   require Logger
-  alias Bot.Manager
 
   @api Application.get_env(:portfolio_tracker, :exchange_api)
-  @backup_path "./backup/"
+  @client Application.get_env(:portfolio_tracker, :bot_client)
+  @backup_path Application.get_env(:portfolio_tracker, :backup_path)
 
   def start_link(%Portfolio{} = state) do
     GenServer.start_link(__MODULE__, state, name: {:global, {state.id, __MODULE__}})
@@ -46,11 +46,10 @@ defmodule PortfolioTracker.Server do
   end
 
   @impl true
-  def handle_call(:live, _from, state) do
+  def handle_cast(:live, state) do
     new_state = Portfolio.update(state, update_stocks_with_live(state.stocks))
-    # todo remove later
-    Process.send_after(self(), :check_alert, 1000)
-    {:reply, new_state, new_state}
+    {:ok, _} = @client.send(Portfolio.detailed_to_string(new_state), state.id)
+    {:noreply, new_state}
   end
 
   @impl true
@@ -92,8 +91,8 @@ defmodule PortfolioTracker.Server do
     {hit_list, not_hit_list} = check_alerts_condition(alerts)
 
     if not (hit_list == []) do
-      ("Alert conditions were triggered -> " <> Enum.join(hit_list, "\n "))
-      |> Manager.send_message_user(state.id)
+      ("Alert conditions were triggered -> " <> Enum.join(hit_list, " \n"))
+      |> @client.send(state.id)
     end
 
     {:noreply, %Portfolio{state | alerts: not_hit_list}}
@@ -165,7 +164,7 @@ defmodule PortfolioTracker.Server do
 
   def update(id), do: via_tuple(id, &GenServer.cast(&1, :update))
 
-  def live(id), do: via_tuple(id, &GenServer.call(&1, :live))
+  def live(id), do: via_tuple(id, &GenServer.cast(&1, :live))
 
   def remove_alert(id, stock_id),
     do: via_tuple(id, &GenServer.cast(&1, {:remove_alert, stock_id}))
@@ -183,7 +182,7 @@ defmodule PortfolioTracker.Server do
         resp
 
       _ ->
-        {:error, :listener_not_found}
+        {:error, :portfolio_not_found}
     end
   end
 

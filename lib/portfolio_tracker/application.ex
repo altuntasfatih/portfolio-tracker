@@ -1,6 +1,4 @@
 defmodule PortfolioTracker.Application do
-  # See https://hexdocs.pm/elixir/Application.html
-  # for more information on OTP Applications
   @moduledoc false
   use Application
 
@@ -12,21 +10,21 @@ defmodule PortfolioTracker.Application do
       strategy: :one_for_one,
       max_restarts: 10,
       max_seconds: 20,
-      name: PortfolioTracker.Supervisor
+      name: PortfolioTracker.BaseSupervisor
     ]
 
     Supervisor.start_link(children_by_env(@env), opts)
   end
 
   defp children_by_env(:test) do
-    [{PortfolioTracker.ServerSupervisor, :ok}]
+    [{PortfolioTracker.Supervisor, :ok}]
   end
 
   defp children_by_env(_) do
     [
-      {PortfolioTracker.ServerSupervisor, :ok},
+      {PortfolioTracker.Supervisor, :ok},
       # -1 is offset get last message
-      {Bot.Manager, -1}
+      {PortfolioTracker.BotServer, -1}
     ]
   end
 end
