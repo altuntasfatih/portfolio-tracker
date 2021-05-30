@@ -4,10 +4,10 @@ defmodule PortfolioTracker.Tracker do
   """
   use GenServer
   require Logger
-  alias PortfolioTracker.Bot.TelegramClient
 
   @api Application.get_env(:portfolio_tracker, :exchange_api)
-  @backup_path "./backup/"
+  @client Application.get_env(:portfolio_tracker, :bot_client)
+  @backup_path Application.get_env(:portfolio_tracker, :backup_path)
 
   def start_link(%Portfolio{} = state) do
     GenServer.start_link(__MODULE__, state, name: {:global, {state.id, __MODULE__}})
@@ -48,7 +48,7 @@ defmodule PortfolioTracker.Tracker do
   @impl true
   def handle_cast(:live, state) do
     new_state = Portfolio.update(state, update_stocks_with_live(state.stocks))
-    :ok = TelegramClient.send(Portfolio.detailed_to_string(new_state),state.id)
+    {:ok, _} = @client.send(Portfolio.detailed_to_string(new_state), state.id)
     {:noreply, new_state}
   end
 
@@ -92,7 +92,7 @@ defmodule PortfolioTracker.Tracker do
 
     if not (hit_list == []) do
       ("Alert conditions were triggered -> " <> Enum.join(hit_list, " \n"))
-      |> TelegramClient.send(state.id)
+      |> @client.send(state.id)
     end
 
     {:noreply, %Portfolio{state | alerts: not_hit_list}}

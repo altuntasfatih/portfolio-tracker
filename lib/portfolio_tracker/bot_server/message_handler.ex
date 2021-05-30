@@ -1,7 +1,5 @@
 defmodule PortfolioTracker.MessageHandler do
-  require Logger
-  alias PortfolioTracker.{Supervisor,Tracker}
-  alias PortfolioTracker.Bot.TelegramClient
+  alias PortfolioTracker.{Supervisor, Tracker, BotServer}
 
   @type instructions ::
           :create
@@ -17,26 +15,16 @@ defmodule PortfolioTracker.MessageHandler do
           | :start
           | :help
 
-  @help_file "./resource/help.md"
-  @pattern " "
-
-  def handle_message(%{from: from}=message) do
-    case parse(message.text) do
-      {instruction , args} ->
-        log(instruction, args)
-
-        handle(instruction,args, from)
-        |> prepare_reply
-        |> send_reply(from)
-
-      _ ->
-        prepare_reply({:error, :instruction_not_found})
-    end
+  def handle_message(%{from: from} = message) do
+    parse(message.text)
+    |> handle(from)
+    |> prepare_reply
+    |> send_reply(from.id)
   end
 
   def parse("/" <> text) do
     String.trim(text)
-    |> String.split(@pattern)
+    |> String.split(" ")
     |> Enum.filter(fn x -> x != "" end)
     |> parse
   end
@@ -44,7 +32,9 @@ defmodule PortfolioTracker.MessageHandler do
   def parse([instruction | args]), do: {String.to_atom(instruction), args}
   def parse(_), do: []
 
-  @spec handle(instructions, any, any) :: any
+  def handle({instruction, args}, from), do: handle(instruction, args, from)
+  def handle([], _), do: {:error, :instruction_not_found}
+
   def handle(:create, _, from) do
     case Supervisor.start(from.id) do
       {:ok, _pid} -> {:ok, :portfolio_created}
@@ -99,7 +89,7 @@ defmodule PortfolioTracker.MessageHandler do
   def handle(:delete_stock, _, _), do: {:error, :missing_parameter}
 
   def handle(:help, _, _) do
-    {:ok, content} = File.read(@help_file)
+    {:ok, content} = File.read(Application.get_env(:portfolio_tracker, :help_file))
     {:ok, {content, [parse_mode: :markdown]}}
   end
 
@@ -127,22 +117,10 @@ defmodule PortfolioTracker.MessageHandler do
   defp prepare_reply({:ok, reply}), do: reply
   defp prepare_reply(r), do: r
 
-  defp log(message, []) do
-    ("Incoming message -> " <> message)
-    |> Logger.info()
-  end
-
-  defp log(message, args) do
-    ("Incoming message -> " <> message <> ", " <> "args -> " <> Enum.join(args, ", "))
-    |> Logger.info()
-  end
-
   defp convert_data({:error, err}, _), do: {:error, err}
   defp convert_data({:ok, data}, func), do: {:ok, func.(data)}
   defp convert_data([], _), do: {:ok, "Empty"}
   defp convert_data(data, func), do: {:ok, func.(data)}
 
-  defp send_reply(message, to) do
-    TelegramClient.send(message, to)
-  end
+  defp send_reply(message, to), do: BotServer.send_message(message, to)
 end

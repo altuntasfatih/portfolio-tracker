@@ -23,7 +23,8 @@ defmodule PortfolioTracker.Application do
   defp children_by_env(_) do
     [
       {PortfolioTracker.Supervisor, :ok},
-      {PortfolioTracker.Server, -1}  # -1 is offset get last message
+      # -1 is offset get last message
+      {PortfolioTracker.BotServer, -1}
     ]
   end
 end

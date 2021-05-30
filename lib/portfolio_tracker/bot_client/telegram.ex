@@ -1,5 +1,5 @@
 defmodule PortfolioTracker.Bot.TelegramClient do
-  @behaviour PortfolioTracker.Bot.Api
+  @behaviour PortfolioTracker.Bot.Client
 
   @impl true
   def get_messages(args), do: Nadia.get_updates(args)
