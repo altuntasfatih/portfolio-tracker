@@ -65,6 +65,6 @@ defmodule StockTest do
     assert Stock.new(@id, @name, @total, @cost_price)
            |> Stock.update(new_price)
            |> Stock.detailed_to_string() ==
-             "Name: Test \nCount: 100 \nPurchase price: 10.0 \nCost: 1.0e3 \nCurrent price: 8.57 \nValue: 857.0 \nRate: -14.29 🔴 "
+            "Name: Test \nTotal: 100 \nCost price: 10.0 \nCost: 1.0e3 \nPrice: 8.57 \nValue: 857.0 \nRate: -14.29 🔴 "
   end
 end
