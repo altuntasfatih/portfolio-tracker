@@ -1,6 +1,4 @@
 defmodule Stock do
-  import Util
-
   defstruct id: "",
             name: "",
             total: 0.0,
@@ -23,7 +21,7 @@ defmodule Stock do
 
   @spec new(String.t(), String.t(), number(), float()) :: Stock.t()
   def new(id, name, total, price) do
-    value = (total * price) |> round_ceil
+    value = (total * price) |> Util.round_ceil()
 
     %Stock{
       id: id,
@@ -39,23 +37,13 @@ defmodule Stock do
 
   @spec update(Stock.t(), float()) :: Stock.t()
   def update(%Stock{} = stock, new_price) do
-    value = (stock.total * new_price) |> round_ceil
+    value = (stock.total * new_price) |> Util.round_ceil()
 
     %Stock{
       stock
       | price: new_price,
         value: value,
-        rate: ((value - stock.cost) / stock.cost * 100) |> round_ceil
+        rate: ((value - stock.cost) / stock.cost * 100) |> Util.round_ceil()
     }
-  end
-
-  def to_string(%Stock{} = stock) do
-    "Name: #{stock.id} \nValue: #{stock.value} \nRate: #{rate(stock.rate)}"
-  end
-
-  def detailed_to_string(%Stock{} = stock) do
-    "Name: #{stock.id} \nTotal: #{stock.total} \nCost price: #{stock.cost_price} \nCost: #{
-      stock.cost
-    } \nPrice: #{stock.price} \nValue: #{stock.value} \nRate: #{rate(stock.rate)}"
   end
 end

@@ -1,0 +1,44 @@
+defmodule PortfolioTracker.ViewTest do
+  use ExUnit.Case
+  alias PortfolioTracker.View
+
+  @id "Test"
+  @name "Test Market"
+  @total 100
+  @cost_price 10.0
+
+  test "it_should_return_string_represantation_of_portfolio" do
+    portfolio =
+      Portfolio.new(@id)
+      |> Portfolio.add_stock(Map.put(Stock.new("A", "A_company", 66, 18.20), :rate, 3.0))
+
+    assert View.to_string(portfolio, :short) ==
+             "Your Portfolio  \nValue: 1201.22 \nUpdate Time:  \nRate: 0.0 🟢 "
+  end
+
+  test "it_should_return_long_string_represantation_of_portfolio" do
+    portfolio =
+      Portfolio.new(@id)
+      |> Portfolio.add_stock(Map.put(Stock.new("A", "A_company", 66, 18.20), :rate, 3.0))
+
+    assert View.to_string(portfolio, :long) ==
+             "Your Portfolio \nCost: 1201.22 \nValue: 1201.22 \nUpdate Time:  \nRate: 0.0 🟢   \n------------------------------------- \nName: A \nTotal: 66 \nCost price: 18.2 \nCost: 1201.21 \nPrice: 18.2 \nValue: 1201.21 \nRate: 3.0 🟢 "
+  end
+
+  test "it_should_return_string_represantation_of_stock" do
+    new_price = 8.57
+
+    assert Stock.new(@id, @name, @total, @cost_price)
+           |> Stock.update(new_price)
+           |> View.to_string(:short) == "Name: Test \nValue: 857.0 \nRate: -14.29 🔴 "
+  end
+
+  test "it_should_return_long_string_represantation_of_stock" do
+    new_price = 8.57
+
+    assert Stock.new(@id, @name, @total, @cost_price)
+           |> Stock.update(new_price)
+           |> View.to_string(:long) ==
+             "Name: Test \nTotal: 100 \nCost price: 10.0 \nCost: 1.0e3 \nPrice: 8.57 \nValue: 857.0 \nRate: -14.29 🔴 "
+  end
+end

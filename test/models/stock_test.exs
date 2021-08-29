@@ -51,20 +51,5 @@ defmodule StockTest do
              }
   end
 
-  test "it_should_return_string_represantation_of_stock" do
-    new_price = 8.57
 
-    assert Stock.new(@id, @name, @total, @cost_price)
-           |> Stock.update(new_price)
-           |> Stock.to_string() == "Name: Test \nValue: 857.0 \nRate: -14.29 🔴 "
-  end
-
-  test "it_should_return_detailed_string_represantation_of_stock" do
-    new_price = 8.57
-
-    assert Stock.new(@id, @name, @total, @cost_price)
-           |> Stock.update(new_price)
-           |> Stock.detailed_to_string() ==
-            "Name: Test \nTotal: 100 \nCost price: 10.0 \nCost: 1.0e3 \nPrice: 8.57 \nValue: 857.0 \nRate: -14.29 🔴 "
-  end
 end

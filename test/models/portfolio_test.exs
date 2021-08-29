@@ -43,25 +43,7 @@ defmodule PortfolioTest do
       |> Portfolio.add_stock(stock3)
       |> Portfolio.add_stock(stock4)
 
-    assert Portfolio.get_stocks(portfolio) == [stock4, stock, stock2, stock3]
-  end
-
-  test "it_should_return_string_represantation_of_portfolio" do
-    portfolio =
-      Portfolio.new(@id)
-      |> Portfolio.add_stock(Map.put(Stock.new("A", "A_company", 66, 18.20), :rate, 3.0))
-
-    assert Portfolio.to_string(portfolio) ==
-             "Your Portfolio  \nValue: 1201.22 \nUpdate Time:  \nRate: 0.0 🟢 "
-  end
-
-  test "it_should_return_detailed_string_represantation_of_portfolio" do
-    portfolio =
-      Portfolio.new(@id)
-      |> Portfolio.add_stock(Map.put(Stock.new("A", "A_company", 66, 18.20), :rate, 3.0))
-
-    assert Portfolio.detailed_to_string(portfolio) ==
-             "Your Portfolio \nCost: 1201.22 \nValue: 1201.22 \nUpdate Time:  \nRate: 0.0 🟢   \n------------------------------------- \nName: A \nTotal: 66 \nCost price: 18.2 \nCost: 1201.21 \nPrice: 18.2 \nValue: 1201.21 \nRate: 3.0 🟢 "
+    assert Portfolio.get_stock_by_order(portfolio) == [stock4, stock, stock2, stock3]
   end
 
   test "it_should_add_alert_for_stock" do

@@ -19,12 +19,9 @@ defmodule Portfolio do
           last_update_time: any()
         }
 
-  @line_break " \n------------------------------------- \n"
-  def new(id) do
-    %Portfolio{id: id}
-  end
+  def new(id), do: %Portfolio{id: id}
 
-  def get_stocks(%Portfolio{stocks: stocks}) do
+  def get_stock_by_order(%Portfolio{stocks: stocks}) do
     Map.values(stocks)
     |> Enum.sort(&(&1.rate >= &2.rate))
   end
@@ -80,22 +77,5 @@ defmodule Portfolio do
         value: value |> round_ceil,
         rate: rate |> round_ceil
     }
-  end
-
-  def to_string(%Portfolio{} = p) do
-    "Your Portfolio  \nValue: #{p.value} \nUpdate Time: #{p.last_update_time} \nRate: #{
-      rate(p.rate)
-    }"
-  end
-
-  def detailed_to_string(%Portfolio{} = p) do
-    stocks =
-      Enum.reduce(get_stocks(p), "", fn s, acc ->
-        acc <> @line_break <> Stock.detailed_to_string(s)
-      end)
-
-    "Your Portfolio \nCost: #{p.cost} \nValue: #{p.value} \nUpdate Time: #{p.last_update_time} \nRate: #{
-      rate(p.rate)
-    } #{stocks}"
   end
 end

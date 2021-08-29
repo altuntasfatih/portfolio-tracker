@@ -1,5 +1,5 @@
 defmodule PortfolioTracker.MessageHandler do
-  alias PortfolioTracker.{Supervisor, Tracker, BotServer}
+  alias PortfolioTracker.{Supervisor, Tracker, BotServer, View}
 
   @type instructions ::
           :create
@@ -18,7 +18,7 @@ defmodule PortfolioTracker.MessageHandler do
   def handle_message(%{from: from} = message) do
     parse(message.text)
     |> handle(from)
-    |> prepare_reply
+    |> View.to_string()
     |> send_reply(from.id)
   end
 
@@ -42,11 +42,19 @@ defmodule PortfolioTracker.MessageHandler do
     end
   end
 
-  def handle(:get, _, from),
-    do: convert_data(Tracker.get(from.id), fn p -> Portfolio.to_string(p) end)
+  def handle(:get, _, from) do
+    case Tracker.get(from.id) do
+      {:error, err} -> {:error, err}
+      resp -> View.to_string(resp, :short)
+    end
+  end
 
-  def handle(:get_detail, _, from),
-    do: convert_data(Tracker.get(from.id), fn p -> Portfolio.detailed_to_string(p) end)
+  def handle(:get_detail, _, from) do
+    case Tracker.get(from.id) do
+      {:error, err} -> {:error, err}
+      resp -> View.to_string(resp, :long)
+    end
+  end
 
   def handle(:live, _, from), do: Tracker.live(from.id)
 
@@ -80,8 +88,7 @@ defmodule PortfolioTracker.MessageHandler do
 
   def handle(:remove_alert, _, _), do: {:error, :missing_parameter}
 
-  def handle(:get_alerts, _, from),
-    do: convert_data(Tracker.get_alerts(from.id), &Enum.join(&1))
+  def handle(:get_alerts, _, from), do: Tracker.get_alerts(from.id)
 
   def handle(:delete_stock, [stock_id], from),
     do: Tracker.delete_stock(from.id, stock_id)
@@ -96,31 +103,6 @@ defmodule PortfolioTracker.MessageHandler do
   def handle(:start, args, from), do: handle(:help, args, from)
 
   def handle(_, _, _), do: {:error, :instruction_not_found}
-
-  defp prepare_reply({:error, :portfolio_not_found}),
-    do: "There is no portfolio tracker for you, You should create firstly"
-
-  defp prepare_reply({:error, :portfolio_already_created}),
-    do: "Your portfolio tracker have already created"
-
-  defp prepare_reply({:ok, :portfolio_created}), do: "Portfolio tracker was created for you"
-
-  defp prepare_reply({:error, :missing_parameter}),
-    do: "Argumet/Arguments are missing"
-
-  defp prepare_reply({:error, :args_parse_error}),
-    do: "Argumet/Arguments formats are invalid"
-
-  defp prepare_reply({:error, :instruction_not_found}),
-    do: "Instruction does not exist"
-
-  defp prepare_reply({:ok, reply}), do: reply
-  defp prepare_reply(r), do: r
-
-  defp convert_data({:error, err}, _), do: {:error, err}
-  defp convert_data({:ok, data}, func), do: {:ok, func.(data)}
-  defp convert_data([], _), do: {:ok, "Empty"}
-  defp convert_data(data, func), do: {:ok, func.(data)}
 
   defp send_reply(message, to), do: BotServer.send_message(message, to)
 end

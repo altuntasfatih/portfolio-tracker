@@ -62,7 +62,7 @@ defmodule PortfolioTracker.MessageHandlerTest do
 
     test "it should handle get message", _ do
       assert MessageHandler.handle(:get, [], @from) ==
-        {:ok, "Your Portfolio  \nValue: 0.0 \nUpdate Time:  \nRate: 0.0 🟢 "}
+               "Your Portfolio  \nValue: 0.0 \nUpdate Time:  \nRate: 0.0 🟢 "
     end
 
     test "it should return portfolio not found error", _ do
@@ -73,12 +73,11 @@ defmodule PortfolioTracker.MessageHandlerTest do
       assert MessageHandler.handle(:set_alert, ["upper_limit", "TOASO", "42.67"], @from) == :ok
       assert MessageHandler.handle(:remove_alert, ["TOASO"], @from) == :ok
 
-      assert MessageHandler.handle(:get_alerts, [], @from) == {:ok, "Empty"}
+      assert MessageHandler.handle(:get_alerts, [], @from) == []
 
       assert MessageHandler.handle(:set_alert, ["lower_limit", "TEST", "10.67"], @from) == :ok
 
-      assert MessageHandler.handle(:get_alerts, [], @from) ==
-               {:ok, "For TEST lower_limit on 10.67 "}
+      refute MessageHandler.handle(:get_alerts, [], @from) == []
     end
   end
 
@@ -91,16 +90,4 @@ defmodule PortfolioTracker.MessageHandlerTest do
       assert MessageHandler.parse("/get") == {:get, []}
     end
   end
-
-  """
-  # test "it_should_process_live_instruction" do
-  #  assert process_message(create_message("/live")) == " "
-  # end
-
-  def start() do
-    assert consume_message(create_message("/create")) == "Portfolio tracker was created for you"
-  end
-
-  def create_message(message), do: %{text: message, from: %{id: @id}}
-  """
 end
