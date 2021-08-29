@@ -64,7 +64,7 @@ defmodule PortfolioTracker.Tracker do
 
   @impl true
   def handle_cast({:delete_stock, stock_id}, state) do
-    {:noreply, Portfolio.delete_stock(state, stock_id)}
+    {:noreply, Portfolio.remove_stock(state, stock_id)}
   end
 
   @impl true
@@ -149,7 +149,7 @@ defmodule PortfolioTracker.Tracker do
   end
 
   defp calculate_stock(nil, %Stock{} = stock), do: stock
-  defp calculate_stock(c, %Stock{} = stock), do: Stock.calculate(stock, c.price)
+  defp calculate_stock(c, %Stock{} = stock), do: Stock.update(stock, c.price)
 
   defp take_backup(pid), do: Process.send_after(pid, :take_backup, 1000)
 

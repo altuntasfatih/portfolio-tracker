@@ -18,14 +18,7 @@ defmodule PortfolioTracker.ServerTest do
     stock = Stock.new("AVISA", "avivasa", 66, 18.20)
     assert add(pid, stock) == :ok
 
-    assert get(pid) == %{
-             @portfolio
-             | stocks: %{
-                 "AVISA" => stock
-               },
-               total_cost: stock.total_cost,
-               total_worth: stock.current_worth
-           }
+    assert get(pid) == @portfolio |> Portfolio.add_stock(stock)
   end
 
   test "it should delete stock from portfolio", %{pid: pid} do
@@ -53,12 +46,12 @@ defmodule PortfolioTracker.ServerTest do
     portfolio = get(pid)
 
     assert portfolio.stocks == %{
-             "AVISA" => Stock.calculate(stock, 15.00),
-             "TUPRS" => Stock.calculate(stock2, 5)
+             "AVISA" => Stock.update(stock, 15.00),
+             "TUPRS" => Stock.update(stock2, 5)
            }
 
-    assert portfolio.total_cost == 125.0
-    assert portfolio.total_worth == 175.0
+    assert portfolio.cost == 125.0
+    assert portfolio.value == 175.0
     assert portfolio.rate == 40.0
     assert portfolio.update_time != nil
   end
@@ -70,8 +63,8 @@ defmodule PortfolioTracker.ServerTest do
     current_prices = [%{name: "AVISA", price: 19.33}, %{name: "TUPRS", price: 102.60}]
 
     assert Tracker.update_stocks_with_live([stock2, stock], current_prices) == [
-             Stock.calculate(stock2, 102.60),
-             Stock.calculate(stock, 19.33)
+             Stock.update(stock2, 102.60),
+             Stock.update(stock, 19.33)
            ]
   end
 
