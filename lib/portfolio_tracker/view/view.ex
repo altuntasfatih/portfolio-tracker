@@ -28,11 +28,20 @@ defmodule PortfolioTracker.View do
     } #{stocks}"
   end
 
+  def to_string(%Portfolio{} = p), do: to_string(p, :long)
+
   def to_string(%Alert{} = alert) do
     "For #{alert.stock_name} #{Atom.to_string(alert.type)} on #{alert.price} "
   end
 
   def to_string([]), do: {:ok, "Empty"}
+
+  def to_string({:alert_list, alerts}) when is_list(alerts) do
+    "Alerts: " <>
+      Enum.reduce(alerts, "", fn alert, acc ->
+        acc <> "For #{alert.stock_name} #{Atom.to_string(alert.type)} on #{alert.price} \n"
+      end)
+  end
 
   def to_string({:error, :portfolio_not_found}),
     do: "There is no portfolio tracker for you, You should create firstly"

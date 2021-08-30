@@ -1,7 +1,7 @@
 defmodule PortfolioTracker.BotServer do
   use GenServer
   require Logger
-  alias PortfolioTracker.MessageHandler
+  alias PortfolioTracker.{MessageHandler, View}
 
   @client Application.get_env(:portfolio_tracker, :bot_client)
 
@@ -25,12 +25,18 @@ defmodule PortfolioTracker.BotServer do
   @impl true
   def handle_info(:get_messages, offset) do
     {:ok, update} = @client.get_messages(offset: offset, limit: 1)
-    call_itself()
-    {:noreply, handle(update, offset)}
+    {:noreply, handle(update, offset), {:continue, :call_itself}}
+  end
+
+  @impl true
+  def handle_continue(:call_itself, state) do
+    Process.send_after(self(), :get_messages, @interval)
+    {:noreply, state}
   end
 
   defp handle([], offset), do: offset
   defp handle([u], _), do: handle(u)
+
   defp handle(%{message: nil, update_id: id}), do: id + 1
 
   defp handle(%{message: message, update_id: id}) do
@@ -38,9 +44,10 @@ defmodule PortfolioTracker.BotServer do
     id + 1
   end
 
-  defp call_itself(), do: Process.send_after(self(), :get_messages, @interval)
+  def send_message(message, to) when is_binary(message),
+    do: GenServer.cast(__MODULE__, {:send_message, message, to})
 
-  def send_message(message, to), do: GenServer.cast(__MODULE__, {:send_message, message, to})
+  def send_message(message, to), do: View.to_string(message) |> send_message(to)
 
   def child_spec(opts) do
     %{
