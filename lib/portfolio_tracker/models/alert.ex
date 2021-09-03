@@ -38,10 +38,4 @@ defmodule Alert do
   def is_hit(%Alert{} = alert, current_price) do
     alert.function.(current_price, alert.price)
   end
-
-  defimpl String.Chars, for: Alert do
-    def to_string(alert) do
-      "For #{alert.stock_name} #{Atom.to_string(alert.type)} on #{alert.price} "
-    end
-  end
 end

@@ -6,18 +6,18 @@ defmodule PortfolioTest do
     assert Portfolio.new(@id) == %Portfolio{
              id: @id,
              stocks: %{},
-             total_worth: 0,
-             total_cost: 0,
-             rate: 0
+             cost: 0.0,
+             value: 0.0,
+             rate: 0.0
            }
   end
 
   test "it_should_calculate_portfolio" do
     portfolio = Portfolio.new(@id)
-    stock = Stock.new("A", "A_company", 66, 18.20) |> Stock.calculate(19.32)
-    stock2 = Stock.new("E", "E_company", 460, 14.47) |> Stock.calculate(14.60)
-    stock3 = Stock.new("S", "S_company", 84, 14.28) |> Stock.calculate(14.48)
-    stock4 = Stock.new("D", "D_company", 10, 110.22) |> Stock.calculate(100.70)
+    stock = Stock.new("A", "A_company", 66, 18.20) |> Stock.update(19.32)
+    stock2 = Stock.new("E", "E_company", 460, 14.47) |> Stock.update(14.60)
+    stock3 = Stock.new("S", "S_company", 84, 14.28) |> Stock.update(14.48)
+    stock4 = Stock.new("D", "D_company", 10, 110.22) |> Stock.update(100.70)
 
     portfolio =
       Portfolio.add_stock(portfolio, stock)
@@ -25,8 +25,8 @@ defmodule PortfolioTest do
       |> Portfolio.add_stock(stock3)
       |> Portfolio.add_stock(stock4)
 
-    assert portfolio.total_worth == 10214.45
-    assert portfolio.total_cost == 10159.15
+    assert portfolio.value == 10214.46
+    assert portfolio.cost == 10159.16
     assert portfolio.rate == 0.55
   end
 
@@ -43,25 +43,7 @@ defmodule PortfolioTest do
       |> Portfolio.add_stock(stock3)
       |> Portfolio.add_stock(stock4)
 
-    assert Portfolio.get_stocks(portfolio) == [stock4, stock, stock2, stock3]
-  end
-
-  test "it_should_return_string_represantation_of_portfolio" do
-    portfolio =
-      Portfolio.new(@id)
-      |> Portfolio.add_stock(Map.put(Stock.new("A", "A_company", 66, 18.20), :rate, 3.0))
-
-    assert Portfolio.to_string(portfolio) ==
-             "Your Portfolio  \nWorth: 1201.21 \nUpdate Time:  \nRate: 0.0 🟢 "
-  end
-
-  test "it_should_return_detailed_string_represantation_of_portfolio" do
-    portfolio =
-      Portfolio.new(@id)
-      |> Portfolio.add_stock(Map.put(Stock.new("A", "A_company", 66, 18.20), :rate, 3.0))
-
-    assert Portfolio.detailed_to_string(portfolio) ==
-             "Your Portfolio \nCost: 1201.21 \nWorth: 1201.21 \nUpdate Time:  \nRate: 0.0 🟢   \n------------------------------------- \nName: A \nCount: 66 \nPurchase price: 18.2 \nCost: 1201.21 \nCurrent price: 18.2 \nWorth: 1201.21 \nRate: 3.0 🟢 "
+    assert Portfolio.get_stock_by_order(portfolio) == [stock4, stock, stock2, stock3]
   end
 
   test "it_should_add_alert_for_stock" do
