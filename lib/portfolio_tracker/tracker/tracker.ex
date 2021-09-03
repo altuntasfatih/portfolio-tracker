@@ -4,7 +4,7 @@ defmodule PortfolioTracker.Tracker do
   """
   use GenServer
   require Logger
-  alias PortfolioTracker.BotServer
+  alias PortfolioTracker.MessageSender
 
   @api Application.get_env(:portfolio_tracker, :exchange_api)
   @backup_path Application.get_env(:portfolio_tracker, :backup_path)
@@ -48,7 +48,7 @@ defmodule PortfolioTracker.Tracker do
   @impl true
   def handle_cast(:live, state) do
     new_state = Portfolio.update(state, update_stocks_with_live(state.stocks))
-    :ok = BotServer.send_message(new_state, state.id)
+    :ok = MessageSender.send_message(new_state, state.id)
     {:noreply, new_state}
   end
 
@@ -91,7 +91,7 @@ defmodule PortfolioTracker.Tracker do
     {hit_list, not_hit_list} = check_alerts_condition(alerts)
 
     if not (hit_list == []) do
-      BotServer.send_message({:alert_list, hit_list}, state.id)
+      MessageSender.send_message({:alert_list, hit_list}, state.id)
     end
 
     {:noreply, %Portfolio{state | alerts: not_hit_list}}
