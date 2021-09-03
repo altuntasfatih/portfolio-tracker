@@ -4,9 +4,7 @@ defmodule PortfolioTracker.MessageHandlerTest do
   alias PortfolioTracker.Supervisor
 
   @from %{id: 1}
-
   setup do
-    {:ok, _} = PortfolioTracker.MockExchangeApi.start_link()
     on_exit(fn -> Supervisor.termine_all() end)
   end
 

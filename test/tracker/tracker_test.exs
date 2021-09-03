@@ -4,13 +4,18 @@ defmodule PortfolioTracker.ServerTest do
 
   @portfolio Portfolio.new("1")
 
+  setup_all do
+    {:ok, pid} = PortfolioTracker.MockExchangeApi.start_link()
+    on_exit(fn -> Agent.stop(pid) end)
+  end
+
   setup do
-    {:ok, _} = PortfolioTracker.MockExchangeApi.start_link()
     {:ok, pid} = GenServer.start_link(Tracker, @portfolio)
+    on_exit(fn -> Process.exit(pid, :normal) end)
     {:ok, pid: pid}
   end
 
-  test "i tshould get portfolio", %{pid: pid} do
+  test "it should get portfolio", %{pid: pid} do
     assert get(pid) == @portfolio
   end
 
