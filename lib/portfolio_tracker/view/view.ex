@@ -1,14 +1,18 @@
 defmodule PortfolioTracker.View do
   @line_break " \n------------------------------------- \n"
 
+  @spec to_string(
+          %{:__struct__ => Portfolio | Stock, :rate => any, :value => any, optional(any) => any},
+          :long | :short
+        ) :: <<_::64, _::_*8>>
   def to_string(%Stock{} = stock, :short) do
     "Name: #{stock.id} \nValue: #{stock.value} \nRate: #{Util.rate(stock.rate)}"
   end
 
   def to_string(%Stock{} = stock, :long) do
-    "Name: #{stock.id} \nTotal: #{stock.total} \nCost price: #{stock.cost_price} \nCost: #{
-      stock.cost
-    } \nPrice: #{stock.price} \nValue: #{stock.value} \nRate: #{Util.rate(stock.rate)}"
+    "Name: #{stock.id} \nTotal: #{stock.total} \nValue: #{stock.value} \nCost price: #{
+      stock.cost_price
+    } \nPrice: #{stock.price} \nRate: #{Util.rate(stock.rate)}"
   end
 
   def to_string(%Portfolio{} = p, :short) do

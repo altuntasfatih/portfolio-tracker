@@ -43,7 +43,7 @@ defmodule PortfolioTracker.BotServer do
     id + 1
   end
 
-  def send_message(message, to) when is_binary(message),
+  def send_message(message, to) ,
     do: GenServer.cast(__MODULE__, {:send_message, message, to})
 
   def child_spec(opts) do

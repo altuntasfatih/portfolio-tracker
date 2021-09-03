@@ -1,5 +1,5 @@
 defmodule PortfolioTracker.MessageHandler do
-  alias PortfolioTracker.{Supervisor, Tracker, BotServer, View}
+  alias PortfolioTracker.{Supervisor, Tracker, MessageSender, View}
 
   @type instructions ::
           :create
@@ -104,5 +104,5 @@ defmodule PortfolioTracker.MessageHandler do
 
   def handle(_, _, _), do: {:error, :instruction_not_found}
 
-  defp send_reply(message, to), do: BotServer.send_message(message, to)
+  defp send_reply(message, to), do: MessageSender.send_message(message, to)
 end

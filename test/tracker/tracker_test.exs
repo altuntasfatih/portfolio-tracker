@@ -1,4 +1,4 @@
-defmodule PortfolioTracker.ServerTest do
+defmodule PortfolioTracker.TrackerTest do
   use ExUnit.Case
   alias PortfolioTracker.Tracker
 
