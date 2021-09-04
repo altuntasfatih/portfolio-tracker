@@ -75,7 +75,7 @@ defmodule PortfolioTracker.MessageHandlerTest do
 
       assert MessageHandler.handle(:set_alert, ["lower_limit", "TEST", "10.67"], @from) == :ok
 
-      refute MessageHandler.handle(:get_alerts, [], @from) == []
+      [_ | _] = MessageHandler.handle(:get_alerts, [], @from)
     end
   end
 

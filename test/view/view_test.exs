@@ -41,4 +41,12 @@ defmodule PortfolioTracker.ViewTest do
            |> View.to_string(:long) ==
              "Name: Test \nTotal: 100 \nValue: 857.0 \nCost price: 10.0 \nPrice: 8.57 \nRate: -14.29 🔴 "
   end
+
+  test "it_should_return_string_represantation_of_alert_list" do
+    alert = Alert.new(:lower_limit, "TUPRS", 12.25)
+    alert2 = Alert.new(:upper_limit, "AVISA", 13.25)
+
+    assert View.to_string([alert, alert2]) ==
+             "Alerts: \nFor TUPRS lower_limit on 12.25 \nFor AVISA upper_limit on 13.25 \n"
+  end
 end

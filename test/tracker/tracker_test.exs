@@ -5,8 +5,8 @@ defmodule PortfolioTracker.TrackerTest do
   @portfolio Portfolio.new("1")
 
   setup_all do
-    {:ok, pid} = PortfolioTracker.MockExchangeApi.start_link()
-    on_exit(fn -> Agent.stop(pid) end)
+    {:ok, _} = PortfolioTracker.MockExchangeApi.start_link()
+    :ok
   end
 
   setup do
