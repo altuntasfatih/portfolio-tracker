@@ -2,7 +2,7 @@ defmodule Portfolio do
   import Util
 
   defstruct id: "",
-            stocks: %{},
+            assets: %{},
             cost: 0.0,
             value: 0.0,
             rate: 0.0,
@@ -11,7 +11,7 @@ defmodule Portfolio do
 
   @type t :: %Portfolio{
           id: String.t(),
-          stocks: map(),
+          assets: map(),
           cost: float(),
           value: float(),
           rate: float(),
@@ -21,20 +21,20 @@ defmodule Portfolio do
 
   def new(id), do: %Portfolio{id: id}
 
-  def get_stock_by_order(%Portfolio{stocks: stocks}) do
-    Map.values(stocks)
+  def get_assets_by_order(%Portfolio{assets: assets}) do
+    Map.values(assets)
     |> Enum.sort(&(&1.rate >= &2.rate))
   end
 
-  @spec add_stock(Portfolio.t(), Stock.t()) :: Portfolio.t()
-  def add_stock(%Portfolio{} = portfolio, %Stock{} = new_stock) do
-    Map.put(portfolio, :stocks, Map.put(portfolio.stocks, new_stock.name, new_stock))
+  @spec add_asset(Portfolio.t(), Asset.t()) :: Portfolio.t()
+  def add_asset(%Portfolio{} = portfolio, %Asset{} = new_asset) do
+    Map.put(portfolio, :assets, Map.put(portfolio.assets, new_asset.name, new_asset))
     |> calculate()
   end
 
-  @spec remove_stock(Portfolio.t(), String.t()) :: Portfolio.t()
-  def remove_stock(%Portfolio{} = portfolio, stock_id) do
-    Map.put(portfolio, :stocks, Map.delete(portfolio.stocks, stock_id))
+  @spec remove_asset(Portfolio.t(), String.t()) :: Portfolio.t()
+  def remove_asset(%Portfolio{} = portfolio, asset_name) do
+    Map.put(portfolio, :assets, Map.delete(portfolio.assets, asset_name))
     |> calculate()
   end
 
@@ -47,23 +47,23 @@ defmodule Portfolio do
   end
 
   @spec remove_alert(Portfolio.t(), String.t()) :: Portfolio.t()
-  def remove_alert(%Portfolio{alerts: current_alerts} = p, stock_name) do
+  def remove_alert(%Portfolio{alerts: current_alerts} = p, asset_name) do
     %Portfolio{
       p
-      | alerts: current_alerts |> Enum.filter(&(&1.stock_name != stock_name))
+      | alerts: current_alerts |> Enum.filter(&(&1.asset_name != asset_name))
     }
   end
 
   @spec update(Portfolio.t(), map()) :: Portfolio.t()
-  def update(%Portfolio{} = portfolio, new_stocks) do
-    Map.put(portfolio, :stocks, new_stocks)
+  def update(%Portfolio{} = portfolio, %{} = new_assets) do
+    Map.put(portfolio, :assets, new_assets)
     |> calculate()
     |> Map.put(:update_time, current_time())
   end
 
-  defp calculate(%Portfolio{stocks: stocks} = p) do
+  defp calculate(%Portfolio{assets: assets} = p) do
     {cost, value, rate} =
-      Enum.reduce(Map.values(stocks), {0.0, 0.0, 0}, fn s, {cost, value, _rate} ->
+      Enum.reduce(Map.values(assets), {0.0, 0.0, 0}, fn s, {cost, value, _rate} ->
         cost = cost + s.cost
         value = value + s.value
         rate = (value - cost) / cost * 100

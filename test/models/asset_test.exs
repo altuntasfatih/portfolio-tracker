@@ -1,12 +1,12 @@
-defmodule StockTest do
+defmodule AssetTest do
   use ExUnit.Case
 
   @name "Test"
   @total 100
   @cost_price 10.0
 
-  test "it_should_create_stock" do
-    assert Stock.new(@name, @total, @cost_price) == %Stock{
+  test "it_should_create_asset" do
+    assert Asset.new(@name, @total, @cost_price) == %Asset{
              name: @name,
              total: @total,
              cost_price: @cost_price,
@@ -17,11 +17,11 @@ defmodule StockTest do
            }
   end
 
-  test "it_should_calculate_stock_value, " do
+  test "it_should_calculate_asset_value, " do
     new_price = 13.41
 
-    assert Stock.new(@name, @total, @cost_price) |> Stock.update(new_price) ==
-             %Stock{
+    assert Asset.new(@name, @total, @cost_price) |> Asset.update(new_price) ==
+             %Asset{
                name: @name,
                total: @total,
                cost_price: @cost_price,
@@ -32,11 +32,11 @@ defmodule StockTest do
              }
   end
 
-  test "it_should_calculate_stock_value_when_rate_is_negative " do
+  test "it_should_calculate_asset_value_when_rate_is_negative " do
     new_price = 8.57
 
-    assert Stock.new(@name, @total, @cost_price) |> Stock.update(new_price) ==
-             %Stock{
+    assert Asset.new(@name, @total, @cost_price) |> Asset.update(new_price) ==
+             %Asset{
                name: @name,
                total: @total,
                cost_price: @cost_price,

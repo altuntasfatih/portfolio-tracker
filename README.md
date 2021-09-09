@@ -1,6 +1,6 @@
 # Portfolio Tracker
 
-It is a telegram bot that follows stocks' prices according to your portfolio. Also it supports custom alert conditions for your thresholds. When condition hits, it sends a notification to your telegram acount.
+It is a telegram bot that follows assets' prices according to your portfolio. Also it supports custom alert conditions for your thresholds. When condition hits, it sends a notification to your telegram acount.
 
 It supports only BIST(Borsa Istanbul). But you can add a new behavior for exchange api then it runs according to it.
 (Current exchange api is [collect_api](https://collectapi.com/tr/api/economy/altin-doviz-ve-borsa-api) free version :) )
@@ -34,25 +34,25 @@ import_config "dev.secret.exs"
 
 ### How to use
 1. Firstly you should create a portfolio.
-2. Then you can add or remove any number of stocks to your portfolio.
+2. Then you can add or remove any number of assets to your portfolio.
 3. Also you can add or remove custom alerts to your portfolio.
-4. You can learn current value of stocks.
+4. You can learn current value of assets.
 
 <img width="410" alt="Screen Shot 2021-05-12 at 19 38 35" src="https://user-images.githubusercontent.com/13722649/118012635-f0e60600-b359-11eb-969c-c0209764e21a.png">
 
 
 ### Bot Commands
 
-| Commands         | Explanation                                                                  | Example        |
-|:---------------- |:----------------------------------------------------------------------------:| :--------------|
-| `/create`        | It creates a stock portfolio for you.                                        | `/create`      |
-| `/get`           | It returns your stock portfolio.                                             | `/get`         |
-| `/get_detail`    | It returns your stock portfolio with detail.                                 | `/get_detail`  |
-| `/live`          | It calculates your potfolio with live stocks prices.                         | `/live`        |
-| `/add_stock`     | It adds stock to your portfolio.                                             | `/add_stock stock_id name count price` (stock_id must be same with exchange identifier)  |
-| `/delete_stock`  | It deletes stock from portfolie.                                             | `/delete_stock stock_id`        |
-| `/set_alert`     | It creates a alert for a stock. When it hits target, it send notification to you.| `/set_alert type stock_id target_price`  (type -> upper_limit or lower_limit)           |
-| `/get_alerts`    | It returns active alerts for your portfolio.                                 | `/get_alerts`   |
-| `/start`         | Alias for `/help `                                                           | `/live`        |
+| Commands         | Explanation                                                                      | Example        |
+|:---------------- |:-------------------------------------------------------------------------------: | :--------------|
+| `/create`        | It creates a portfolio for you.                                                  | `/create`      |
+| `/get`           | It returns your portfolio.                                                       | `/get`         |
+| `/get_detail`    | It returns your portfolio with detail.                                           | `/get_detail`  |
+| `/live`          | It calculates your potfolio with live  prices.                                   | `/live`        |
+| `/add_asset`     | It adds asset to your portfolio.                                                 | `/add_asset name count price` (name must be same with exchange identifier)  |
+| `/delete_asset`  | It deletes asset from portfolie.                                                 | `/delete_asset name`        |
+| `/set_alert`     | It creates a alert for a asset. When it hits target, it send notification to you.| `/set_alert type name target_price`  (type -> upper_limit or lower_limit)           |
+| `/get_alerts`    | It returns active alerts for your portfolio.                                     | `/get_alerts`  |
+| `/start`         | Alias for `/help `                                                               | `/live`        |
 | `/help`          | Help()                                                                       | `/help`        |
 

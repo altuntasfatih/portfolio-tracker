@@ -7,11 +7,11 @@ defmodule PortfolioTracker.MessageHandler do
           | :get_detail
           | :live
           | :destroy
-          | :add_stock
+          | :add_asset
+          | :delete_asset
           | :set_alert
           | :remove_alert
           | :get_alerts
-          | :delete_stock
           | :start
           | :help
 
@@ -60,22 +60,22 @@ defmodule PortfolioTracker.MessageHandler do
 
   def handle(:destroy, _, from), do: Tracker.destroy(from.id)
 
-  def handle(:add_stock, [name, count, price], from) do
+  def handle(:add_asset, [name, count, price], from) do
     with {count, _} <- Integer.parse(count),
          {price, _} <- Float.parse(price) do
-      Stock.new(name, count, price)
-      |> Tracker.add_stock(from.id)
+      Asset.new(name, count, price)
+      |> Tracker.add_asset(from.id)
     else
       _ -> {:error, :args_parse_error}
     end
   end
 
-  def handle(:add_stock, _, _), do: {:error, :missing_parameter}
+  def handle(:add_asset, _, _), do: {:error, :missing_parameter}
 
-  def handle(:set_alert, [type, stock_name, target_price], from) do
+  def handle(:set_alert, [type, asset_name, target_price], from) do
     with {target_price, _} <- Float.parse(target_price),
          type <- String.to_atom(type) do
-      Alert.new(type, stock_name, target_price)
+      Alert.new(type, asset_name, target_price)
       |> Tracker.set_alert(from.id)
     else
       _ -> {:error, :args_parse_error}
@@ -84,16 +84,16 @@ defmodule PortfolioTracker.MessageHandler do
 
   def handle(:set_alert, _, _), do: {:error, :missing_parameter}
 
-  def handle(:remove_alert, [stock_name], from), do: Tracker.remove_alert(from.id, stock_name)
+  def handle(:remove_alert, [asset_name], from), do: Tracker.remove_alert(from.id, asset_name)
 
   def handle(:remove_alert, _, _), do: {:error, :missing_parameter}
 
   def handle(:get_alerts, _, from), do: Tracker.get_alerts(from.id)
 
-  def handle(:delete_stock, [stock_name], from),
-    do: Tracker.delete_stock(from.id, stock_name)
+  def handle(:delete_asset, [asset_name], from),
+    do: Tracker.delete_asset(from.id, asset_name)
 
-  def handle(:delete_stock, _, _), do: {:error, :missing_parameter}
+  def handle(:delete_asset, _, _), do: {:error, :missing_parameter}
 
   def handle(:help, _, _) do
     {:ok, content} = File.read(Application.get_env(:portfolio_tracker, :help_file))

@@ -19,27 +19,27 @@ defmodule PortfolioTracker.TrackerTest do
     assert get(pid) == @portfolio
   end
 
-  test "it should add stock to portfolio", %{pid: pid} do
-    stock = Stock.new("AVISA", 66, 18.20)
-    assert add(pid, stock) == :ok
+  test "it should add asset to portfolio", %{pid: pid} do
+    asset = Asset.new("AVISA", 66, 18.20)
+    assert add(pid, asset) == :ok
 
-    assert get(pid) == @portfolio |> Portfolio.add_stock(stock)
+    assert get(pid) == @portfolio |> Portfolio.add_asset(asset)
   end
 
-  test "it should delete stock from portfolio", %{pid: pid} do
-    stock = Stock.new("AVISA", 66, 18.20)
-    assert add(pid, stock) == :ok
+  test "it should delete asset from portfolio", %{pid: pid} do
+    asset = Asset.new("AVISA", 66, 18.20)
+    assert add(pid, asset) == :ok
 
-    assert delete(pid, stock.name) == :ok
+    assert delete(pid, asset.name) == :ok
     assert get(pid) == @portfolio
   end
 
-  test "it should update stocks with live prices", %{pid: pid} do
-    stock = Stock.new("AVISA", 10, 10)
-    stock2 = Stock.new("TUPRS", 5, 5.00)
+  test "it should update assets with live prices", %{pid: pid} do
+    asset = Asset.new("AVISA", 10, 10)
+    asset2 = Asset.new("TUPRS", 5, 5.00)
 
-    assert add(pid, stock) == :ok
-    assert add(pid, stock2) == :ok
+    assert add(pid, asset) == :ok
+    assert add(pid, asset2) == :ok
 
     PortfolioTracker.MockExchangeApi.push([
       %{name: "AVISA", price: 15.00},
@@ -50,9 +50,9 @@ defmodule PortfolioTracker.TrackerTest do
 
     portfolio = get(pid)
 
-    assert portfolio.stocks == %{
-             "AVISA" => Stock.update(stock, 15.00),
-             "TUPRS" => Stock.update(stock2, 5)
+    assert portfolio.assets == %{
+             "AVISA" => Asset.update(asset, 15.00),
+             "TUPRS" => Asset.update(asset2, 5)
            }
 
     assert portfolio.cost == 125.0
@@ -61,19 +61,19 @@ defmodule PortfolioTracker.TrackerTest do
     assert portfolio.update_time != nil
   end
 
-  test "it should update stocks price", _ do
-    stock = Stock.new("AVISA", 66, 18.20)
-    stock2 = Stock.new("TUPRS", 10, 110.22)
+  test "it should update assets price", _ do
+    asset = Asset.new("AVISA", 66, 18.20)
+    asset2 = Asset.new("TUPRS", 10, 110.22)
 
     current_prices = [%{name: "AVISA", price: 19.33}, %{name: "TUPRS", price: 102.60}]
 
-    assert Tracker.update_stocks_with_live([stock2, stock], current_prices) == [
-             Stock.update(stock2, 102.60),
-             Stock.update(stock, 19.33)
+    assert Tracker.update_assets_with_live([asset2, asset], current_prices) == [
+             Asset.update(asset2, 102.60),
+             Asset.update(asset, 19.33)
            ]
   end
 
-  test "it should add_alert for stock", %{pid: pid} do
+  test "it should add_alert for asset", %{pid: pid} do
     alert = Alert.new(:lower_limit, "AVISA", 16.0)
     assert set_alert(pid, alert) == :ok
     assert get_alerts(pid) == [alert]
@@ -82,7 +82,7 @@ defmodule PortfolioTracker.TrackerTest do
   test "it should delete alert", %{pid: pid} do
     alert = Alert.new(:lower_limit, "AVISA", 16.0)
     assert set_alert(pid, alert) == :ok
-    assert remove_alert(pid, alert.stock_name) == :ok
+    assert remove_alert(pid, alert.asset_name) == :ok
     assert get_alerts(pid) == []
   end
 
@@ -125,16 +125,16 @@ defmodule PortfolioTracker.TrackerTest do
     GenServer.call(pid, :get)
   end
 
-  def add(pid, new_stock) do
-    GenServer.cast(pid, {:add_stock, new_stock})
+  def add(pid, new_asset) do
+    GenServer.cast(pid, {:add_asset, new_asset})
   end
 
   def set_alert(pid, alert) do
     GenServer.cast(pid, {:set_alert, alert})
   end
 
-  def remove_alert(pid, stock_id) do
-    GenServer.cast(pid, {:remove_alert, stock_id})
+  def remove_alert(pid, asset_name) do
+    GenServer.cast(pid, {:remove_alert, asset_name})
   end
 
   def check_alerts(pid) do
@@ -148,8 +148,8 @@ defmodule PortfolioTracker.TrackerTest do
     GenServer.call(pid, :get_alerts)
   end
 
-  def delete(pid, stock_id) do
-    GenServer.cast(pid, {:delete_stock, stock_id})
+  def delete(pid, asset_name) do
+    GenServer.cast(pid, {:delete_asset, asset_name})
   end
 
   def update(pid) do
