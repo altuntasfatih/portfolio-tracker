@@ -1,6 +1,5 @@
 defmodule Stock do
-  defstruct id: "",
-            name: "",
+  defstruct name: "",
             total: 0.0,
             cost_price: 0.0,
             cost: 0.0,
@@ -9,7 +8,6 @@ defmodule Stock do
             rate: 0.0
 
   @type t :: %Stock{
-          id: String.t(),
           name: String.t(),
           total: float(),
           cost_price: float(),
@@ -19,12 +17,11 @@ defmodule Stock do
           rate: float()
         }
 
-  @spec new(String.t(), String.t(), number(), float()) :: Stock.t()
-  def new(id, name, total, price) do
+  @spec new(String.t(), number(), float()) :: Stock.t()
+  def new(name, total, price) do
     value = (total * price) |> Util.round_ceil()
 
     %Stock{
-      id: id,
       name: name,
       total: total,
       cost_price: price,

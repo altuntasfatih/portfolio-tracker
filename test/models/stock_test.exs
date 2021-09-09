@@ -1,14 +1,12 @@
 defmodule StockTest do
   use ExUnit.Case
 
-  @id "Test"
-  @name "Test Market"
+  @name "Test"
   @total 100
   @cost_price 10.0
 
   test "it_should_create_stock" do
-    assert Stock.new(@id, @name, @total, @cost_price) == %Stock{
-             id: @id,
+    assert Stock.new(@name, @total, @cost_price) == %Stock{
              name: @name,
              total: @total,
              cost_price: @cost_price,
@@ -22,9 +20,8 @@ defmodule StockTest do
   test "it_should_calculate_stock_value, " do
     new_price = 13.41
 
-    assert Stock.new(@id, @name, @total, @cost_price) |> Stock.update(new_price) ==
+    assert Stock.new(@name, @total, @cost_price) |> Stock.update(new_price) ==
              %Stock{
-               id: @id,
                name: @name,
                total: @total,
                cost_price: @cost_price,
@@ -38,9 +35,8 @@ defmodule StockTest do
   test "it_should_calculate_stock_value_when_rate_is_negative " do
     new_price = 8.57
 
-    assert Stock.new(@id, @name, @total, @cost_price) |> Stock.update(new_price) ==
+    assert Stock.new(@name, @total, @cost_price) |> Stock.update(new_price) ==
              %Stock{
-               id: @id,
                name: @name,
                total: @total,
                cost_price: @cost_price,
@@ -50,6 +46,4 @@ defmodule StockTest do
                rate: -14.29
              }
   end
-
-
 end

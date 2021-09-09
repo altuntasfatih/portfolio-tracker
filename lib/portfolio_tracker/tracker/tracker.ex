@@ -134,7 +134,7 @@ defmodule PortfolioTracker.Tracker do
 
   def update_stocks_with_live(stocks, current_prices) when is_list(stocks) do
     Enum.map(stocks, fn s ->
-      Enum.find(current_prices, fn x -> s.id == x.name end)
+      Enum.find(current_prices, fn x -> s.name == x.name end)
       |> calculate_stock(s)
     end)
   end
@@ -144,7 +144,7 @@ defmodule PortfolioTracker.Tracker do
 
     Map.values(stocks)
     |> update_stocks_with_live(current_prices)
-    |> Enum.reduce(%{}, fn s, acc -> Map.put(acc, s.id, s) end)
+    |> Enum.reduce(%{}, fn s, acc -> Map.put(acc, s.name, s) end)
   end
 
   defp calculate_stock(nil, %Stock{} = stock), do: stock

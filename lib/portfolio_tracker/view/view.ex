@@ -6,11 +6,11 @@ defmodule PortfolioTracker.View do
           :long | :short
         ) :: <<_::64, _::_*8>>
   def to_string(%Stock{} = stock, :short) do
-    "Name: #{stock.id} \nValue: #{stock.value} \nRate: #{Util.rate(stock.rate)}"
+    "Name: #{stock.name} \nValue: #{stock.value} \nRate: #{Util.rate(stock.rate)}"
   end
 
   def to_string(%Stock{} = stock, :long) do
-    "Name: #{stock.id} \nTotal: #{stock.total} \nValue: #{stock.value} \nCost price: #{
+    "Name: #{stock.name} \nTotal: #{stock.total} \nValue: #{stock.value} \nCost price: #{
       stock.cost_price
     } \nPrice: #{stock.price} \nRate: #{Util.rate(stock.rate)}"
   end

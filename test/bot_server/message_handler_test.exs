@@ -41,12 +41,12 @@ defmodule PortfolioTracker.MessageHandlerTest do
     end
 
     test "it should handle add_stock message", _ do
-      assert MessageHandler.handle(:add_stock, ["VAKBN", "VAKIF_BANK", "250", "4.5"], @from) ==
+      assert MessageHandler.handle(:add_stock, ["VAKBN", "250", "4.5"], @from) ==
                :ok
     end
 
     test "it should return args parse error", _ do
-      assert MessageHandler.handle(:add_stock, ["VAKBN", "VAKIF_BANK", "x", "x"], @from) ==
+      assert MessageHandler.handle(:add_stock, ["VAKBN", "x", "x"], @from) ==
                {:error, :args_parse_error}
     end
 

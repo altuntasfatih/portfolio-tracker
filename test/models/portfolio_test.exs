@@ -14,10 +14,10 @@ defmodule PortfolioTest do
 
   test "it_should_calculate_portfolio" do
     portfolio = Portfolio.new(@id)
-    stock = Stock.new("A", "A_company", 66, 18.20) |> Stock.update(19.32)
-    stock2 = Stock.new("E", "E_company", 460, 14.47) |> Stock.update(14.60)
-    stock3 = Stock.new("S", "S_company", 84, 14.28) |> Stock.update(14.48)
-    stock4 = Stock.new("D", "D_company", 10, 110.22) |> Stock.update(100.70)
+    stock = Stock.new("A", 66, 18.20) |> Stock.update(19.32)
+    stock2 = Stock.new("E", 460, 14.47) |> Stock.update(14.60)
+    stock3 = Stock.new("S", 84, 14.28) |> Stock.update(14.48)
+    stock4 = Stock.new("D", 10, 110.22) |> Stock.update(100.70)
 
     portfolio =
       Portfolio.add_stock(portfolio, stock)
@@ -32,10 +32,10 @@ defmodule PortfolioTest do
 
   test "it_should_sort_stocks_by_rate" do
     portfolio = Portfolio.new(@id)
-    stock = Map.put(Stock.new("A", "A_company", 66, 18.20), :rate, 3.0)
-    stock2 = Map.put(Stock.new("E", "E_company", 460, 14.47), :rate, 0.0)
-    stock3 = Map.put(Stock.new("S", "S_company", 84, 14.28), :rate, -10.0)
-    stock4 = Map.put(Stock.new("D", "D_company", 84, 14.28), :rate, 7.0)
+    stock = Map.put(Stock.new("A", 66, 18.20), :rate, 3.0)
+    stock2 = Map.put(Stock.new("E", 460, 14.47), :rate, 0.0)
+    stock3 = Map.put(Stock.new("S", 84, 14.28), :rate, -10.0)
+    stock4 = Map.put(Stock.new("D", 84, 14.28), :rate, 7.0)
 
     portfolio =
       Portfolio.add_stock(portfolio, stock)

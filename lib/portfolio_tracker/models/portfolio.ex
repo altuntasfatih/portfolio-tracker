@@ -28,7 +28,7 @@ defmodule Portfolio do
 
   @spec add_stock(Portfolio.t(), Stock.t()) :: Portfolio.t()
   def add_stock(%Portfolio{} = portfolio, %Stock{} = new_stock) do
-    Map.put(portfolio, :stocks, Map.put(portfolio.stocks, new_stock.id, new_stock))
+    Map.put(portfolio, :stocks, Map.put(portfolio.stocks, new_stock.name, new_stock))
     |> calculate()
   end
 
