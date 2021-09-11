@@ -47,6 +47,9 @@ defmodule PortfolioTracker.View do
       end)
   end
 
+  def to_string([:crypto, :bist]),
+    do: ":crypto -> Crypto Currency \n" <> ":bist -> The Borsa Istanbul Stock"
+
   def to_string({:error, :portfolio_not_found}),
     do: "There is no portfolio tracker for you, You should create firstly"
 

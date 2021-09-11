@@ -20,14 +20,14 @@ defmodule PortfolioTracker.TrackerTest do
   end
 
   test "it should add asset to portfolio", %{pid: pid} do
-    asset = Asset.new("AVISA", 66, 18.20)
+    asset = Asset.new("AVISA", "bist", 66, 18.20)
     assert add(pid, asset) == :ok
 
     assert get(pid) == @portfolio |> Portfolio.add_asset(asset)
   end
 
   test "it should delete asset from portfolio", %{pid: pid} do
-    asset = Asset.new("AVISA", 66, 18.20)
+    asset = Asset.new("AVISA", "bist", 66, 18.20)
     assert add(pid, asset) == :ok
 
     assert delete(pid, asset.name) == :ok
@@ -35,8 +35,8 @@ defmodule PortfolioTracker.TrackerTest do
   end
 
   test "it should update assets with live prices", %{pid: pid} do
-    asset = Asset.new("AVISA", 10, 10)
-    asset2 = Asset.new("TUPRS", 5, 5.00)
+    asset = Asset.new("AVISA", "bist", 10, 10)
+    asset2 = Asset.new("TUPRS", "bist", 5, 5.00)
 
     assert add(pid, asset) == :ok
     assert add(pid, asset2) == :ok
@@ -62,8 +62,8 @@ defmodule PortfolioTracker.TrackerTest do
   end
 
   test "it should update assets price", _ do
-    asset = Asset.new("AVISA", 66, 18.20)
-    asset2 = Asset.new("TUPRS", 10, 110.22)
+    asset = Asset.new("AVISA", "bist", 66, 18.20)
+    asset2 = Asset.new("TUPRS", "bist", 10, 110.22)
 
     current_prices = [%{name: "AVISA", price: 19.33}, %{name: "TUPRS", price: 102.60}]
 

@@ -40,13 +40,17 @@ defmodule PortfolioTracker.MessageHandlerTest do
       assert MessageHandler.handle(:destroy, [], @from) == :ok
     end
 
+    test "it should handle get_asset_type message", _ do
+      assert MessageHandler.handle(:get_asset_types, [], @from) == Asset.get_asset_types()
+    end
+
     test "it should handle add_asset message", _ do
-      assert MessageHandler.handle(:add_asset, ["VAKBN", "250", "4.5"], @from) ==
+      assert MessageHandler.handle(:add_asset, ["VAKBN", "crypto", "250", "4.5"], @from) ==
                :ok
     end
 
     test "it should return args parse error", _ do
-      assert MessageHandler.handle(:add_asset, ["VAKBN", "x", "x"], @from) ==
+      assert MessageHandler.handle(:add_asset, ["VAKBN", "crypto", "x", "x"], @from) ==
                {:error, :args_parse_error}
     end
 

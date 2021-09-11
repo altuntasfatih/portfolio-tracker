@@ -3,15 +3,17 @@ defmodule PortfolioTracker.MessageHandler do
 
   @type instructions ::
           :create
+          | :destroy
           | :get
           | :get_detail
           | :live
-          | :destroy
+          | :get_asset_types
           | :add_asset
           | :delete_asset
           | :set_alert
           | :remove_alert
           | :get_alerts
+          | :destroy
           | :start
           | :help
 
@@ -35,6 +37,7 @@ defmodule PortfolioTracker.MessageHandler do
   def handle({instruction, args}, from), do: handle(instruction, args, from)
   def handle([], _), do: {:error, :instruction_not_found}
 
+  @spec handle(instructions(), list(), map()) :: String.t()
   def handle(:create, _, from) do
     case Supervisor.start(from.id) do
       {:ok, _pid} -> {:ok, :portfolio_created}
@@ -59,11 +62,13 @@ defmodule PortfolioTracker.MessageHandler do
   def handle(:live, _, from), do: Tracker.live(from.id)
 
   def handle(:destroy, _, from), do: Tracker.destroy(from.id)
+  def handle(:get_asset_types, _, from), do: Asset.get_asset_types()
 
-  def handle(:add_asset, [name, count, price], from) do
-    with {count, _} <- Integer.parse(count),
-         {price, _} <- Float.parse(price) do
-      Asset.new(name, count, price)
+  def handle(:add_asset, [name, type, count, price], from) do
+    with {count, _} <- Float.parse(count),
+         {price, _} <- Float.parse(price),
+         {:ok, type} <- Asset.parse_type(type) do
+      Asset.new(name, type, count, price)
       |> Tracker.add_asset(from.id)
     else
       _ -> {:error, :args_parse_error}

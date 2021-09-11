@@ -1,9 +1,11 @@
 # Portfolio Tracker
 
-It is a telegram bot that follows assets' prices according to your portfolio. Also it supports custom alert conditions for your thresholds. When condition hits, it sends a notification to your telegram acount.
+It is a Telegram bot that follows asset's prices according to your portfolio.
+Also it supports custom alert conditions for your thresholds. When condition hits, it sends a notification to your telegram acount.
 
-It supports only BIST(Borsa Istanbul). But you can add a new behavior for exchange api then it runs according to it.
-(Current exchange api is [collect_api](https://collectapi.com/tr/api/economy/altin-doviz-ve-borsa-api) free version :) )
+Currently it supports two types of asset. These are :bist(a.k.a The Borsa İstanbul) and :crypto(Crypto currency).
+
+For BIST current price of stocks are fed by [collect_api](https://collectapi.com/tr/api/economy/altin-doviz-ve-borsa-api) free version :)
 
 Behavior for Exchange Api
 ```
@@ -43,16 +45,17 @@ import_config "dev.secret.exs"
 
 ### Bot Commands
 
-| Commands         | Explanation                                                                      | Example        |
-|:---------------- |:-------------------------------------------------------------------------------: | :--------------|
-| `/create`        | It creates a portfolio for you.                                                  | `/create`      |
-| `/get`           | It returns your portfolio.                                                       | `/get`         |
-| `/get_detail`    | It returns your portfolio with detail.                                           | `/get_detail`  |
-| `/live`          | It calculates your potfolio with live  prices.                                   | `/live`        |
-| `/add_asset`     | It adds asset to your portfolio.                                                 | `/add_asset name count price` (name must be same with exchange identifier)  |
+| Commands          | Explanation                                                                      | Example        |
+|:----------------  |:-------------------------------------------------------------------------------: | :--------------|
+| `/create`         | It creates a portfolio for you.                                                  | `/create`      |
+| `/get`            | It returns your portfolio.                                                       | `/get`         |
+| `/get_detail`     | It returns your portfolio with detail.                                           | `/get_detail`  |
+| `/live`           | It calculates your potfolio with live  prices.                                   | `/live`        |
+| `/get_asset_types`| It returns supported asset types                                                 | `/get_asset_types`  |
+| `/add_asset`      | It adds asset to your portfolio.                                                 | `/add_asset type name count price` (name must be same with exchange identifier)  |
 | `/delete_asset`  | It deletes asset from portfolie.                                                 | `/delete_asset name`        |
 | `/set_alert`     | It creates a alert for a asset. When it hits target, it send notification to you.| `/set_alert type name target_price`  (type -> upper_limit or lower_limit)           |
-| `/get_alerts`    | It returns active alerts for your portfolio.                                     | `/get_alerts`  |
-| `/start`         | Alias for `/help `                                                               | `/live`        |
-| `/help`          | Help()                                                                       | `/help`        |
+| `/get_alerts`     | It returns active alerts for your portfolio.                                     | `/get_alerts`  |
+| `/start`          | Alias for `/help `                                                               | `/live`        |
+| `/help`           | Help()                                                                           | `/help`        |
 
