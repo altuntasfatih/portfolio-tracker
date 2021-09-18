@@ -1,5 +1,5 @@
-defmodule PortfolioTracker.MessageHandler do
-  alias PortfolioTracker.{Supervisor, Tracker, MessageSender, View}
+defmodule PortfolioTracker.Bot.MessageHandler do
+  alias PortfolioTracker.{Supervisor, Tracker, Bot.MessageSender, View}
 
   @type instructions ::
           :create
@@ -60,9 +60,8 @@ defmodule PortfolioTracker.MessageHandler do
   end
 
   def handle(:live, _, from), do: Tracker.live(from.id)
-
   def handle(:destroy, _, from), do: Tracker.destroy(from.id)
-  def handle(:get_asset_types, _, from), do: Asset.get_asset_types()
+  def handle(:get_asset_types, _,_from), do: Asset.get_asset_types()
 
   def handle(:add_asset, [name, type, count, price], from) do
     with {count, _} <- Float.parse(count),

@@ -4,9 +4,9 @@ defmodule PortfolioTracker.Tracker do
   """
   use GenServer
   require Logger
-  alias PortfolioTracker.MessageSender
+  alias PortfolioTracker.Bot.MessageSender
 
-  @api Application.get_env(:portfolio_tracker, :exchange_api)
+  @api Application.get_env(:portfolio_tracker, :bist_api)
   @backup_path Application.get_env(:portfolio_tracker, :backup_path)
 
   def start_link(%Portfolio{} = state) do
@@ -46,7 +46,15 @@ defmodule PortfolioTracker.Tracker do
   end
 
   @impl true
+  def handle_cast(:live, %Portfolio{assets: []} = state) do
+    {:noreply, state}
+  end
+
+  @impl true
   def handle_cast(:live, state) do
+    #//split_assets
+    #//get_current_prices
+    #//update portfolio
     new_state = Portfolio.update(state, update_assets_with_live(state.assets))
     :ok = MessageSender.send_message(new_state, state.id)
     {:noreply, new_state}
@@ -70,19 +78,6 @@ defmodule PortfolioTracker.Tracker do
   @impl true
   def handle_cast({:remove_alert, asset_name}, state) do
     {:noreply, Portfolio.remove_alert(state, asset_name)}
-  end
-
-  @impl true
-  def handle_cast(:update, state), do: handle_info(:update, state)
-
-  @impl true
-  def handle_info(:update, %Portfolio{assets: []} = state) do
-    {:noreply, state}
-  end
-
-  @impl true
-  def handle_info(:update, %Portfolio{assets: assets} = state) do
-    {:noreply, Portfolio.update(state, update_assets_with_live(assets))}
   end
 
   def handle_info(:check_alert, %Portfolio{alerts: []} = state), do: {:noreply, state}
@@ -118,15 +113,15 @@ defmodule PortfolioTracker.Tracker do
     {:ok, current_prices} =
       Enum.map(alerts, fn alert -> alert.asset_name end) |> @api.get_live_prices()
 
-    current_prices =
-      Enum.reduce(current_prices, %{}, fn p, acc ->
-        Map.put(acc, p.name, p.price)
+    asset_current_prices =
+      Enum.reduce(current_prices, %{}, fn asset, acc ->
+        Map.put(acc, asset.name, asset.price)
       end)
 
     {hit_list, not_hit_list} =
       alerts
       |> Enum.split_with(fn alert ->
-        Alert.is_hit(alert, Map.get(current_prices, alert.asset_name))
+        Alert.is_hit(alert, Map.get(asset_current_prices, alert.asset_name))
       end)
 
     {hit_list, not_hit_list}
@@ -152,6 +147,7 @@ defmodule PortfolioTracker.Tracker do
 
   defp take_backup(pid), do: Process.send_after(pid, :take_backup, 1000)
 
+
   def get(id), do: via_tuple(id, &GenServer.call(&1, :get))
 
   def add_asset(%Asset{} = asset, id), do: via_tuple(id, &GenServer.cast(&1, {:add_asset, asset}))
@@ -160,8 +156,6 @@ defmodule PortfolioTracker.Tracker do
     do: via_tuple(id, &GenServer.cast(&1, {:set_alert, alert}))
 
   def get_alerts(id), do: via_tuple(id, &GenServer.call(&1, :get_alerts))
-
-  def update(id), do: via_tuple(id, &GenServer.cast(&1, :update))
 
   def live(id), do: via_tuple(id, &GenServer.cast(&1, :live))
 

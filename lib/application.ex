@@ -24,7 +24,7 @@ defmodule PortfolioTracker.Application do
     [
       {PortfolioTracker.Supervisor, :ok},
       # -1 is offset get last message
-      {PortfolioTracker.BotServer, -1}
+      {PortfolioTracker.Bot.Server, -1}
     ]
   end
 end

@@ -1,8 +1,8 @@
-defmodule PortfolioTracker.MockExchangeApi do
-  @behaviour PortfolioTracker.ExchangeApi
+defmodule PortfolioTracker.BistMockApi do
+  @behaviour PortfolioTracker.BistApi
 
   def start_link do
-    Agent.start_link(fn -> [] end, name: __MODULE__)
+    Agent.start(fn -> [] end, name: __MODULE__)
   end
 
   def push(expected_response) do
@@ -19,6 +19,8 @@ defmodule PortfolioTracker.MockExchangeApi do
       end
     end)
   end
+
+  def stop(pid), do: Agent.stop(pid)
 
   @impl true
   def get_live_prices() do

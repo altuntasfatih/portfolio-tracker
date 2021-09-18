@@ -1,6 +1,6 @@
 defmodule PortfolioTracker.MessageHandlerTest do
   use ExUnit.Case
-  alias PortfolioTracker.MessageHandler
+  alias PortfolioTracker.Bot.MessageHandler
   alias PortfolioTracker.Supervisor
 
   @from %{id: 1}

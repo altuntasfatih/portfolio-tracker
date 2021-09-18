@@ -1,7 +1,7 @@
-defmodule PortfolioTracker.BotServer do
+defmodule PortfolioTracker.Bot.Server do
   use GenServer
   require Logger
-  alias PortfolioTracker.MessageHandler
+  alias PortfolioTracker.Bot.MessageHandler
 
   @client Application.get_env(:portfolio_tracker, :bot_client)
 

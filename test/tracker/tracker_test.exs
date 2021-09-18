@@ -1,17 +1,14 @@
 defmodule PortfolioTracker.TrackerTest do
   use ExUnit.Case
-  alias PortfolioTracker.Tracker
+  alias PortfolioTracker.{BistMockApi,Tracker}
 
   @portfolio Portfolio.new("1")
 
-  setup_all do
-    {:ok, _} = PortfolioTracker.MockExchangeApi.start_link()
-    :ok
-  end
-
   setup do
+    {:ok, mock_api} = BistMockApi.start_link()
     {:ok, pid} = GenServer.start_link(Tracker, @portfolio)
     on_exit(fn -> Process.exit(pid, :normal) end)
+    on_exit(fn -> BistMockApi.stop(mock_api) end)
     {:ok, pid: pid}
   end
 
@@ -32,33 +29,6 @@ defmodule PortfolioTracker.TrackerTest do
 
     assert delete(pid, asset.name) == :ok
     assert get(pid) == @portfolio
-  end
-
-  test "it should update assets with live prices", %{pid: pid} do
-    asset = Asset.new("AVISA", "bist", 10, 10)
-    asset2 = Asset.new("TUPRS", "bist", 5, 5.00)
-
-    assert add(pid, asset) == :ok
-    assert add(pid, asset2) == :ok
-
-    PortfolioTracker.MockExchangeApi.push([
-      %{name: "AVISA", price: 15.00},
-      %{name: "TUPRS", price: 5.00}
-    ])
-
-    assert update(pid) == :ok
-
-    portfolio = get(pid)
-
-    assert portfolio.assets == %{
-             "AVISA" => Asset.update(asset, 15.00),
-             "TUPRS" => Asset.update(asset2, 5)
-           }
-
-    assert portfolio.cost == 125.0
-    assert portfolio.value == 175.0
-    assert portfolio.rate == 40.0
-    assert portfolio.update_time != nil
   end
 
   test "it should update assets price", _ do
@@ -86,12 +56,12 @@ defmodule PortfolioTracker.TrackerTest do
     assert get_alerts(pid) == []
   end
 
-  test "it should check alerts condition", _ do
+  test "it should split alerts by condition hit", _ do
     alert = Alert.new(:lower_limit, "AVISA", 16.0)
     alert2 = Alert.new(:lower_limit, "TUPRS", 100.0)
     alert3 = Alert.new(:upper_limit, "KRDMD", 50.0)
 
-    PortfolioTracker.MockExchangeApi.push([
+    BistMockApi.push([
       %{name: "AVISA", price: 15.33},
       %{name: "TUPRS", price: 120.60},
       %{name: "KRDMD", price: 20.60},
@@ -110,7 +80,7 @@ defmodule PortfolioTracker.TrackerTest do
     assert set_alert(pid, not_hit_alert_) == :ok
     assert set_alert(pid, not_hit_alert_2) == :ok
 
-    PortfolioTracker.MockExchangeApi.push([
+    BistMockApi.push([
       %{name: "AVISA", price: 15.33},
       %{name: "TUPRS", price: 120.60},
       %{name: "KRDMD", price: 20.60},

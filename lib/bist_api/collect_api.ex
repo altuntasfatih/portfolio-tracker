@@ -1,6 +1,6 @@
-defmodule PortfolioTracker.CollectApi do
-  @behaviour PortfolioTracker.ExchangeApi
-  alias PortfolioTracker.ExchangeApi.Models.Response
+defmodule PortfolioTracker.BistCollectApi do
+  @behaviour PortfolioTracker.BistApi
+  alias PortfolioTracker.BistApi.Models.Response
 
   @token Application.fetch_env!(:portfolio_tracker, :token)
   @url Application.fetch_env!(:portfolio_tracker, :url)

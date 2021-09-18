@@ -1,5 +1,5 @@
 import Config
 
 config :portfolio_tracker,
-  exchange_api: PortfolioTracker.MockExchangeApi,
+  bist_api: PortfolioTracker.BistMockApi,
   bot_client: PortfolioTracker.Bot.MockClient

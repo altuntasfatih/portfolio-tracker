@@ -1,4 +1,4 @@
-defmodule PortfolioTracker.ExchangeApi.Models do
+defmodule PortfolioTracker.BistApi.Models do
   defmodule Response do
     defstruct success: false, result: []
 
