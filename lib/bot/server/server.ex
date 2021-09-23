@@ -43,7 +43,7 @@ defmodule PortfolioTracker.Bot.Server do
     id + 1
   end
 
-  def send_message(message, to) ,
+  def send_message(message, to),
     do: GenServer.cast(__MODULE__, {:send_message, message, to})
 
   def child_spec(opts) do

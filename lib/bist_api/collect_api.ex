@@ -1,30 +1,32 @@
-defmodule PortfolioTracker.BistCollectApi do
-  @behaviour PortfolioTracker.BistApi
-  alias PortfolioTracker.BistApi.Models.Response
+defmodule PortfolioTracker.Bist.CollectApi do
+  @behaviour PortfolioTracker.Bist.Api
+  alias PortfolioTracker.Bist.Api.Models.{Response, StockInfo}
 
-  @token Application.fetch_env!(:portfolio_tracker, :token)
-  @url Application.fetch_env!(:portfolio_tracker, :url)
+  @token Application.get_env(:portfolio_tracker, :bist)[:collect_api_token]
+  @url Application.get_env(:portfolio_tracker, :bist)[:collect_api_url]
 
   @impl true
-  def get_live_prices() do
+  @spec get_live_prices(list()) ::
+          {:error, HTTPoison.Error.t()} | {:ok, %{String.t() => StockInfo.t()}}
+  def get_live_prices(stock_list) do
     headers = [
       authorization: @token,
       accept: "Application/json; Charset=utf-8",
       ContentType: "application/json"
     ]
 
-    case HTTPoison.post(@url, "", headers) do
-      {:ok, response} ->
-        {:ok, Response.parse(response.body)}
-
-      err ->
-        err
-    end
+    HTTPoison.post(@url, "", headers)
+    |> parse(stock_list)
   end
 
-  @impl true
-  def get_live_prices(name_list) when is_list(name_list) do
-    {:ok, current_prices} = get_live_prices()
-    {:ok, Enum.filter(current_prices, fn s -> s.name in name_list end)}
+  defp parse({:ok, response}, stock_list) do
+    stocks =
+      Response.parse(response.body)
+      |> Enum.filter(fn s -> s.name in stock_list end)
+      |> Enum.reduce(%{}, fn stock, acc -> Map.put(acc, stock.name, stock) end)
+
+    {:ok, stocks}
   end
+
+  defp parse(err, _), do: err
 end

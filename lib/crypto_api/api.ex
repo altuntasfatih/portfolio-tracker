@@ -1,4 +1,6 @@
-defmodule PortfolioTracker.CryptoApi do
+defmodule PortfolioTracker.Crypto.Api do
+  alias PortfolioTracker.Crypto.Api.Models.CryptoPrice
 
-  @callback get_live_prices(list()) :: {:ok, any()} | any
+  @callback get_live_prices(list()) ::
+              {:error, any()} | {:ok, %{String.t() => CryptoPrice.t()}} | any
 end

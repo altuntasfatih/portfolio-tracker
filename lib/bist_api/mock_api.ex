@@ -1,5 +1,5 @@
-defmodule PortfolioTracker.BistMockApi do
-  @behaviour PortfolioTracker.BistApi
+defmodule PortfolioTracker.Bist.MockApi do
+  @behaviour PortfolioTracker.Bist.Api
 
   def start_link do
     Agent.start(fn -> [] end, name: __MODULE__)
@@ -21,11 +21,6 @@ defmodule PortfolioTracker.BistMockApi do
   end
 
   def stop(pid), do: Agent.stop(pid)
-
-  @impl true
-  def get_live_prices() do
-    {:ok, pop()}
-  end
 
   @impl true
   def get_live_prices(_) do

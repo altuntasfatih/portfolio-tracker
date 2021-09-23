@@ -1,6 +1,6 @@
-defmodule PortfolioTracker.BistApi do
-  alias PortfolioTracker.BistApi.Models.StockInfo
+defmodule PortfolioTracker.Bist.Api do
+  alias PortfolioTracker.Bist.Api.Models.StockInfo
 
-  @callback get_live_prices() :: {:ok, [StockInfo.t()]} | any
-  @callback get_live_prices(list()) :: {:ok, [StockInfo.t()]} | any
+  @callback get_live_prices(list()) ::
+              {:error, any()} | {:ok, %{String.t() => StockInfo.t()}} | any
 end
