@@ -5,7 +5,7 @@ defmodule PortfolioTest do
   test "it_should_create_portfolio" do
     assert Portfolio.new(@id) == %Portfolio{
              id: @id,
-             stocks: %{},
+             assets: %{},
              cost: 0.0,
              value: 0.0,
              rate: 0.0
@@ -14,39 +14,39 @@ defmodule PortfolioTest do
 
   test "it_should_calculate_portfolio" do
     portfolio = Portfolio.new(@id)
-    stock = Stock.new("A", "A_company", 66, 18.20) |> Stock.update(19.32)
-    stock2 = Stock.new("E", "E_company", 460, 14.47) |> Stock.update(14.60)
-    stock3 = Stock.new("S", "S_company", 84, 14.28) |> Stock.update(14.48)
-    stock4 = Stock.new("D", "D_company", 10, 110.22) |> Stock.update(100.70)
+    asset = Asset.new("A", :crypto, 66, 18.20) |> Asset.update(19.32)
+    asset2 = Asset.new("E", :bist, 460, 14.47) |> Asset.update(14.60)
+    asset3 = Asset.new("S", :crypto, 84, 14.28) |> Asset.update(14.48)
+    asset4 = Asset.new("D", :bist, 10, 110.22) |> Asset.update(100.70)
 
     portfolio =
-      Portfolio.add_stock(portfolio, stock)
-      |> Portfolio.add_stock(stock2)
-      |> Portfolio.add_stock(stock3)
-      |> Portfolio.add_stock(stock4)
+      Portfolio.add_asset(portfolio, asset)
+      |> Portfolio.add_asset(asset2)
+      |> Portfolio.add_asset(asset3)
+      |> Portfolio.add_asset(asset4)
 
     assert portfolio.value == 10214.46
     assert portfolio.cost == 10159.16
     assert portfolio.rate == 0.55
   end
 
-  test "it_should_sort_stocks_by_rate" do
+  test "it_should_sort_assets_by_rate" do
     portfolio = Portfolio.new(@id)
-    stock = Map.put(Stock.new("A", "A_company", 66, 18.20), :rate, 3.0)
-    stock2 = Map.put(Stock.new("E", "E_company", 460, 14.47), :rate, 0.0)
-    stock3 = Map.put(Stock.new("S", "S_company", 84, 14.28), :rate, -10.0)
-    stock4 = Map.put(Stock.new("D", "D_company", 84, 14.28), :rate, 7.0)
+    asset = Map.put(Asset.new("A", :crypto, 66, 18.20), :rate, 3.0)
+    asset2 = Map.put(Asset.new("E", :crypto, 460, 14.47), :rate, 0.0)
+    asset3 = Map.put(Asset.new("S", :crypto, 84, 14.28), :rate, -10.0)
+    asset4 = Map.put(Asset.new("D", :crypto, 84, 14.28), :rate, 7.0)
 
     portfolio =
-      Portfolio.add_stock(portfolio, stock)
-      |> Portfolio.add_stock(stock2)
-      |> Portfolio.add_stock(stock3)
-      |> Portfolio.add_stock(stock4)
+      Portfolio.add_asset(portfolio, asset)
+      |> Portfolio.add_asset(asset2)
+      |> Portfolio.add_asset(asset3)
+      |> Portfolio.add_asset(asset4)
 
-    assert Portfolio.get_stock_by_order(portfolio) == [stock4, stock, stock2, stock3]
+    assert Portfolio.get_assets_by_order(portfolio) == [asset4, asset, asset2, asset3]
   end
 
-  test "it_should_add_alert_for_stock" do
+  test "it_should_add_alert_for_asset" do
     alert = Alert.new(:upper_limit, "A", 20.0)
     portfolio = Portfolio.new(@id)
 
@@ -57,6 +57,6 @@ defmodule PortfolioTest do
     alert = Alert.new(:upper_limit, "A", 20.0)
     portfolio = Portfolio.new(@id) |> Portfolio.add_alert(alert)
 
-    assert Portfolio.remove_alert(portfolio, alert.stock_name).alerts == []
+    assert Portfolio.remove_alert(portfolio, alert.asset_name).alerts == []
   end
 end

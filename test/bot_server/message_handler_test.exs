@@ -1,6 +1,6 @@
 defmodule PortfolioTracker.MessageHandlerTest do
   use ExUnit.Case
-  alias PortfolioTracker.MessageHandler
+  alias PortfolioTracker.Bot.MessageHandler
   alias PortfolioTracker.Supervisor
 
   @from %{id: 1}
@@ -40,22 +40,26 @@ defmodule PortfolioTracker.MessageHandlerTest do
       assert MessageHandler.handle(:destroy, [], @from) == :ok
     end
 
-    test "it should handle add_stock message", _ do
-      assert MessageHandler.handle(:add_stock, ["VAKBN", "VAKIF_BANK", "250", "4.5"], @from) ==
+    test "it should handle get_asset_type message", _ do
+      assert MessageHandler.handle(:get_asset_types, [], @from) == Asset.get_asset_types()
+    end
+
+    test "it should handle add_asset message", _ do
+      assert MessageHandler.handle(:add_asset, ["VAKBN", "crypto", "250", "4.5"], @from) ==
                :ok
     end
 
     test "it should return args parse error", _ do
-      assert MessageHandler.handle(:add_stock, ["VAKBN", "VAKIF_BANK", "x", "x"], @from) ==
+      assert MessageHandler.handle(:add_asset, ["VAKBN", "crypto", "x", "x"], @from) ==
                {:error, :args_parse_error}
     end
 
     test "it should return args missing error", _ do
-      assert MessageHandler.handle(:add_stock, [], @from) == {:error, :missing_parameter}
+      assert MessageHandler.handle(:add_asset, [], @from) == {:error, :missing_parameter}
     end
 
-    test "it should handle delete_stock message", _ do
-      assert MessageHandler.handle(:delete_stock, ["VAKBN"], @from) == :ok
+    test "it should handle delete_asset message", _ do
+      assert MessageHandler.handle(:delete_asset, ["VAKBN"], @from) == :ok
     end
 
     test "it should handle get message", _ do
@@ -81,8 +85,8 @@ defmodule PortfolioTracker.MessageHandlerTest do
 
   describe "parse/1" do
     test "it should split message into arguments" do
-      assert MessageHandler.parse("/add_stock VAKBN VAKIF_BANK 250 4.5") ==
-               {:add_stock, ["VAKBN", "VAKIF_BANK", "250", "4.5"]}
+      assert MessageHandler.parse("/add_asset VAKBN VAKIF_BANK 250 4.5") ==
+               {:add_asset, ["VAKBN", "VAKIF_BANK", "250", "4.5"]}
 
       assert MessageHandler.parse("/remove_alert test") == {:remove_alert, ["test"]}
       assert MessageHandler.parse("/get") == {:get, []}

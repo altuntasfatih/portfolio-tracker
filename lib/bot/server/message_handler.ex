@@ -1,17 +1,19 @@
-defmodule PortfolioTracker.MessageHandler do
-  alias PortfolioTracker.{Supervisor, Tracker, MessageSender, View}
+defmodule PortfolioTracker.Bot.MessageHandler do
+  alias PortfolioTracker.{Supervisor, Tracker, Bot.MessageSender, View}
 
   @type instructions ::
           :create
+          | :destroy
           | :get
           | :get_detail
           | :live
-          | :destroy
-          | :add_stock
+          | :get_asset_types
+          | :add_asset
+          | :delete_asset
           | :set_alert
           | :remove_alert
           | :get_alerts
-          | :delete_stock
+          | :destroy
           | :start
           | :help
 
@@ -35,6 +37,7 @@ defmodule PortfolioTracker.MessageHandler do
   def handle({instruction, args}, from), do: handle(instruction, args, from)
   def handle([], _), do: {:error, :instruction_not_found}
 
+  @spec handle(instructions(), list(), map()) :: String.t()
   def handle(:create, _, from) do
     case Supervisor.start(from.id) do
       {:ok, _pid} -> {:ok, :portfolio_created}
@@ -57,25 +60,26 @@ defmodule PortfolioTracker.MessageHandler do
   end
 
   def handle(:live, _, from), do: Tracker.live(from.id)
-
   def handle(:destroy, _, from), do: Tracker.destroy(from.id)
+  def handle(:get_asset_types, _,_from), do: Asset.get_asset_types()
 
-  def handle(:add_stock, [id, name, count, price], from) do
-    with {count, _} <- Integer.parse(count),
-         {price, _} <- Float.parse(price) do
-      Stock.new(id, name, count, price)
-      |> Tracker.add_stock(from.id)
+  def handle(:add_asset, [name, type, count, price], from) do
+    with {count, _} <- Float.parse(count),
+         {price, _} <- Float.parse(price),
+         {:ok, type} <- Asset.parse_type(type) do
+      Asset.new(name, type, count, price)
+      |> Tracker.add_asset(from.id)
     else
       _ -> {:error, :args_parse_error}
     end
   end
 
-  def handle(:add_stock, _, _), do: {:error, :missing_parameter}
+  def handle(:add_asset, _, _), do: {:error, :missing_parameter}
 
-  def handle(:set_alert, [type, stock_id, target_price], from) do
+  def handle(:set_alert, [type, asset_name, target_price], from) do
     with {target_price, _} <- Float.parse(target_price),
          type <- String.to_atom(type) do
-      Alert.new(type, stock_id, target_price)
+      Alert.new(type, asset_name, target_price)
       |> Tracker.set_alert(from.id)
     else
       _ -> {:error, :args_parse_error}
@@ -84,16 +88,16 @@ defmodule PortfolioTracker.MessageHandler do
 
   def handle(:set_alert, _, _), do: {:error, :missing_parameter}
 
-  def handle(:remove_alert, [stock_id], from), do: Tracker.remove_alert(from.id, stock_id)
+  def handle(:remove_alert, [asset_name], from), do: Tracker.remove_alert(from.id, asset_name)
 
   def handle(:remove_alert, _, _), do: {:error, :missing_parameter}
 
   def handle(:get_alerts, _, from), do: Tracker.get_alerts(from.id)
 
-  def handle(:delete_stock, [stock_id], from),
-    do: Tracker.delete_stock(from.id, stock_id)
+  def handle(:delete_asset, [asset_name], from),
+    do: Tracker.delete_asset(from.id, asset_name)
 
-  def handle(:delete_stock, _, _), do: {:error, :missing_parameter}
+  def handle(:delete_asset, _, _), do: {:error, :missing_parameter}
 
   def handle(:help, _, _) do
     {:ok, content} = File.read(Application.get_env(:portfolio_tracker, :help_file))

@@ -4,9 +4,10 @@ defmodule PortfolioTracker.Tracker do
   """
   use GenServer
   require Logger
-  alias PortfolioTracker.MessageSender
+  alias PortfolioTracker.Bot.MessageSender
 
-  @api Application.get_env(:portfolio_tracker, :exchange_api)
+  @bist_api Application.get_env(:portfolio_tracker, :bist)[:api]
+  @crypto_api Application.get_env(:portfolio_tracker, :crypto)[:api]
   @backup_path Application.get_env(:portfolio_tracker, :backup_path)
 
   def start_link(%Portfolio{} = state) do
@@ -46,8 +47,13 @@ defmodule PortfolioTracker.Tracker do
   end
 
   @impl true
-  def handle_cast(:live, state) do
-    new_state = Portfolio.update(state, update_stocks_with_live(state.stocks))
+  def handle_cast(:live, %Portfolio{assets: assets} = state) when map_size(assets) == 0 do
+    {:noreply, state}
+  end
+
+  @impl true
+  def handle_cast(:live, %Portfolio{} = state) do
+    new_state = update_portfolio_with_live(state)
     :ok = MessageSender.send_message(new_state, state.id)
     {:noreply, new_state}
   end
@@ -58,35 +64,24 @@ defmodule PortfolioTracker.Tracker do
   end
 
   @impl true
-  def handle_cast({:add_stock, %Stock{} = stock}, state) do
-    {:noreply, Portfolio.add_stock(state, stock)}
+  def handle_cast({:add_asset, %Asset{} = asset}, state) do
+    {:noreply, Portfolio.add_asset(state, asset)}
   end
 
   @impl true
-  def handle_cast({:delete_stock, stock_id}, state) do
-    {:noreply, Portfolio.remove_stock(state, stock_id)}
+  def handle_cast({:delete_asset, asset_name}, state) do
+    {:noreply, Portfolio.remove_asset(state, asset_name)}
   end
 
   @impl true
-  def handle_cast({:remove_alert, stock_id}, state) do
-    {:noreply, Portfolio.remove_alert(state, stock_id)}
+  def handle_cast({:remove_alert, asset_name}, state) do
+    {:noreply, Portfolio.remove_alert(state, asset_name)}
   end
 
   @impl true
-  def handle_cast(:update, state), do: handle_info(:update, state)
-
-  @impl true
-  def handle_info(:update, %Portfolio{stocks: []} = state) do
-    {:noreply, state}
-  end
-
-  @impl true
-  def handle_info(:update, %Portfolio{stocks: stocks} = state) do
-    {:noreply, Portfolio.update(state, update_stocks_with_live(stocks))}
-  end
-
   def handle_info(:check_alert, %Portfolio{alerts: []} = state), do: {:noreply, state}
 
+  @impl true
   def handle_info(:check_alert, %Portfolio{alerts: alerts} = state) do
     {hit_list, not_hit_list} = check_alerts_condition(alerts)
 
@@ -116,60 +111,83 @@ defmodule PortfolioTracker.Tracker do
 
   def check_alerts_condition(alerts) do
     {:ok, current_prices} =
-      Enum.map(alerts, fn alert -> alert.stock_name end) |> @api.get_live_prices()
+      Enum.map(alerts, fn alert -> alert.asset_name end) |> @bist_api.get_live_prices()
 
-    current_prices =
-      Enum.reduce(current_prices, %{}, fn p, acc ->
-        Map.put(acc, p.name, p.price)
+    asset_current_prices =
+      Enum.reduce(current_prices, %{}, fn asset, acc ->
+        Map.put(acc, asset.name, asset.price)
       end)
 
     {hit_list, not_hit_list} =
       alerts
       |> Enum.split_with(fn alert ->
-        Alert.is_hit(alert, Map.get(current_prices, alert.stock_name))
+        Alert.is_hit(alert, Map.get(asset_current_prices, alert.asset_name))
       end)
 
     {hit_list, not_hit_list}
   end
 
-  def update_stocks_with_live(stocks, current_prices) when is_list(stocks) do
-    Enum.map(stocks, fn s ->
-      Enum.find(current_prices, fn x -> s.id == x.name end)
-      |> calculate_stock(s)
-    end)
+  def update_portfolio_with_live(%Portfolio{assets: assets} = portfolio) do
+    assets =
+      split_assets_by_type(assets)
+      |> Enum.flat_map(&update_asset_by_type(&1))
+      |> Enum.reduce(%{}, fn asset, acc -> Map.put(acc, asset.name, asset) end)
+
+    Portfolio.update(portfolio, assets)
   end
 
-  defp update_stocks_with_live(%{} = stocks) do
-    {:ok, current_prices} = @api.get_live_prices()
-
-    Map.values(stocks)
-    |> update_stocks_with_live(current_prices)
-    |> Enum.reduce(%{}, fn s, acc -> Map.put(acc, s.id, s) end)
+  def split_assets_by_type(%{} = assets) do
+    Map.values(assets)
+    |> Enum.chunk_by(fn a -> a.type end)
   end
 
-  defp calculate_stock(nil, %Stock{} = stock), do: stock
-  defp calculate_stock(c, %Stock{} = stock), do: Stock.update(stock, c.price)
+  def update_asset_by_type([%Asset{type: :crypto} | _] = cryptos) do
+    {:ok, current_prices} =
+      Enum.map(cryptos, fn c -> c.name end)
+      |> @crypto_api.get_live_prices()
+
+    get_price = fn name ->
+      crypto = Map.get(current_prices, name)
+      if crypto != nil, do: crypto.price, else: nil
+    end
+
+    Enum.map(cryptos, &calculate_asset(&1, get_price.(&1.name)))
+  end
+
+  def update_asset_by_type([%Asset{type: :bist} | _] = stocks) do
+    {:ok, current_prices} =
+      Enum.map(stocks, fn c -> c.name end)
+      |> @bist_api.get_live_prices()
+
+    get_price = fn name ->
+      stock = Map.get(current_prices, name)
+      if stock != nil, do: stock.price, else: nil
+    end
+
+    Enum.map(stocks, &calculate_asset(&1, get_price.(&1.name)))
+  end
+
+  defp calculate_asset(%Asset{} = asset, nil), do: asset
+  defp calculate_asset(%Asset{} = asset, new_price), do: Asset.update(asset, new_price)
 
   defp take_backup(pid), do: Process.send_after(pid, :take_backup, 1000)
 
   def get(id), do: via_tuple(id, &GenServer.call(&1, :get))
 
-  def add_stock(%Stock{} = stock, id), do: via_tuple(id, &GenServer.cast(&1, {:add_stock, stock}))
+  def add_asset(%Asset{} = asset, id), do: via_tuple(id, &GenServer.cast(&1, {:add_asset, asset}))
 
   def set_alert(%Alert{} = alert, id),
     do: via_tuple(id, &GenServer.cast(&1, {:set_alert, alert}))
 
   def get_alerts(id), do: via_tuple(id, &GenServer.call(&1, :get_alerts))
 
-  def update(id), do: via_tuple(id, &GenServer.cast(&1, :update))
-
   def live(id), do: via_tuple(id, &GenServer.cast(&1, :live))
 
-  def remove_alert(id, stock_id),
-    do: via_tuple(id, &GenServer.cast(&1, {:remove_alert, stock_id}))
+  def remove_alert(id, asset_name),
+    do: via_tuple(id, &GenServer.cast(&1, {:remove_alert, asset_name}))
 
-  def delete_stock(id, stock_id),
-    do: via_tuple(id, &GenServer.cast(&1, {:delete_stock, stock_id}))
+  def delete_asset(id, asset_name),
+    do: via_tuple(id, &GenServer.cast(&1, {:delete_asset, asset_name}))
 
   def destroy(id), do: via_tuple(id, &GenServer.call(&1, :destroy))
 
