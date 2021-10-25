@@ -20,7 +20,6 @@ config :portfolio_tracker, :crypto,
 
 config :portfolio_tracker,
   backup_path: "./backup/",
-  help_file: "./resource/help.md",
   bot_client: PortfolioTracker.Bot.TelegramClient
 
 import_config "#{Mix.env()}.exs"

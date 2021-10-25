@@ -99,10 +99,7 @@ defmodule PortfolioTracker.Bot.MessageHandler do
 
   def handle(:delete_asset, _, _), do: {:error, :missing_parameter}
 
-  def handle(:help, _, _) do
-    {:ok, content} = File.read(Application.get_env(:portfolio_tracker, :help_file))
-    {:ok, {content, [parse_mode: :markdown]}}
-  end
+  def handle(:help, _, _), do: :help
 
   def handle(:start, args, from), do: handle(:help, args, from)
 
