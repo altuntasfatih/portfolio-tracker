@@ -174,7 +174,15 @@ defmodule PortfolioTracker.Tracker do
 
   def get(id), do: via_tuple(id, &GenServer.call(&1, :get))
 
-  def add_asset(%Asset{} = asset, id), do: via_tuple(id, &GenServer.cast(&1, {:add_asset, asset}))
+  def add_asset(%Asset{type: :crypto} = asset, name) do
+    case @crypto_api.look_up(name) do
+      {:ok, id} -> via_tuple(id, &GenServer.cast(&1, {:add_asset, asset}))
+      {:error, err} -> {:error, err}
+    end
+  end
+
+  def add_asset(%Asset{type: :bist} = asset, id),
+    do: via_tuple(id, &GenServer.cast(&1, {:add_asset, asset}))
 
   def set_alert(%Alert{} = alert, id),
     do: via_tuple(id, &GenServer.cast(&1, {:set_alert, alert}))

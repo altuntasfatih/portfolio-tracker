@@ -7,7 +7,7 @@ defmodule Portfolio do
             value: 0.0,
             rate: 0.0,
             alerts: [],
-            last_update_time: nil
+            time: nil
 
   @type t :: %Portfolio{
           id: String.t(),
@@ -16,7 +16,7 @@ defmodule Portfolio do
           value: float(),
           rate: float(),
           alerts: [Alert.t()],
-          last_update_time: any()
+          time: any()
         }
 
   def new(id), do: %Portfolio{id: id}
@@ -58,7 +58,7 @@ defmodule Portfolio do
   def update(%Portfolio{} = portfolio, %{} = new_assets) do
     Map.put(portfolio, :assets, new_assets)
     |> calculate()
-    |> Map.put(:update_time, current_time())
+    |> Map.put(:time, current_time())
   end
 
   defp calculate(%Portfolio{assets: assets} = p) do

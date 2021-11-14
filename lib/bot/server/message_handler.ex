@@ -20,7 +20,7 @@ defmodule PortfolioTracker.Bot.MessageHandler do
   def handle_message(%{from: from} = message) do
     parse(message.text)
     |> handle(from)
-    |> View.to_string()
+    |> View.to_str()
     |> send_reply(from.id)
   end
 
@@ -48,20 +48,20 @@ defmodule PortfolioTracker.Bot.MessageHandler do
   def handle(:get, _, from) do
     case Tracker.get(from.id) do
       {:error, err} -> {:error, err}
-      resp -> View.to_string(resp, :short)
+      resp -> View.to_str(resp, :short)
     end
   end
 
   def handle(:get_detail, _, from) do
     case Tracker.get(from.id) do
       {:error, err} -> {:error, err}
-      resp -> View.to_string(resp, :long)
+      resp -> View.to_str(resp, :long)
     end
   end
 
   def handle(:live, _, from), do: Tracker.live(from.id)
   def handle(:destroy, _, from), do: Tracker.destroy(from.id)
-  def handle(:get_asset_types, _,_from), do: Asset.get_asset_types()
+  def handle(:get_asset_types, _, _from), do: Asset.get_asset_types()
 
   def handle(:add_asset, [name, type, count, price], from) do
     with {count, _} <- Float.parse(count),

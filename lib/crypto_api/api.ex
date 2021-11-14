@@ -3,4 +3,7 @@ defmodule PortfolioTracker.Crypto.Api do
 
   @callback get_live_prices(list()) ::
               {:error, any()} | {:ok, %{String.t() => CryptoPrice.t()}} | any
+
+  @callback look_up(String.t()) ::
+              {:error, any()} | {:ok, String.t()}
 end
