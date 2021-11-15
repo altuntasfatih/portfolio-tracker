@@ -21,7 +21,7 @@ defmodule Asset do
         }
 
   @spec new(String.t(), assetype(), float(), float()) :: Asset.t()
-  def new(name, type, total, price) do
+  def new(name, type, total, price) when is_atom(type) do
     value = (total * price) |> Util.round_ceil()
 
     %Asset{

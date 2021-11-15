@@ -7,9 +7,9 @@ defmodule PortfolioTracker.Crypto.CoinGeckoApi do
   @url Application.get_env(:portfolio_tracker, :crypto)[:coin_gecko_api_url]
 
   @impl true
-  @spec get_live_prices(maybe_improper_list) ::
+  @spec get_price(maybe_improper_list) ::
           {:error, HTTPoison.Error.t()} | {:ok, %{String.t() => CryptoPrice.t()}}
-  def get_live_prices(coin_list) when is_list(coin_list) do
+  def get_price(coin_list) when is_list(coin_list) do
     headers = [
       accept: "Application/json; Charset=utf-8",
       ContentType: "application/json"

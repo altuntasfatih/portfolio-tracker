@@ -23,7 +23,7 @@ defmodule PortfolioTracker.Bist.MockApi do
   def stop(pid), do: Agent.stop(pid)
 
   @impl true
-  def get_live_prices(_) do
+  def get_price(_) do
     {:ok, pop()}
   end
 end
