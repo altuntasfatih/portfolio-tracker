@@ -1,5 +1,5 @@
 defmodule PortfolioTracker.View do
-  @messages_path "./lib/view/messages"
+  @messages_path "./lib/views/templates"
 
   @spec to_str(
           %{:__struct__ => Portfolio | Asset, :rate => any, :value => any, optional(any) => any},
@@ -36,7 +36,7 @@ defmodule PortfolioTracker.View do
   end
 
   def to_str(%Portfolio{} = p, :long) do
-    File.read!("./lib/view/messages/portfolio_long.mustache")
+    File.read!(@messages_path <> "/portfolio_long.mustache")
     |> Mustache.render(%{
       value: p.value,
       cost: p.cost,

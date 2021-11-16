@@ -4,14 +4,14 @@ defmodule PortfolioTracker.Tracker do
   """
   use GenServer
   alias PortfolioTracker.Bot.MessageSender
-  alias PortfolioTracker.{Crypto, Bist, State}
+  alias PortfolioTracker.{Crypto, Bist, Repo}
 
   def start_link(%Portfolio{} = state) do
     GenServer.start_link(__MODULE__, state, name: {:global, {state.id, __MODULE__}})
   end
 
   def start_link(id) do
-    State.get(id)
+    Repo.get(id)
     |> start_link()
   end
 
@@ -99,7 +99,7 @@ defmodule PortfolioTracker.Tracker do
 
   @impl true
   def handle_info(:take_backup, state) do
-    State.save(state.id, state)
+    Repo.save(state.id, state)
     {:noreply, state}
   end
 
@@ -130,7 +130,7 @@ defmodule PortfolioTracker.Tracker do
     {hit_list, not_hit_list}
   end
 
-  defp update_portfolio_with_live(%Portfolio{assets: assets} = portfolio) do
+  def update_portfolio_with_live(%Portfolio{assets: assets} = portfolio) do
     assets =
       split_assets_by_type(assets)
       |> Enum.flat_map(&update_asset_by_type(&1))
@@ -139,12 +139,12 @@ defmodule PortfolioTracker.Tracker do
     Portfolio.update(portfolio, assets)
   end
 
-  defp split_assets_by_type(%{} = assets) do
+  def split_assets_by_type(%{} = assets) do
     Map.values(assets)
     |> Enum.chunk_by(fn a -> a.type end)
   end
 
-  defp update_asset_by_type([%Asset{type: :crypto} | _] = cryptos) do
+  def update_asset_by_type([%Asset{type: :crypto} | _] = cryptos) do
     {:ok, current_prices} =
       Enum.map(cryptos, fn c -> c.name end)
       |> Crypto.Api.get_price()
@@ -157,7 +157,7 @@ defmodule PortfolioTracker.Tracker do
     Enum.map(cryptos, &calculate_asset(&1, get_price.(&1.name)))
   end
 
-  defp update_asset_by_type([%Asset{type: :bist} | _] = stocks) do
+  def update_asset_by_type([%Asset{type: :bist} | _] = stocks) do
     {:ok, current_prices} =
       Enum.map(stocks, fn c -> c.name end)
       |> Bist.Api.get_price()

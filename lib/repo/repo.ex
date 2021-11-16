@@ -1,4 +1,4 @@
-defmodule PortfolioTracker.State do
+defmodule PortfolioTracker.Repo do
   require Logger
 
   @backup_path Application.get_env(:portfolio_tracker, :backup_path)

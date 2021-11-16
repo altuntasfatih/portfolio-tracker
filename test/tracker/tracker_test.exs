@@ -72,7 +72,7 @@ defmodule PortfolioTracker.TrackerTest do
     |> expect(:look_up, fn "btc" -> {:ok, "bitcoin"} end)
 
     PortfolioTracker.CryptoMock
-    |> expect(:get_price, fn [btc] ->
+    |> expect(:get_price, fn ["bitcoin"] ->
       {:ok, %{"bitcoin" => %{name: "bitcoin", currency: "usd", price: 11.00}}}
     end)
 
