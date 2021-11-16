@@ -57,7 +57,7 @@ defmodule PortfolioTracker.TrackerTest do
     assert get(pid) == @portfolio
   end
 
-  test "it should hndle live message", %{pid: pid} do
+  test "it should handle live message", %{pid: pid} do
     asset = Asset.new("AVISA", :bist, 10, 10.0)
     asset1 = Asset.new("TUPRS", :bist, 10, 10.0)
     asset2 = Asset.new("btc", :crypto, 10, 10.0)
@@ -65,10 +65,7 @@ defmodule PortfolioTracker.TrackerTest do
     PortfolioTracker.BistMock
     |> expect(:get_price, fn ["AVISA", "TUPRS"] ->
       {:ok,
-       [
-         %{name: "AVISA", price: 11.00},
-         %{name: "TUPRS", price: 12.00}
-       ]}
+       %{"AVISA" => %{name: "AVISA", price: 11.00}, "TUPRS" => %{name: "TUPRS", price: 12.00}}}
     end)
 
     PortfolioTracker.CryptoMock
@@ -84,7 +81,42 @@ defmodule PortfolioTracker.TrackerTest do
     assert add(pid, asset2) == :ok
     assert live(pid) == :ok
 
-    assert get(pid) == @portfolio
+    portfolio = get(pid)
+
+    assert portfolio.assets == %{
+             "AVISA" => %Asset{
+               cost: 100.0,
+               cost_price: 10.0,
+               name: "AVISA",
+               price: 11.0,
+               rate: 10.0,
+               total: 10,
+               type: :bist,
+               value: 110.0
+             },
+             "TUPRS" => %Asset{
+               cost: 100.0,
+               cost_price: 10.0,
+               name: "TUPRS",
+               price: 12.0,
+               rate: 20.0,
+               total: 10,
+               type: :bist,
+               value: 120.0
+             },
+             "bitcoin" => %Asset{
+               cost: 100.0,
+               cost_price: 10.0,
+               name: "bitcoin",
+               price: 11.0,
+               rate: 10.0,
+               total: 10,
+               type: :crypto,
+               value: 110.0
+             }
+           }
+
+    assert portfolio.value == 340.0
   end
 
   test "it should handle add_alert message", %{pid: pid} do
