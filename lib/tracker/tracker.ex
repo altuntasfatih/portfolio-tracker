@@ -3,27 +3,16 @@ defmodule PortfolioTracker.Tracker do
   Documentation for `PortfolioTracker`.
   """
   use GenServer
-  require Logger
   alias PortfolioTracker.Bot.MessageSender
-  alias PortfolioTracker.Crypto
-
-  @bist_api Application.get_env(:portfolio_tracker, :bist)[:api]
-  @backup_path Application.get_env(:portfolio_tracker, :backup_path)
+  alias PortfolioTracker.{Crypto, Bist, State}
 
   def start_link(%Portfolio{} = state) do
     GenServer.start_link(__MODULE__, state, name: {:global, {state.id, __MODULE__}})
   end
 
   def start_link(id) do
-    load_create_state(id)
+    State.get(id)
     |> start_link()
-  end
-
-  defp load_create_state(id) do
-    case File.read(@backup_path <> "#{id}") do
-      {:ok, binary} -> :erlang.binary_to_term(binary)
-      _ -> Portfolio.new(id)
-    end
   end
 
   @impl true
@@ -110,13 +99,7 @@ defmodule PortfolioTracker.Tracker do
 
   @impl true
   def handle_info(:take_backup, state) do
-    binary = :erlang.term_to_binary(state)
-
-    case File.write(@backup_path <> "#{state.id}", binary) do
-      :ok -> Logger.info("State was succefully back up")
-      {:error, err} -> Logger.error("Back up failed err -> #{err}")
-    end
-
+    State.save(state.id, state)
     {:noreply, state}
   end
 
@@ -131,7 +114,7 @@ defmodule PortfolioTracker.Tracker do
 
   def check_alerts_condition(alerts) do
     {:ok, current_prices} =
-      Enum.map(alerts, fn alert -> alert.asset_name end) |> @bist_api.get_price()
+      Enum.map(alerts, fn alert -> alert.asset_name end) |> Bist.Api.get_price()
 
     asset_current_prices =
       Enum.reduce(current_prices, %{}, fn asset, acc ->
@@ -147,7 +130,7 @@ defmodule PortfolioTracker.Tracker do
     {hit_list, not_hit_list}
   end
 
-  def update_portfolio_with_live(%Portfolio{assets: assets} = portfolio) do
+  defp update_portfolio_with_live(%Portfolio{assets: assets} = portfolio) do
     assets =
       split_assets_by_type(assets)
       |> Enum.flat_map(&update_asset_by_type(&1))
@@ -156,12 +139,12 @@ defmodule PortfolioTracker.Tracker do
     Portfolio.update(portfolio, assets)
   end
 
-  def split_assets_by_type(%{} = assets) do
+  defp split_assets_by_type(%{} = assets) do
     Map.values(assets)
     |> Enum.chunk_by(fn a -> a.type end)
   end
 
-  def update_asset_by_type([%Asset{type: :crypto} | _] = cryptos) do
+  defp update_asset_by_type([%Asset{type: :crypto} | _] = cryptos) do
     {:ok, current_prices} =
       Enum.map(cryptos, fn c -> c.name end)
       |> Crypto.Api.get_price()
@@ -174,10 +157,10 @@ defmodule PortfolioTracker.Tracker do
     Enum.map(cryptos, &calculate_asset(&1, get_price.(&1.name)))
   end
 
-  def update_asset_by_type([%Asset{type: :bist} | _] = stocks) do
+  defp update_asset_by_type([%Asset{type: :bist} | _] = stocks) do
     {:ok, current_prices} =
       Enum.map(stocks, fn c -> c.name end)
-      |> @bist_api.get_price()
+      |> Bist.Api.get_price()
 
     get_price = fn name ->
       stock = Map.get(current_prices, name)
