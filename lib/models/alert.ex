@@ -1,21 +1,24 @@
 defmodule Alert do
   defstruct type: nil,
             asset_name: "",
+            asset_type: nil,
             price: 0.0,
             function: nil
 
   @type t :: %Alert{
           type: atom(),
           asset_name: String.t(),
+          asset_type: Asset.type(),
           price: float(),
           function: function()
         }
 
-  @spec new(:lower_limit | :upper_limit, String.t(), float()) :: Alert.t()
-  def new(:lower_limit, asset_name, price) do
+  @spec new(:lower_limit | :upper_limit, String.t(), Asset.type(), float()) :: Alert.t()
+  def new(:lower_limit, asset_name, asset_type, price) when is_atom(asset_type) do
     %Alert{
       type: :lower_limit,
       asset_name: asset_name,
+      asset_type: asset_type,
       price: price,
       function: fn current_price, alert_price ->
         current_price <= alert_price
@@ -23,10 +26,11 @@ defmodule Alert do
     }
   end
 
-  def new(:upper_limit, asset_name, price) do
+  def new(:upper_limit, asset_name, asset_type, price) when is_atom(asset_type) do
     %Alert{
       type: :upper_limit,
       asset_name: asset_name,
+      asset_type: asset_type,
       price: price,
       function: fn current_price, alert_price ->
         current_price >= alert_price

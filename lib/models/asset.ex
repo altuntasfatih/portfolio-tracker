@@ -8,10 +8,10 @@ defmodule Asset do
             value: 0.0,
             rate: 0.0
 
-  @type assetype :: :crypto | :bist
+  @type type :: :crypto | :bist
   @type t :: %Asset{
           name: String.t(),
-          type: assetype(),
+          type: type(),
           total: float(),
           cost_price: float(),
           cost: float(),
@@ -20,7 +20,7 @@ defmodule Asset do
           rate: float()
         }
 
-  @spec new(String.t(), assetype(), float(), float()) :: Asset.t()
+  @spec new(String.t(), type(), float(), float()) :: Asset.t()
   def new(name, type, total, price) when is_atom(type) do
     value = (total * price) |> Util.round_ceil()
 
@@ -50,7 +50,7 @@ defmodule Asset do
 
   def get_asset_types(), do: [:crypto, :bist]
 
-  @spec parse_type(String.t()) :: {:ok, assetype()} | {:error, any()}
+  @spec parse_type(String.t()) :: {:ok, type()} | {:error, any()}
   def parse_type("crypto"), do: {:ok, :crypto}
   def parse_type("bist"), do: {:ok, :bist}
   def parse_type(_), do: {:error, "invlaid asset type"}

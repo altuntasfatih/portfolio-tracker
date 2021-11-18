@@ -76,10 +76,11 @@ defmodule PortfolioTracker.Bot.MessageHandler do
 
   def handle(:add_asset, _, _), do: {:error, :missing_parameter}
 
-  def handle(:set_alert, [type, asset_name, target_price], from) do
+  def handle(:set_alert, [type, asset_name,asset_type, target_price], from) do
     with {target_price, _} <- Float.parse(target_price),
-         type <- String.to_atom(type) do
-      Alert.new(type, asset_name, target_price)
+         alertType <- String.to_atom(type),
+         assetType <- String.to_atom(asset_type) do
+      Alert.new(alertType, asset_name,assetType, target_price)
       |> Tracker.set_alert(from.id)
     else
       _ -> {:error, :args_parse_error}

@@ -120,13 +120,13 @@ defmodule PortfolioTracker.TrackerTest do
   end
 
   test "it should handle add_alert message", %{pid: pid} do
-    alert = Alert.new(:lower_limit, "AVISA", 16.0)
+    alert = Alert.new(:lower_limit, "AVISA", :bist, 16.0)
     assert set_alert(pid, alert) == :ok
     assert get_alerts(pid) == [alert]
   end
 
   test "it should handle delete_alert message", %{pid: pid} do
-    alert = Alert.new(:lower_limit, "AVISA", 16.0)
+    alert = Alert.new(:lower_limit, "AVISA", :bist, 16.0)
     assert set_alert(pid, alert) == :ok
     assert remove_alert(pid, alert.asset_name) == :ok
     assert get_alerts(pid) == []
@@ -143,17 +143,17 @@ defmodule PortfolioTracker.TrackerTest do
        ]}
     end)
 
-    alert = Alert.new(:lower_limit, "AVISA", 16.0)
-    alert2 = Alert.new(:lower_limit, "TUPRS", 100.0)
-    alert3 = Alert.new(:upper_limit, "KRDMD", 50.0)
+    alert = Alert.new(:lower_limit, "AVISA", :bist, 16.0)
+    alert2 = Alert.new(:lower_limit, "TUPRS", :bist, 100.0)
+    alert3 = Alert.new(:upper_limit, "KRDMD", :bist, 50.0)
 
     assert Tracker.check_alerts_condition([alert, alert2, alert3]) == {[alert], [alert2, alert3]}
   end
 
   test "it should handle check alerts message", %{pid: pid} do
-    hit_alert = Alert.new(:lower_limit, "AVISA", 16.0)
-    not_hit_alert_ = Alert.new(:lower_limit, "TUPRS", 100.0)
-    not_hit_alert_2 = Alert.new(:upper_limit, "KRDMD", 50.0)
+    hit_alert = Alert.new(:lower_limit, "AVISA", :bist, 16.0)
+    not_hit_alert_ = Alert.new(:lower_limit, "TUPRS", :bist, 100.0)
+    not_hit_alert_2 = Alert.new(:upper_limit, "KRDMD", :bist, 50.0)
 
     assert set_alert(pid, hit_alert) == :ok
     assert set_alert(pid, not_hit_alert_) == :ok
