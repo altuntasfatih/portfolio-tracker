@@ -3,30 +3,11 @@
 It is a Telegram bot that follows asset's prices according to your portfolio.
 Also it supports custom alert conditions for your thresholds. When condition hits, it sends a notification to your telegram acount.
 
-Currently it supports two types of asset. These are :bist(a.k.a The Borsa İstanbul) and :crypto(Crypto currency).
+Currently it supports two types of asset which  are :bist(a.k.a The Borsa İstanbul) and :crypto(Crypto currency).
 
-For BIST current price of stocks are fed by [collect_api](https://collectapi.com/tr/api/economy/altin-doviz-ve-borsa-api) free version :)
+To fetch live price of Bist's stocks the [Collect_Api](https://collectapi.com/tr/api/economy/altin-doviz-ve-borsa-api) is using.
 
-Behavior for Exchange Api
-```
-defmodule PortfolioTracker.ExchangeApi do
-  alias PortfolioTracker.ExchangeApi.Models.StockInfo
-
-  @callback get_live_prices() :: {:ok, [StockInfo.t()]} | any
-  @callback get_live_prices(list()) :: {:ok, [StockInfo.t()]} | any
-end
-```
-You can set config to decide which exchange api runs on which environment.
-```
-import Config
-
-config :portfolio_tracker,
-  exchange_api: PortfolioTracker.CollectApi,
-
-import_config "dev.secret.exs"
-
-```
-
+To fetch live price of Cryptocurrencies the [CoinGecko](https://www.coingecko.com/en/api) is using.
 
 ## Bot
 [<img width="398" alt="Screen Shot 2021-04-30 at 22 30 11" src="https://user-images.githubusercontent.com/13722649/116748942-daaa8280-aa08-11eb-8502-43f1bda81e2d.png">](https://t.me/foter_portfolio_tracker_bot)
