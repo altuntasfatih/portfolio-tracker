@@ -132,45 +132,40 @@ defmodule PortfolioTracker.TrackerTest do
     assert get_alerts(pid) == []
   end
 
-  test "it should split alerts by condition hit", _ do
-    PortfolioTracker.BistMock
-    |> expect(:get_price, fn ["AVISA", "TUPRS", "KRDMD"] ->
-      {:ok,
-       [
-         %{name: "AVISA", price: 15.33},
-         %{name: "TUPRS", price: 120.60},
-         %{name: "KRDMD", price: 20.60}
-       ]}
-    end)
-
-    alert = Alert.new(:lower_limit, "AVISA", :bist, 16.0)
-    alert2 = Alert.new(:lower_limit, "TUPRS", :bist, 100.0)
-    alert3 = Alert.new(:upper_limit, "KRDMD", :bist, 50.0)
-
-    assert Tracker.check_alerts_condition([alert, alert2, alert3]) == {[alert], [alert2, alert3]}
-  end
-
   test "it should handle check alerts message", %{pid: pid} do
     hit_alert = Alert.new(:lower_limit, "AVISA", :bist, 16.0)
-    not_hit_alert_ = Alert.new(:lower_limit, "TUPRS", :bist, 100.0)
-    not_hit_alert_2 = Alert.new(:upper_limit, "KRDMD", :bist, 50.0)
+    hit_alert_2 = Alert.new(:lower_limit, "TUPRS", :bist, 100.0)
+    hit_alert_3 = Alert.new(:upper_limit, "bitcoin", :crypto, 600.0)
+    not_hit_alert = Alert.new(:upper_limit, "KRDMD", :bist, 50.0)
+    not_hit_alert2 = Alert.new(:lower_limit, "eth", :crypto, 190.0)
 
     assert set_alert(pid, hit_alert) == :ok
-    assert set_alert(pid, not_hit_alert_) == :ok
-    assert set_alert(pid, not_hit_alert_2) == :ok
+    assert set_alert(pid, hit_alert_2) == :ok
+    assert set_alert(pid, hit_alert_3) == :ok
+    assert set_alert(pid, not_hit_alert) == :ok
+    assert set_alert(pid, not_hit_alert2) == :ok
 
     PortfolioTracker.BistMock
     |> expect(:get_price, fn _ ->
       {:ok,
-       [
-         %{name: "AVISA", price: 15.33},
-         %{name: "TUPRS", price: 120.60},
-         %{name: "KRDMD", price: 20.60}
-       ]}
+       %{
+         "AVISA" => %{name: "AVISA", price: 15.33},
+         "TUPRS" => %{name: "TUPRS", price: 90.60},
+         "KRDMD" => %{name: "KRDMD", price: 20.60}
+       }}
+    end)
+
+    PortfolioTracker.CryptoMock
+    |> expect(:get_price, fn ["bitcoin", "eth"] ->
+      {:ok,
+       %{
+         "bitcoin" => %{name: "bitcoin", currency: "usd", price: 650.00},
+         "eth" => %{name: "eth", currency: "usd", price: 210.00}
+       }}
     end)
 
     assert check_alerts(pid) == :ok
-    assert get_alerts(pid) == [not_hit_alert_, not_hit_alert_2]
+    assert get_alerts(pid) == [not_hit_alert2, not_hit_alert]
   end
 
   defp get(pid), do: GenServer.call(pid, :get)

@@ -56,7 +56,7 @@ defmodule PortfolioTracker.View do
     |> Mustache.render(%{
       name: alert.asset_name,
       type: Atom.to_string(alert.type),
-      target: alert.price
+      target: alert.target
     })
   end
 

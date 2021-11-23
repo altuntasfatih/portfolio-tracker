@@ -2,15 +2,15 @@ defmodule Alert do
   defstruct type: nil,
             asset_name: "",
             asset_type: nil,
-            price: 0.0,
-            function: nil
+            target: 0.0,
+            condition: nil
 
   @type t :: %Alert{
           type: atom(),
           asset_name: String.t(),
           asset_type: Asset.type(),
-          price: float(),
-          function: function()
+          target: float(),
+          condition: function()
         }
 
   @spec new(:lower_limit | :upper_limit, String.t(), Asset.type(), float()) :: Alert.t()
@@ -19,9 +19,9 @@ defmodule Alert do
       type: :lower_limit,
       asset_name: asset_name,
       asset_type: asset_type,
-      price: price,
-      function: fn current_price, alert_price ->
-        current_price <= alert_price
+      target: price,
+      condition: fn current_price ->
+        current_price <= price
       end
     }
   end
@@ -31,15 +31,16 @@ defmodule Alert do
       type: :upper_limit,
       asset_name: asset_name,
       asset_type: asset_type,
-      price: price,
-      function: fn current_price, alert_price ->
-        current_price >= alert_price
+      target: price,
+      condition: fn current_price ->
+        current_price >= price
       end
     }
   end
 
   @spec is_hit(Alert.t(), float()) :: boolean()
-  def is_hit(%Alert{} = alert, current_price) do
-    alert.function.(current_price, alert.price)
-  end
+  def is_hit(%Alert{} = alert, current_price) when is_number(current_price),
+    do: alert.condition.(current_price)
+
+  def is_hit(%Alert{} = _, _), do: false
 end

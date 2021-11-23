@@ -112,60 +112,76 @@ defmodule PortfolioTracker.Tracker do
     :ok = MessageSender.send_message(message, to)
   end
 
-  def check_alerts_condition(alerts) do
-    {:ok, current_prices} =
-      Enum.map(alerts, fn alert -> alert.asset_name end) |> Bist.Api.get_price()
+  def check_alerts([%Alert{asset_type: :crypto} | _] = alerts) do
+    current_price =
+      Enum.map(alerts, fn a -> a.asset_name end)
+      |> get_crypto_prices()
 
-    asset_current_prices =
-      Enum.reduce(current_prices, %{}, fn asset, acc ->
-        Map.put(acc, asset.name, asset.price)
-      end)
-
-    {hit_list, not_hit_list} =
-      alerts
-      |> Enum.split_with(fn alert ->
-        Alert.is_hit(alert, Map.get(asset_current_prices, alert.asset_name))
-      end)
-
-    {hit_list, not_hit_list}
+    alerts
+    |> Enum.split_with(fn alert ->
+      Alert.is_hit(alert, current_price.(alert.asset_name))
+    end)
   end
 
-  def update_portfolio_with_live(%Portfolio{assets: assets} = portfolio) do
+  def check_alerts([%Alert{asset_type: :bist} | _] = alerts) do
+    current_price =
+      Enum.map(alerts, fn a -> a.asset_name end)
+      |> get_bist_prices()
+
+    alerts
+    |> Enum.split_with(fn alert ->
+      Alert.is_hit(alert, current_price.(alert.asset_name))
+    end)
+  end
+
+  def check_alerts_condition(alerts) do
+    Enum.chunk_by(alerts, fn a -> a.asset_type end)
+    |> Enum.map(&check_alerts(&1))
+    |> Enum.reduce({[], []}, fn {hit_list, not_hit_list}, {hit_acc, not_hit_acc} ->
+      {hit_list ++ hit_acc, not_hit_list ++ not_hit_acc}
+    end)
+  end
+
+  def get_crypto_prices(asset_names) do
+    {:ok, current_prices} = asset_names |> Crypto.Api.get_price()
+
+    fn name ->
+      crypto = Map.get(current_prices, name)
+      if crypto != nil, do: crypto.price, else: nil
+    end
+  end
+
+  def get_bist_prices(asset_names) do
+    {:ok, current_prices} = asset_names |> Bist.Api.get_price()
+
+    fn name ->
+      stock = Map.get(current_prices, name)
+      if stock != nil, do: stock.price, else: nil
+    end
+  end
+
+  defp update_portfolio_with_live(%Portfolio{assets: assets} = portfolio) do
     assets =
-      split_assets_by_type(assets)
+      Map.values(assets)
+      |> Enum.chunk_by(fn a -> a.type end)
       |> Enum.flat_map(&update_asset_by_type(&1))
       |> Enum.reduce(%{}, fn asset, acc -> Map.put(acc, asset.name, asset) end)
 
     Portfolio.update(portfolio, assets)
   end
 
-  def split_assets_by_type(%{} = assets) do
-    Map.values(assets)
-    |> Enum.chunk_by(fn a -> a.type end)
-  end
-
-  def update_asset_by_type([%Asset{type: :crypto} | _] = cryptos) do
-    {:ok, current_prices} =
+  defp update_asset_by_type([%Asset{type: :crypto} | _] = cryptos) do
+    get_price =
       Enum.map(cryptos, fn c -> c.name end)
-      |> Crypto.Api.get_price()
-
-    get_price = fn name ->
-      crypto = Map.get(current_prices, name)
-      if crypto != nil, do: crypto.price, else: nil
-    end
+      |> get_crypto_prices()
 
     Enum.map(cryptos, &calculate_asset(&1, get_price.(&1.name)))
   end
 
-  def update_asset_by_type([%Asset{type: :bist} | _] = stocks) do
-    {:ok, current_prices} =
+  defp update_asset_by_type([%Asset{type: :bist} | _] = stocks) do
+    get_price =
       Enum.map(stocks, fn c -> c.name end)
-      |> Bist.Api.get_price()
-
-    get_price = fn name ->
-      stock = Map.get(current_prices, name)
-      if stock != nil, do: stock.price, else: nil
-    end
+      |> get_bist_prices()
 
     Enum.map(stocks, &calculate_asset(&1, get_price.(&1.name)))
   end
