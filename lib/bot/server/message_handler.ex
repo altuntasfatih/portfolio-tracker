@@ -20,7 +20,7 @@ defmodule PortfolioTracker.Bot.MessageHandler do
   def handle_message(%{from: from} = message) do
     parse(message.text)
     |> handle(from)
-    |> View.to_string()
+    |> View.to_str()
     |> send_reply(from.id)
   end
 
@@ -48,20 +48,20 @@ defmodule PortfolioTracker.Bot.MessageHandler do
   def handle(:get, _, from) do
     case Tracker.get(from.id) do
       {:error, err} -> {:error, err}
-      resp -> View.to_string(resp, :short)
+      resp -> View.to_str(resp, :short)
     end
   end
 
   def handle(:get_detail, _, from) do
     case Tracker.get(from.id) do
       {:error, err} -> {:error, err}
-      resp -> View.to_string(resp, :long)
+      resp -> View.to_str(resp, :long)
     end
   end
 
   def handle(:live, _, from), do: Tracker.live(from.id)
   def handle(:destroy, _, from), do: Tracker.destroy(from.id)
-  def handle(:get_asset_types, _,_from), do: Asset.get_asset_types()
+  def handle(:get_asset_types, _, _from), do: Asset.get_asset_types()
 
   def handle(:add_asset, [name, type, count, price], from) do
     with {count, _} <- Float.parse(count),
@@ -76,10 +76,11 @@ defmodule PortfolioTracker.Bot.MessageHandler do
 
   def handle(:add_asset, _, _), do: {:error, :missing_parameter}
 
-  def handle(:set_alert, [type, asset_name, target_price], from) do
+  def handle(:set_alert, [type, asset_name, asset_type, target_price], from) do
     with {target_price, _} <- Float.parse(target_price),
-         type <- String.to_atom(type) do
-      Alert.new(type, asset_name, target_price)
+         alertType <- String.to_atom(type),
+         assetType <- String.to_atom(asset_type) do
+      Alert.new(alertType, asset_name, assetType, target_price)
       |> Tracker.set_alert(from.id)
     else
       _ -> {:error, :args_parse_error}
@@ -99,10 +100,7 @@ defmodule PortfolioTracker.Bot.MessageHandler do
 
   def handle(:delete_asset, _, _), do: {:error, :missing_parameter}
 
-  def handle(:help, _, _) do
-    {:ok, content} = File.read(Application.get_env(:portfolio_tracker, :help_file))
-    {:ok, {content, [parse_mode: :markdown]}}
-  end
+  def handle(:help, _, _), do: :help
 
   def handle(:start, args, from), do: handle(:help, args, from)
 

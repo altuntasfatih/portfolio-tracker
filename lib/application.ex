@@ -23,6 +23,7 @@ defmodule PortfolioTracker.Application do
   defp children_by_env(_) do
     [
       {PortfolioTracker.Supervisor, :ok},
+      {PortfolioTracker.Crypto.CoinGeckoCache,:ok},
       # -1 is offset get last message
       {PortfolioTracker.Bot.Server, -1}
     ]

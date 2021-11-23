@@ -23,9 +23,11 @@ defmodule PortfolioTracker.MixProject do
   defp deps do
     [
       {:httpoison, "~> 1.7.0"},
+      {:mustache, "~> 0.3.0"},
       {:nadia, "~> 0.7.0"},
       {:jason, "~> 1.2"},
-      {:tzdata, "~> 1.1"}
+      {:tzdata, "~> 1.1"},
+      {:mox, "~> 1.0", only: :test}
     ]
   end
 end

@@ -47,14 +47,14 @@ defmodule PortfolioTest do
   end
 
   test "it_should_add_alert_for_asset" do
-    alert = Alert.new(:upper_limit, "A", 20.0)
+    alert = Alert.new(:upper_limit, "A", :crypto, 20.0)
     portfolio = Portfolio.new(@id)
 
     assert Portfolio.add_alert(portfolio, alert).alerts == [alert]
   end
 
   test "it_should_remove_alert" do
-    alert = Alert.new(:upper_limit, "A", 20.0)
+    alert = Alert.new(:upper_limit, "A", :bist, 20.0)
     portfolio = Portfolio.new(@id) |> Portfolio.add_alert(alert)
 
     assert Portfolio.remove_alert(portfolio, alert.asset_name).alerts == []

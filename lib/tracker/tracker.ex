@@ -3,27 +3,16 @@ defmodule PortfolioTracker.Tracker do
   Documentation for `PortfolioTracker`.
   """
   use GenServer
-  require Logger
   alias PortfolioTracker.Bot.MessageSender
-
-  @bist_api Application.get_env(:portfolio_tracker, :bist)[:api]
-  @crypto_api Application.get_env(:portfolio_tracker, :crypto)[:api]
-  @backup_path Application.get_env(:portfolio_tracker, :backup_path)
+  alias PortfolioTracker.{Crypto, Bist, Repo}
 
   def start_link(%Portfolio{} = state) do
     GenServer.start_link(__MODULE__, state, name: {:global, {state.id, __MODULE__}})
   end
 
   def start_link(id) do
-    load_create_state(id)
+    Repo.get(id)
     |> start_link()
-  end
-
-  defp load_create_state(id) do
-    case File.read(@backup_path <> "#{id}") do
-      {:ok, binary} -> :erlang.binary_to_term(binary)
-      _ -> Portfolio.new(id)
-    end
   end
 
   @impl true
@@ -54,7 +43,7 @@ defmodule PortfolioTracker.Tracker do
   @impl true
   def handle_cast(:live, %Portfolio{} = state) do
     new_state = update_portfolio_with_live(state)
-    :ok = MessageSender.send_message(new_state, state.id)
+    send_message(new_state, state.id)
     {:noreply, new_state}
   end
 
@@ -64,7 +53,23 @@ defmodule PortfolioTracker.Tracker do
   end
 
   @impl true
-  def handle_cast({:add_asset, %Asset{} = asset}, state) do
+  def handle_cast({:add_asset, %Asset{type: :crypto, name: name} = asset}, state) do
+    case Crypto.Api.look_up(name) do
+      {:ok, id} ->
+        {:noreply,
+         Portfolio.add_asset(state, %Asset{
+           asset
+           | name: id
+         })}
+
+      err ->
+        send_message(err, state.id)
+        {:noreply, state}
+    end
+  end
+
+  @impl true
+  def handle_cast({:add_asset, %Asset{type: :bist} = asset}, state) do
     {:noreply, Portfolio.add_asset(state, asset)}
   end
 
@@ -94,13 +99,7 @@ defmodule PortfolioTracker.Tracker do
 
   @impl true
   def handle_info(:take_backup, state) do
-    binary = :erlang.term_to_binary(state)
-
-    case File.write(@backup_path <> "#{state.id}", binary) do
-      :ok -> Logger.info("State was succefully back up")
-      {:error, err} -> Logger.error("Back up failed err -> #{err}")
-    end
-
+    Repo.save(state.id, state)
     {:noreply, state}
   end
 
@@ -109,60 +108,80 @@ defmodule PortfolioTracker.Tracker do
     {:stop, :normal, []}
   end
 
-  def check_alerts_condition(alerts) do
-    {:ok, current_prices} =
-      Enum.map(alerts, fn alert -> alert.asset_name end) |> @bist_api.get_live_prices()
-
-    asset_current_prices =
-      Enum.reduce(current_prices, %{}, fn asset, acc ->
-        Map.put(acc, asset.name, asset.price)
-      end)
-
-    {hit_list, not_hit_list} =
-      alerts
-      |> Enum.split_with(fn alert ->
-        Alert.is_hit(alert, Map.get(asset_current_prices, alert.asset_name))
-      end)
-
-    {hit_list, not_hit_list}
+  defp send_message(message, to) do
+    :ok = MessageSender.send_message(message, to)
   end
 
-  def update_portfolio_with_live(%Portfolio{assets: assets} = portfolio) do
+  def check_alerts([%Alert{asset_type: :crypto} | _] = alerts) do
+    current_price =
+      Enum.map(alerts, fn a -> a.asset_name end)
+      |> get_crypto_prices()
+
+    alerts
+    |> Enum.split_with(fn alert ->
+      Alert.is_hit(alert, current_price.(alert.asset_name))
+    end)
+  end
+
+  def check_alerts([%Alert{asset_type: :bist} | _] = alerts) do
+    current_price =
+      Enum.map(alerts, fn a -> a.asset_name end)
+      |> get_bist_prices()
+
+    alerts
+    |> Enum.split_with(fn alert ->
+      Alert.is_hit(alert, current_price.(alert.asset_name))
+    end)
+  end
+
+  def check_alerts_condition(alerts) do
+    Enum.chunk_by(alerts, fn a -> a.asset_type end)
+    |> Enum.map(&check_alerts(&1))
+    |> Enum.reduce({[], []}, fn {hit_list, not_hit_list}, {hit_acc, not_hit_acc} ->
+      {hit_list ++ hit_acc, not_hit_list ++ not_hit_acc}
+    end)
+  end
+
+  def get_crypto_prices(asset_names) do
+    {:ok, current_prices} = asset_names |> Crypto.Api.get_price()
+
+    fn name ->
+      crypto = Map.get(current_prices, name)
+      if crypto != nil, do: crypto.price, else: nil
+    end
+  end
+
+  def get_bist_prices(asset_names) do
+    {:ok, current_prices} = asset_names |> Bist.Api.get_price()
+
+    fn name ->
+      stock = Map.get(current_prices, name)
+      if stock != nil, do: stock.price, else: nil
+    end
+  end
+
+  defp update_portfolio_with_live(%Portfolio{assets: assets} = portfolio) do
     assets =
-      split_assets_by_type(assets)
+      Map.values(assets)
+      |> Enum.chunk_by(fn a -> a.type end)
       |> Enum.flat_map(&update_asset_by_type(&1))
       |> Enum.reduce(%{}, fn asset, acc -> Map.put(acc, asset.name, asset) end)
 
     Portfolio.update(portfolio, assets)
   end
 
-  def split_assets_by_type(%{} = assets) do
-    Map.values(assets)
-    |> Enum.chunk_by(fn a -> a.type end)
-  end
-
-  def update_asset_by_type([%Asset{type: :crypto} | _] = cryptos) do
-    {:ok, current_prices} =
+  defp update_asset_by_type([%Asset{type: :crypto} | _] = cryptos) do
+    get_price =
       Enum.map(cryptos, fn c -> c.name end)
-      |> @crypto_api.get_live_prices()
-
-    get_price = fn name ->
-      crypto = Map.get(current_prices, name)
-      if crypto != nil, do: crypto.price, else: nil
-    end
+      |> get_crypto_prices()
 
     Enum.map(cryptos, &calculate_asset(&1, get_price.(&1.name)))
   end
 
-  def update_asset_by_type([%Asset{type: :bist} | _] = stocks) do
-    {:ok, current_prices} =
+  defp update_asset_by_type([%Asset{type: :bist} | _] = stocks) do
+    get_price =
       Enum.map(stocks, fn c -> c.name end)
-      |> @bist_api.get_live_prices()
-
-    get_price = fn name ->
-      stock = Map.get(current_prices, name)
-      if stock != nil, do: stock.price, else: nil
-    end
+      |> get_bist_prices()
 
     Enum.map(stocks, &calculate_asset(&1, get_price.(&1.name)))
   end
@@ -174,7 +193,8 @@ defmodule PortfolioTracker.Tracker do
 
   def get(id), do: via_tuple(id, &GenServer.call(&1, :get))
 
-  def add_asset(%Asset{} = asset, id), do: via_tuple(id, &GenServer.cast(&1, {:add_asset, asset}))
+  def add_asset(%Asset{} = asset, id),
+    do: via_tuple(id, &GenServer.cast(&1, {:add_asset, asset}))
 
   def set_alert(%Alert{} = alert, id),
     do: via_tuple(id, &GenServer.cast(&1, {:set_alert, alert}))

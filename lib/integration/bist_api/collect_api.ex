@@ -6,9 +6,9 @@ defmodule PortfolioTracker.Bist.CollectApi do
   @url Application.get_env(:portfolio_tracker, :bist)[:collect_api_url]
 
   @impl true
-  @spec get_live_prices(list()) ::
+  @spec get_price(list()) ::
           {:error, HTTPoison.Error.t()} | {:ok, %{String.t() => StockInfo.t()}}
-  def get_live_prices(stock_list) do
+  def get_price(stock_list) do
     headers = [
       authorization: @token,
       accept: "Application/json; Charset=utf-8",
