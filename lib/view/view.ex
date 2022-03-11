@@ -1,5 +1,5 @@
 defmodule PortfolioTracker.View do
-  @messages_path "./lib/views/templates"
+  @messages_path "./lib/view/templates"
 
   @spec to_str(
           %{:__struct__ => Portfolio | Asset, :rate => any, :value => any, optional(any) => any},
@@ -44,7 +44,7 @@ defmodule PortfolioTracker.View do
       lime: p.time,
       assets:
         Enum.reduce(get_assets(p), "", fn alert, acc ->
-          acc <> to_str(alert, :long) <> "\n"
+          acc <> to_str(alert, :long) <> "\n\n"
         end)
     })
   end

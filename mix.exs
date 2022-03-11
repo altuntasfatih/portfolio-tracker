@@ -27,6 +27,7 @@ defmodule PortfolioTracker.MixProject do
       {:nadia, "~> 0.7.0"},
       {:jason, "~> 1.2"},
       {:tzdata, "~> 1.1"},
+      {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:mox, "~> 1.0", only: :test}
     ]
   end

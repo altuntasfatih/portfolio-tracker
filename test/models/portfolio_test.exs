@@ -25,8 +25,8 @@ defmodule PortfolioTest do
       |> Portfolio.add_asset(asset3)
       |> Portfolio.add_asset(asset4)
 
-    assert portfolio.value == 10214.46
-    assert portfolio.cost == 10159.16
+    assert portfolio.value == 102_14.46
+    assert portfolio.cost == 101_59.16
     assert portfolio.rate == 0.55
   end
 

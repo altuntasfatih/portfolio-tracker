@@ -4,19 +4,15 @@ defmodule PortfolioTracker.Crypto.CoinGeckoApi do
   alias PortfolioTracker.Crypto.CoinGeckoCache
 
   @currency "usd"
-  @url Application.get_env(:portfolio_tracker, :crypto)[:coin_gecko_api_url]
 
   @impl true
   @spec get_price(maybe_improper_list) ::
           {:error, HTTPoison.Error.t()} | {:ok, %{String.t() => CryptoPrice.t()}}
   def get_price(coin_list) when is_list(coin_list) do
-    headers = [
-      accept: "Application/json; Charset=utf-8",
-      ContentType: "application/json"
-    ]
+    coins = Enum.join(coin_list, ",")
+    url = base_url() <> "/api/v3/simple/price?ids=#{coins}&vs_currencies=#{@currency}"
 
-    build_url_for_coin_prices(coin_list)
-    |> HTTPoison.get(headers)
+    HTTPoison.get(url, headers())
     |> parse()
   end
 
@@ -24,12 +20,8 @@ defmodule PortfolioTracker.Crypto.CoinGeckoApi do
   def look_up(name), do: CoinGeckoCache.look_up(name)
 
   def get_coin_list() do
-    headers = [
-      accept: "Application/json; Charset=utf-8",
-      ContentType: "application/json"
-    ]
-
-    {:ok, response} = "#{@url}/api/v3/coins/list" |> HTTPoison.get(headers)
+    url = base_url() <> "/api/v3/coins/list"
+    {:ok, response} = HTTPoison.get(url, headers())
 
     Jason.decode!(response.body)
     |> Enum.reduce(%{}, fn coin, acc ->
@@ -42,11 +34,6 @@ defmodule PortfolioTracker.Crypto.CoinGeckoApi do
     end)
   end
 
-  defp build_url_for_coin_prices(coins) do
-    coins_query = Enum.join(coins, ",")
-    "#{@url}/api/v3/simple/price?ids=#{coins_query}&vs_currencies=#{@currency}"
-  end
-
   defp parse({:ok, response}) do
     {:ok,
      Jason.decode!(response.body)
@@ -56,4 +43,10 @@ defmodule PortfolioTracker.Crypto.CoinGeckoApi do
   end
 
   defp parse(err), do: err
+
+  defp headers() do
+    [accept: "Application/json; Charset=utf-8", ContentType: "application/json"]
+  end
+
+  defp base_url(), do: Application.get_env(:portfolio_tracker, :crypto)[:coin_gecko_api_url]
 end

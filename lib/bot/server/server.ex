@@ -3,8 +3,6 @@ defmodule PortfolioTracker.Bot.Server do
   require Logger
   alias PortfolioTracker.Bot.MessageHandler
 
-  @client Application.get_env(:portfolio_tracker, :bot_client)
-
   @interval 100
   def start_link(offset) do
     GenServer.start_link(__MODULE__, offset, name: __MODULE__)
@@ -17,13 +15,13 @@ defmodule PortfolioTracker.Bot.Server do
 
   @impl true
   def handle_cast({:send_message, message, to}, state) do
-    {:ok, _} = @client.send(message, to)
+    {:ok, _} = client().send(message, to)
     {:noreply, state}
   end
 
   @impl true
   def handle_info(:get_messages, offset) do
-    {:ok, update} = @client.get_messages(offset: offset, limit: 1)
+    {:ok, update} = client().get_messages(offset: offset, limit: 1)
     {:noreply, handle(update, offset), {:continue, :call_itself}}
   end
 
@@ -42,6 +40,8 @@ defmodule PortfolioTracker.Bot.Server do
     :ok = MessageHandler.handle_message(message)
     id + 1
   end
+
+  defp client(), do: Application.get_env(:portfolio_tracker, :bot_client)
 
   def send_message(message, to),
     do: GenServer.cast(__MODULE__, {:send_message, message, to})

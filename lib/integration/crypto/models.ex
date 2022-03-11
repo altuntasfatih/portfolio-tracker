@@ -8,5 +8,4 @@ defmodule PortfolioTracker.Crypto.Api.Models do
             currency: String.t()
           }
   end
-
 end

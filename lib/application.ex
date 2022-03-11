@@ -2,8 +2,6 @@ defmodule PortfolioTracker.Application do
   @moduledoc false
   use Application
 
-  @env Mix.env()
-
   @impl true
   def start(_type, _args) do
     opts = [
@@ -13,17 +11,19 @@ defmodule PortfolioTracker.Application do
       name: PortfolioTracker.BaseSupervisor
     ]
 
-    Supervisor.start_link(children_by_env(@env), opts)
+    Mix.env()
+    |> children()
+    |> Supervisor.start_link(opts)
   end
 
-  defp children_by_env(:test) do
+  defp children(:test) do
     [{PortfolioTracker.Supervisor, :ok}]
   end
 
-  defp children_by_env(_) do
+  defp children(_) do
     [
       {PortfolioTracker.Supervisor, :ok},
-      {PortfolioTracker.Crypto.CoinGeckoCache,:ok},
+      {PortfolioTracker.Crypto.CoinGeckoCache, :ok},
       # -1 is offset get last message
       {PortfolioTracker.Bot.Server, -1}
     ]

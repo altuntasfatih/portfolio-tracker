@@ -1,7 +1,7 @@
 defmodule PortfolioTracker.Repo do
   require Logger
 
-  @backup_path Application.get_env(:portfolio_tracker, :backup_path)
+  @backup_path Application.compile_env(:portfolio_tracker, :backup_path)
 
   def get(id) do
     case File.read(@backup_path <> "#{id}") do
