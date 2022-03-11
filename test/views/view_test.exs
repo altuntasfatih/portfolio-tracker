@@ -22,8 +22,7 @@ defmodule PortfolioTracker.ViewTest do
       Portfolio.new(@id)
       |> Portfolio.add_asset(Map.put(Asset.new("A", @asset_type, 66, 18.20), :rate, 3.0))
 
-    assert View.to_str(portfolio, :long) ==
-             "Your portfolio:\n\nValue: 1201.22\nCost: 1201.22\nRate: 0.0 🟢 \nTime: \n \nName: A\nValue: 1201.21\nTotal: 66\nPrice: 18.2\nCost Price:  18.2\nRate: 3.0 🟢 \n"
+    assert View.to_str(portfolio, :long) == "Your portfolio:\n\nValue: 1201.22\nCost: 1201.22\nRate: 0.0 🟢 \nTime: \n \nName: A\nValue: 1201.21\nTotal: 66\nPrice: 18.2\nCost Price:  18.2\nRate: 3.0 🟢 \n\n"
   end
 
   test "it_should_return_string_represantation_of_asset" do
