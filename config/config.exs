@@ -16,7 +16,7 @@ config :portfolio_tracker, :bist,
 
 config :portfolio_tracker, :crypto,
   api: PortfolioTracker.Crypto.CoinGeckoApi,
-  coin_gecko_api_url: "https://api.coingecko.com"
+  coin_gecko_api_url: "https://api.coingecko.com/api/v3/"
 
 config :portfolio_tracker,
   backup_path: "./backup/",

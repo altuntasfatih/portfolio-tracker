@@ -88,8 +88,6 @@ defmodule PortfolioTracker.View do
   def to_str({:error, :portfolio_already_created}),
     do: "Your portfolio tracker have already created"
 
-  def to_str({:ok, :portfolio_created}), do: "Portfolio tracker was created for you"
-
   def to_str({:error, :missing_parameter}),
     do: "Argumet/Arguments are missing"
 
@@ -98,6 +96,13 @@ defmodule PortfolioTracker.View do
 
   def to_str({:error, :instruction_not_found}),
     do: "Instruction does not exist"
+
+  def to_str({:error, :coin_not_found}),
+    do: "Coin name is not found in list, look up -> check it from https://api.coingecko.com/api/v3/coins/list"
+
+  def to_str({:error, any}), do: Atom.to_string(any)
+
+  def to_str({:ok, :portfolio_created}), do: "Portfolio tracker was created for you"
 
   def to_str({:ok, reply}), do: reply
 

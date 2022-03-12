@@ -10,7 +10,7 @@ defmodule PortfolioTracker.Crypto.CoinGeckoApi do
           {:error, HTTPoison.Error.t()} | {:ok, %{String.t() => CryptoPrice.t()}}
   def get_price(coin_list) when is_list(coin_list) do
     coins = Enum.join(coin_list, ",")
-    url = base_url() <> "/api/v3/simple/price?ids=#{coins}&vs_currencies=#{@currency}"
+    url = base_url() <> "/simple/price?ids=#{coins}&vs_currencies=#{@currency}"
 
     HTTPoison.get(url, headers())
     |> parse()
@@ -20,7 +20,7 @@ defmodule PortfolioTracker.Crypto.CoinGeckoApi do
   def look_up(name), do: CoinGeckoCache.look_up(name)
 
   def get_coin_list() do
-    url = base_url() <> "/api/v3/coins/list"
+    url = base_url() <> "/coins/list"
     {:ok, response} = HTTPoison.get(url, headers())
 
     Jason.decode!(response.body)
