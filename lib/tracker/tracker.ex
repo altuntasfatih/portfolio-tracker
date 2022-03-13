@@ -59,7 +59,8 @@ defmodule PortfolioTracker.Tracker do
         {:noreply,
          Portfolio.add_asset(state, %Asset{
            asset
-           | name: id
+           | id: id,
+             name: name
          })}
 
       err ->
@@ -142,20 +143,20 @@ defmodule PortfolioTracker.Tracker do
     end)
   end
 
-  def get_crypto_prices(asset_names) do
-    {:ok, current_prices} = asset_names |> Crypto.Api.get_price()
+  def get_crypto_prices(asset_ids) do
+    {:ok, current_prices} = asset_ids |> Crypto.Api.get_price()
 
-    fn name ->
-      crypto = Map.get(current_prices, name)
+    fn id ->
+      crypto = Map.get(current_prices, id)
       if crypto != nil, do: crypto.price, else: nil
     end
   end
 
-  def get_bist_prices(asset_names) do
-    {:ok, current_prices} = asset_names |> Bist.Api.get_price()
+  def get_bist_prices(asset_ids) do
+    {:ok, current_prices} = asset_ids |> Bist.Api.get_price()
 
-    fn name ->
-      stock = Map.get(current_prices, name)
+    fn id ->
+      stock = Map.get(current_prices, id)
       if stock != nil, do: stock.price, else: nil
     end
   end
@@ -172,18 +173,18 @@ defmodule PortfolioTracker.Tracker do
 
   defp update_asset_by_type([%Asset{type: :crypto} | _] = cryptos) do
     get_price =
-      Enum.map(cryptos, fn c -> c.name end)
+      Enum.map(cryptos, fn c -> c.id end)
       |> get_crypto_prices()
 
-    Enum.map(cryptos, &calculate_asset(&1, get_price.(&1.name)))
+    Enum.map(cryptos, &calculate_asset(&1, get_price.(&1.id)))
   end
 
   defp update_asset_by_type([%Asset{type: :bist} | _] = stocks) do
     get_price =
-      Enum.map(stocks, fn c -> c.name end)
+      Enum.map(stocks, fn c -> c.id end)
       |> get_bist_prices()
 
-    Enum.map(stocks, &calculate_asset(&1, get_price.(&1.name)))
+    Enum.map(stocks, &calculate_asset(&1, get_price.(&1.id)))
   end
 
   defp calculate_asset(%Asset{} = asset, nil), do: asset

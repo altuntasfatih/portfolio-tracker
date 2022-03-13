@@ -1,5 +1,6 @@
 defmodule Asset do
-  defstruct name: "",
+  defstruct id: "",
+            name: "",
             total: 0.0,
             type: nil,
             cost_price: 0.0,
@@ -10,6 +11,7 @@ defmodule Asset do
 
   @type type :: :crypto | :bist
   @type t :: %Asset{
+          id: String.t(),
           name: String.t(),
           type: type(),
           total: float(),
@@ -22,9 +24,14 @@ defmodule Asset do
 
   @spec new(String.t(), type(), float(), float()) :: Asset.t()
   def new(name, type, total, price) when is_atom(type) do
+    new(name, name, type, total, price)
+  end
+
+  def new(id, name, type, total, price) when is_atom(type) do
     value = (total * price) |> Util.round_ceil()
 
     %Asset{
+      id: id,
       name: name,
       total: total,
       type: type,

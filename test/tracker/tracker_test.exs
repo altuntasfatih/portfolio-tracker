@@ -28,18 +28,19 @@ defmodule PortfolioTracker.TrackerTest do
 
   test "it should handle add_asset message with crypto asset", %{pid: pid} do
     PortfolioTracker.CryptoMock
-    |> expect(:look_up, fn "btc" -> {:ok, "bitcoin"} end)
+    |> expect(:look_up, fn "bitcoin" -> {:ok, "btc"} end)
 
-    asset = Asset.new("btc", :crypto, 66, 18.20)
+    asset = Asset.new("btc", "bitcoin", :crypto, 66, 18.20)
 
     assert add(pid, asset) == :ok
 
     assert get(pid).assets ==
              %{
                "bitcoin" => %Asset{
+                 id: "btc",
+                 name: "bitcoin",
                  cost: 1201.21,
                  cost_price: 18.2,
-                 name: "bitcoin",
                  price: 18.2,
                  rate: 0.0,
                  total: 66,
@@ -60,7 +61,7 @@ defmodule PortfolioTracker.TrackerTest do
   test "it should handle live message", %{pid: pid} do
     asset = Asset.new("AVISA", :bist, 10, 10.0)
     asset1 = Asset.new("TUPRS", :bist, 10, 10.0)
-    asset2 = Asset.new("btc", :crypto, 10, 10.0)
+    asset2 = Asset.new("bitcoin", :crypto, 10, 10.0)
 
     PortfolioTracker.BistMock
     |> expect(:get_price, fn ["AVISA", "TUPRS"] ->
@@ -69,11 +70,11 @@ defmodule PortfolioTracker.TrackerTest do
     end)
 
     PortfolioTracker.CryptoMock
-    |> expect(:look_up, fn "btc" -> {:ok, "bitcoin"} end)
+    |> expect(:look_up, fn "bitcoin" -> {:ok, "btc"} end)
 
     PortfolioTracker.CryptoMock
-    |> expect(:get_price, fn ["bitcoin"] ->
-      {:ok, %{"bitcoin" => %{name: "bitcoin", currency: "usd", price: 11.00}}}
+    |> expect(:get_price, fn ["btc"] ->
+      {:ok, %{"btc" => %{name: "btc", currency: "usd", price: 11.00}}}
     end)
 
     assert add(pid, asset) == :ok
@@ -85,9 +86,10 @@ defmodule PortfolioTracker.TrackerTest do
 
     assert portfolio.assets == %{
              "AVISA" => %Asset{
+               id: "AVISA",
+               name: "AVISA",
                cost: 100.0,
                cost_price: 10.0,
-               name: "AVISA",
                price: 11.0,
                rate: 10.0,
                total: 10,
@@ -95,9 +97,10 @@ defmodule PortfolioTracker.TrackerTest do
                value: 110.0
              },
              "TUPRS" => %Asset{
+               id: "TUPRS",
+               name: "TUPRS",
                cost: 100.0,
                cost_price: 10.0,
-               name: "TUPRS",
                price: 12.0,
                rate: 20.0,
                total: 10,
@@ -105,9 +108,10 @@ defmodule PortfolioTracker.TrackerTest do
                value: 120.0
              },
              "bitcoin" => %Asset{
+               id: "btc",
+               name: "bitcoin",
                cost: 100.0,
                cost_price: 10.0,
-               name: "bitcoin",
                price: 11.0,
                rate: 10.0,
                total: 10,
