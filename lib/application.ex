@@ -2,6 +2,8 @@ defmodule PortfolioTracker.Application do
   @moduledoc false
   use Application
 
+  @env Mix.env()
+
   @impl true
   def start(_type, _args) do
     opts = [
@@ -11,7 +13,7 @@ defmodule PortfolioTracker.Application do
       name: PortfolioTracker.BaseSupervisor
     ]
 
-    Mix.env()
+    @env
     |> children()
     |> Supervisor.start_link(opts)
   end
