@@ -7,8 +7,10 @@ defmodule Asset do
             cost: 0.0,
             price: 0.0,
             value: 0.0,
-            rate: 0.0
+            rate: 0.0,
+            currency: :usd
 
+  @type currency :: :usd | :try
   @type type :: :crypto | :bist
   @type t :: %Asset{
           id: String.t(),
@@ -19,19 +21,17 @@ defmodule Asset do
           cost: float(),
           price: float(),
           value: float(),
-          rate: float()
+          rate: float(),
+          currency: currency()
         }
 
-  @spec new(String.t(), type(), float(), float()) :: Asset.t()
-  def new(name, type, total, price) when is_atom(type) do
-    new(name, name, type, total, price)
-  end
+  def new(name, :bist, total, price), do: new(name, :bist, total, price, :try)
 
-  def new(id, name, type, total, price) when is_atom(type) do
+  def new(name, type, total, price, currency \\ :usd) when is_atom(type) do
     value = (total * price) |> Util.round_ceil()
 
     %Asset{
-      id: id,
+      id: name,
       name: name,
       total: total,
       type: type,
@@ -39,7 +39,8 @@ defmodule Asset do
       cost: value,
       price: price,
       value: value,
-      rate: 0.0
+      rate: 0.0,
+      currency: currency
     }
   end
 

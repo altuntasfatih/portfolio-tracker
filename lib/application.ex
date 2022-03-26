@@ -17,7 +17,6 @@ defmodule PortfolioTracker.Application do
     |> children()
     |> Supervisor.start_link(opts)
   end
-
   defp children(:test) do
     [{PortfolioTracker.Supervisor, :ok}]
   end

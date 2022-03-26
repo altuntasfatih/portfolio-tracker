@@ -30,7 +30,7 @@ defmodule PortfolioTracker.TrackerTest do
     PortfolioTracker.CryptoMock
     |> expect(:look_up, fn "bitcoin" -> {:ok, "btc"} end)
 
-    asset = Asset.new("btc", "bitcoin", :crypto, 66, 18.20)
+    asset = Asset.new("bitcoin", :crypto, 66, 18.20) |> Map.put(:id, "btc")
 
     assert add(pid, asset) == :ok
 
@@ -94,7 +94,8 @@ defmodule PortfolioTracker.TrackerTest do
                rate: 10.0,
                total: 10,
                type: :bist,
-               value: 110.0
+               value: 110.0,
+               currency: :try
              },
              "TUPRS" => %Asset{
                id: "TUPRS",
@@ -105,7 +106,8 @@ defmodule PortfolioTracker.TrackerTest do
                rate: 20.0,
                total: 10,
                type: :bist,
-               value: 120.0
+               value: 120.0,
+               currency: :try
              },
              "bitcoin" => %Asset{
                id: "btc",
@@ -116,7 +118,8 @@ defmodule PortfolioTracker.TrackerTest do
                rate: 10.0,
                total: 10,
                type: :crypto,
-               value: 110.0
+               value: 110.0,
+               currency: :usd
              }
            }
 
