@@ -16,10 +16,8 @@ defmodule Util do
   end
 
   def current_time() do
-    {:ok, date} = DateTime.now("Europe/Istanbul")
-
-    DateTime.truncate(date, :second)
-    |> DateTime.to_iso8601()
+    {:ok, date} =  DateTime.now("Etc/UTC")
+    Calendar.strftime(date, "%H:%M:%S %y/%m/%d")
   end
 
   def rate(r) when r < 0, do: "#{r} 🔴 "

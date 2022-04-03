@@ -41,7 +41,7 @@ defmodule PortfolioTracker.View do
       value: p.value,
       cost: p.cost,
       rate: Util.rate(p.rate),
-      lime: p.time,
+      time: p.time,
       assets:
         Enum.reduce(get_assets(p), "", fn alert, acc ->
           acc <> to_str(alert, :long) <> "\n\n"
