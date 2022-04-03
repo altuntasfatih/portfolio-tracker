@@ -9,7 +9,7 @@ defmodule Asset do
             value: 0.0,
             rate: 0.0
 
-  @type type :: :crypto | :bist
+  @type type :: :crypto
   @type t :: %Asset{
           id: String.t(),
           name: String.t(),
@@ -55,10 +55,9 @@ defmodule Asset do
     }
   end
 
-  def get_asset_types(), do: [:crypto, :bist]
+  def get_asset_types(), do: [:crypto]
 
   @spec parse_type(String.t()) :: {:ok, type()} | {:error, any()}
   def parse_type("crypto"), do: {:ok, :crypto}
-  def parse_type("bist"), do: {:ok, :bist}
   def parse_type(_), do: {:error, "invlaid asset type"}
 end

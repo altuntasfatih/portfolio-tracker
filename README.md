@@ -1,13 +1,11 @@
 # Portfolio Tracker
 
-It is a Telegram bot that follows asset's prices according to your portfolio.
+It is a Telegram bot that follows your asset's prices according to your portfolio.
 Also it supports custom alert conditions for your thresholds. When condition hits, it sends a notification to your telegram acount.
 
-Currently it supports two types of asset which  are :bist(a.k.a The Borsa İstanbul) and :crypto(Crypto currency).
+Currently it supports only crypto assets(:crypto: Crypto currency).
 
-To fetch live price of Bist's stocks the [Collect_Api](https://collectapi.com/tr/api/economy/altin-doviz-ve-borsa-api) is using.
-
-To fetch live price of Cryptocurrencies the [CoinGecko](https://www.coingecko.com/en/api) is using.
+To fetch live price of Cryptocurrencies  [CoinGecko Api ](https://www.coingecko.com/en/api) is using.
 
 ## Bot
 [<img width="398" alt="Screen Shot 2021-04-30 at 22 30 11" src="https://user-images.githubusercontent.com/13722649/116748942-daaa8280-aa08-11eb-8502-43f1bda81e2d.png">](https://t.me/foter_portfolio_tracker_bot)
@@ -16,9 +14,9 @@ To fetch live price of Cryptocurrencies the [CoinGecko](https://www.coingecko.co
 
 
 ### How to use
-1. Firstly you should create a portfolio.
+1. Firstly, you should create a portfolio.
 2. Then you can add or remove any number of assets to your portfolio.
-3. Also you can add or remove custom alerts for your assets.
+3. You can add or remove custom alerts for your assets.
 4. You can learn and watch current value of your assets.
 
 <img width="410" alt="Screen Shot 2021-05-12 at 19 38 35" src="https://user-images.githubusercontent.com/13722649/118012635-f0e60600-b359-11eb-969c-c0209764e21a.png">

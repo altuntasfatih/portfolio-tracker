@@ -15,9 +15,9 @@ defmodule PortfolioTest do
   test "it_should_calculate_portfolio" do
     portfolio = Portfolio.new(@id)
     asset = Asset.new("A", :crypto, 66, 18.20) |> Asset.update(19.32)
-    asset2 = Asset.new("E", :bist, 460, 14.47) |> Asset.update(14.60)
+    asset2 = Asset.new("E", :crypto, 460, 14.47) |> Asset.update(14.60)
     asset3 = Asset.new("S", :crypto, 84, 14.28) |> Asset.update(14.48)
-    asset4 = Asset.new("D", :bist, 10, 110.22) |> Asset.update(100.70)
+    asset4 = Asset.new("D", :crypto, 10, 110.22) |> Asset.update(100.70)
 
     portfolio =
       Portfolio.add_asset(portfolio, asset)
@@ -54,9 +54,9 @@ defmodule PortfolioTest do
   end
 
   test "it_should_remove_alert" do
-    alert = Alert.new(:upper_limit, "A", :bist, 20.0)
+    alert = Alert.new(:upper_limit, "A", :crypto, 20.0)
     portfolio = Portfolio.new(@id) |> Portfolio.add_alert(alert)
 
-    assert Portfolio.remove_alert(portfolio, alert.asset_name).alerts == []
+    assert Portfolio.remove_alert(portfolio, alert.asset_id).alerts == []
   end
 end
