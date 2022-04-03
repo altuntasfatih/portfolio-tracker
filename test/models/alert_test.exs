@@ -7,7 +7,7 @@ defmodule AlertTest do
   end
 
   test "it_should_hit_upper_limit" do
-    alert = Alert.new(:upper_limit, "AVISA", :bist, 13.25)
+    alert = Alert.new(:upper_limit, "avax", :crypto, 13.25)
     assert Alert.is_hit(alert, 14.00) == true
   end
 end

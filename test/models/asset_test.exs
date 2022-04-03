@@ -1,8 +1,9 @@
 defmodule AssetTest do
   use ExUnit.Case
 
-  @name "Test"
-  @asset_type :bist
+  @id "t1"
+  @name "t"
+  @asset_type :crypto
   @total 100
   @cost_price 10.0
 
@@ -23,9 +24,9 @@ defmodule AssetTest do
   test "it_should_calculate_asset_value, " do
     new_price = 13.41
 
-    assert Asset.new("id",@name, @asset_type, @total, @cost_price) |> Asset.update(new_price) ==
+    assert Asset.new(@id, @name, @asset_type, @total, @cost_price) |> Asset.update(new_price) ==
              %Asset{
-               id: "id",
+               id: @id,
                name: @name,
                type: @asset_type,
                total: @total,

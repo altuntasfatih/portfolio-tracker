@@ -47,10 +47,10 @@ defmodule Portfolio do
   end
 
   @spec remove_alert(Portfolio.t(), String.t()) :: Portfolio.t()
-  def remove_alert(%Portfolio{alerts: current_alerts} = p, asset_name) do
+  def remove_alert(%Portfolio{alerts: current_alerts} = p, asset_id) do
     %Portfolio{
       p
-      | alerts: current_alerts |> Enum.filter(&(&1.asset_name != asset_name))
+      | alerts: current_alerts |> Enum.filter(&(&1.asset_id != asset_id))
     }
   end
 

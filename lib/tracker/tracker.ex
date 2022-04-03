@@ -4,7 +4,7 @@ defmodule PortfolioTracker.Tracker do
   """
   use GenServer
   alias PortfolioTracker.Bot.MessageSender
-  alias PortfolioTracker.{Crypto, Bist, Repo}
+  alias PortfolioTracker.{Crypto, Repo}
 
   def start_link(%Portfolio{} = state) do
     GenServer.start_link(__MODULE__, state, name: {:global, {state.id, __MODULE__}})
@@ -53,7 +53,7 @@ defmodule PortfolioTracker.Tracker do
   end
 
   @impl true
-  def handle_cast({:add_asset, %Asset{type: :crypto, name: name} = asset}, state) do
+  def handle_cast({:add_asset, %Asset{name: name} = asset}, state) do
     case Crypto.Api.look_up(name) do
       {:ok, id} ->
         {:noreply,
@@ -67,11 +67,6 @@ defmodule PortfolioTracker.Tracker do
         send_message(err, state.id)
         {:noreply, state}
     end
-  end
-
-  @impl true
-  def handle_cast({:add_asset, %Asset{type: :bist} = asset}, state) do
-    {:noreply, Portfolio.add_asset(state, asset)}
   end
 
   @impl true
@@ -115,23 +110,12 @@ defmodule PortfolioTracker.Tracker do
 
   def check_alerts([%Alert{asset_type: :crypto} | _] = alerts) do
     current_price =
-      Enum.map(alerts, fn a -> a.asset_name end)
+      Enum.map(alerts, fn a -> a.asset_id end)
       |> get_crypto_prices()
 
     alerts
     |> Enum.split_with(fn alert ->
-      Alert.is_hit(alert, current_price.(alert.asset_name))
-    end)
-  end
-
-  def check_alerts([%Alert{asset_type: :bist} | _] = alerts) do
-    current_price =
-      Enum.map(alerts, fn a -> a.asset_name end)
-      |> get_bist_prices()
-
-    alerts
-    |> Enum.split_with(fn alert ->
-      Alert.is_hit(alert, current_price.(alert.asset_name))
+      Alert.is_hit(alert, current_price.(alert.asset_id))
     end)
   end
 
@@ -152,15 +136,6 @@ defmodule PortfolioTracker.Tracker do
     end
   end
 
-  def get_bist_prices(asset_ids) do
-    {:ok, current_prices} = asset_ids |> Bist.Api.get_price()
-
-    fn id ->
-      stock = Map.get(current_prices, id)
-      if stock != nil, do: stock.price, else: nil
-    end
-  end
-
   defp update_portfolio_with_live(%Portfolio{assets: assets} = portfolio) do
     assets =
       Map.values(assets)
@@ -177,14 +152,6 @@ defmodule PortfolioTracker.Tracker do
       |> get_crypto_prices()
 
     Enum.map(cryptos, &calculate_asset(&1, get_price.(&1.id)))
-  end
-
-  defp update_asset_by_type([%Asset{type: :bist} | _] = stocks) do
-    get_price =
-      Enum.map(stocks, fn c -> c.id end)
-      |> get_bist_prices()
-
-    Enum.map(stocks, &calculate_asset(&1, get_price.(&1.id)))
   end
 
   defp calculate_asset(%Asset{} = asset, nil), do: asset

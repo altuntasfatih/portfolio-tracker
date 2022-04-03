@@ -54,7 +54,7 @@ defmodule PortfolioTracker.View do
   def to_str(%Alert{} = alert) do
     File.read!(@messages_path <> "/alert.mustache")
     |> Mustache.render(%{
-      name: alert.asset_name,
+      name: alert.asset_id,
       type: Atom.to_string(alert.type),
       target: alert.target
     })
@@ -77,7 +77,8 @@ defmodule PortfolioTracker.View do
     |> Mustache.render()
   end
 
-  def to_str([:crypto, :bist]) do
+  ## todo check again
+  def to_str([:crypto]) do
     File.read!(@messages_path <> "/asset_types.mustache")
     |> Mustache.render()
   end
@@ -98,7 +99,8 @@ defmodule PortfolioTracker.View do
     do: "Instruction does not exist"
 
   def to_str({:error, :coin_not_found}),
-    do: "Coin name is not found in list, look up -> check it from https://api.coingecko.com/api/v3/coins/list"
+    do:
+      "Coin name is not found in list, look up -> check it from https://api.coingecko.com/api/v3/coins/list"
 
   def to_str({:error, any}), do: Atom.to_string(any)
 

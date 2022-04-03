@@ -45,15 +45,13 @@ defmodule PortfolioTracker.ViewTest do
   end
 
   test "it_should_return_string_represantation_of_alert_list" do
-    alert = Alert.new(:lower_limit, "TUPRS", :bist, 12.25)
-    alert2 = Alert.new(:upper_limit, "AVISA", :bist, 13.25)
+    alert = Alert.new(:lower_limit, "Avax", :crypto, 12.25)
+    alert2 = Alert.new(:upper_limit, "Eth", :crypto, 13.25)
 
-    assert View.to_str([alert, alert2]) ==
-             "Your Alerts:\nAlert For: TUPRS\nType: lower_limit\nTarget: 12.25\n\nAlert For: AVISA\nType: upper_limit\nTarget: 13.25\n\n"
+    assert View.to_str([alert, alert2]) == "Your Alerts:\nAlert For: Avax\nType: lower_limit\nTarget: 12.25\n\nAlert For: Eth\nType: upper_limit\nTarget: 13.25\n\n"
   end
 
   test "it_should_string_represantation_of_asset_types" do
-    assert Asset.get_asset_types() |> View.to_str() ==
-             ":bist    The Borsa Istanbul Stock\n:crypto  Crypto Currency"
+    assert Asset.get_asset_types() |> View.to_str() == ":crypto  Crypto Currency"
   end
 end

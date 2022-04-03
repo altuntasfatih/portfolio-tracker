@@ -9,11 +9,6 @@ config :logger, :console,
 config :nadia,
   token: System.get_env("BOT_TOKEN")
 
-config :portfolio_tracker, :bist,
-  api: PortfolioTracker.Bist.CollectApi,
-  collect_api_url: "https://api.collectapi.com/economy/liveBorsa",
-  collect_api_token: "apikey 1hMoXHboCriCLsuorHwr0t:54DcwpMehYTRBUvfDQRfFz"
-
 config :portfolio_tracker, :crypto,
   api: PortfolioTracker.Crypto.CoinGeckoApi,
   coin_gecko_api_url: "https://api.coingecko.com/api/v3/"
