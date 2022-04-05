@@ -3,7 +3,7 @@ defmodule PortfolioTracker.MessageHandlerTest do
   alias PortfolioTracker.Bot.MessageHandler
   alias PortfolioTracker.Supervisor
 
-  @from %{id: 1}
+  @from "testUser"
   setup do
     on_exit(fn -> Supervisor.termine_all() end)
   end
@@ -87,12 +87,12 @@ defmodule PortfolioTracker.MessageHandlerTest do
   end
 
   describe "parse/1" do
-    test "it should split message into arguments" do
-      assert MessageHandler.parse("/add_asset VAKBN VAKIF_BANK 250 4.5") ==
+    test "it should split message into command and aguments" do
+      assert MessageHandler.parse_command("/add_asset VAKBN VAKIF_BANK 250 4.5") ==
                {:add_asset, ["VAKBN", "VAKIF_BANK", "250", "4.5"]}
 
-      assert MessageHandler.parse("/remove_alert test") == {:remove_alert, ["test"]}
-      assert MessageHandler.parse("/get") == {:get, []}
+      assert MessageHandler.parse_command("/remove_alert test") == {:remove_alert, ["test"]}
+      assert MessageHandler.parse_command("/get") == {:get, []}
     end
   end
 end

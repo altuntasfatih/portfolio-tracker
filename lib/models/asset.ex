@@ -22,11 +22,13 @@ defmodule Asset do
           rate: float()
         }
 
-  @spec new(String.t(), type(), float(), float()) :: Asset.t()
-  def new(name, type, total, price) when is_atom(type) do
-    new(name, name, type, total, price)
-  end
-
+  @spec new(
+          asset_id :: String.t(),
+          asset_name :: String.t(),
+          assset_type :: type(),
+          asset_count :: float(),
+          asset_price :: float()
+        ) :: Asset.t()
   def new(id, name, type, total, price) when is_atom(type) do
     value = (total * price) |> Util.round_ceil()
 
@@ -41,6 +43,10 @@ defmodule Asset do
       value: value,
       rate: 0.0
     }
+  end
+
+  def new(name, type, total, price) when is_atom(type) do
+    new(name, name, type, total, price)
   end
 
   @spec update(Asset.t(), float()) :: Asset.t()
