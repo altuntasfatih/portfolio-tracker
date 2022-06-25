@@ -5,11 +5,10 @@ defmodule PortfolioTracker.Crypto.CoinGeckoCache do
   @table :coin_id_cache
 
   def start_link(_) do
-    GenServer.start_link(__MODULE__, nil, name: __MODULE__)
+    GenServer.start_link(__MODULE__, @table, name: __MODULE__)
   end
 
-  def init(_) do
-    table_name = @table
+  def init(table_name) do
     ^table_name = :ets.new(table_name, [:named_table])
 
     for {coin_name, coin} <- CoinGeckoApi.get_coin_list() do

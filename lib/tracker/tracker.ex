@@ -16,67 +16,60 @@ defmodule PortfolioTracker.Tracker do
   end
 
   @impl true
-  def init(state) do
-    {:ok, state}
+  def init(%Portfolio{} = p), do: {:ok, p}
+
+  @impl true
+  def handle_call(:get, _from, %Portfolio{} = p), do: {:reply, {:ok, p}, p}
+
+  @impl true
+  def handle_call(:get_alerts, _from, %Portfolio{} = p), do: {:reply, {:ok, p.alerts}, p}
+
+  @impl true
+  def handle_call(:destroy, _from, %Portfolio{} = p) do
+    # remove from backup
+    {:stop, :normal, :ok, p}
   end
 
   @impl true
-  def handle_call(:get, _from, state) do
-    {:reply, state, state}
+  def handle_cast(:live, %Portfolio{} = p) do
+    new_portfolio = update_portfolio_with_live(p)
+    send_message(new_portfolio, new_portfolio.id)
+
+    {:noreply, new_portfolio}
   end
 
   @impl true
-  def handle_call(:get_alerts, _from, state) do
-    {:reply, state.alerts, state}
+  def handle_cast({:set_alert, %Alert{} = alert}, %Portfolio{} = p) do
+    {:noreply, Portfolio.add_alert(p, alert)}
   end
 
   @impl true
-  def handle_call(:destroy, _from, state) do
-    {:stop, :normal, :ok, state}
-  end
-
-  @impl true
-  def handle_cast(:live, %Portfolio{assets: assets} = state) when map_size(assets) == 0 do
-    {:noreply, state}
-  end
-
-  @impl true
-  def handle_cast(:live, %Portfolio{} = state) do
-    new_state = update_portfolio_with_live(state)
-    send_message(new_state, state.id)
-    {:noreply, new_state}
-  end
-
-  @impl true
-  def handle_cast({:set_alert, %Alert{} = alert}, state) do
-    {:noreply, Portfolio.add_alert(state, alert)}
-  end
-
-  @impl true
-  def handle_cast({:add_asset, %Asset{name: name} = asset}, state) do
+  def handle_cast({:add_asset, %Asset{name: name} = asset}, %Portfolio{} = p) do
     case Crypto.Api.look_up(name) do
       {:ok, id} ->
-        {:noreply,
-         Portfolio.add_asset(state, %Asset{
-           asset
-           | id: id,
-             name: name
-         })}
+        new_portfolio =
+          Portfolio.add_asset(p, %Asset{
+            asset
+            | id: id,
+              name: name
+          })
+
+        {:noreply, new_portfolio}
 
       err ->
-        send_message(err, state.id)
-        {:noreply, state}
+        send_message(err, p.id)
+        {:noreply, p}
     end
   end
 
   @impl true
-  def handle_cast({:delete_asset, asset_name}, state) do
-    {:noreply, Portfolio.remove_asset(state, asset_name)}
+  def handle_cast({:delete_asset, asset_name}, %Portfolio{} = p) do
+    {:noreply, Portfolio.remove_asset(p, asset_name)}
   end
 
   @impl true
-  def handle_cast({:remove_alert, asset_name}, state) do
-    {:noreply, Portfolio.remove_alert(state, asset_name)}
+  def handle_cast({:remove_alert, asset_name}, %Portfolio{} = p) do
+    {:noreply, Portfolio.remove_alert(p, asset_name)}
   end
 
   @impl true

@@ -5,7 +5,7 @@ defmodule PortfolioTracker.Crypto.CoinGeckoApi do
 
   @currency "usd"
 
-  @impl true
+  @impl PortfolioTracker.Crypto.Api
   @spec get_price(maybe_improper_list) ::
           {:error, HTTPoison.Error.t()} | {:ok, %{String.t() => CryptoPrice.t()}}
   def get_price(coin_list) when is_list(coin_list) do
@@ -16,7 +16,7 @@ defmodule PortfolioTracker.Crypto.CoinGeckoApi do
     |> parse()
   end
 
-  @impl true
+  @impl PortfolioTracker.Crypto.Api
   def look_up(name), do: CoinGeckoCache.look_up(name)
 
   def get_coin_list() do

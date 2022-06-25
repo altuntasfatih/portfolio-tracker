@@ -44,17 +44,19 @@ defmodule PortfolioTracker.Bot.MessageHandler do
     end
   end
 
+  # todo tracher should return {:ok,result} or {:error, err}
+  # use with to remove redundant code
   def handle(:get, _, from) do
     case Tracker.get(from) do
       {:error, err} -> {:error, err}
-      resp -> View.to_str(resp, :short)
+      {:ok, resp} -> View.to_str(resp, :short)
     end
   end
 
   def handle(:get_detail, _, from) do
     case Tracker.get(from) do
       {:error, err} -> {:error, err}
-      resp -> View.to_str(resp, :long)
+      {:ok, resp} -> View.to_str(resp, :long)
     end
   end
 

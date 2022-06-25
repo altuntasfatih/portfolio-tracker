@@ -76,13 +76,12 @@ defmodule PortfolioTracker.MessageHandlerTest do
                :ok
 
       assert MessageHandler.handle(:remove_alert, ["dot"], @from) == :ok
-
-      assert MessageHandler.handle(:get_alerts, [], @from) == []
+      assert MessageHandler.handle(:get_alerts, [], @from) == {:ok, []}
 
       assert MessageHandler.handle(:set_alert, ["lower_limit", "TEST", "crppto", "10.67"], @from) ==
                :ok
 
-      [_ | _] = MessageHandler.handle(:get_alerts, [], @from)
+      assert {:ok, [_ | _]} = MessageHandler.handle(:get_alerts, [], @from)
     end
   end
 

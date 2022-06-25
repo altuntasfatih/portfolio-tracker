@@ -15,7 +15,7 @@ defmodule PortfolioTracker.TrackerTest do
   end
 
   test "it should handle get message", %{pid: pid} do
-    assert get(pid) == @portfolio
+    assert {:ok, @portfolio} = get(pid)
   end
 
   test "it should handle add_asset message with crypto asset", %{pid: pid} do
@@ -23,10 +23,11 @@ defmodule PortfolioTracker.TrackerTest do
     |> expect(:look_up, fn "bitcoin" -> {:ok, "btc"} end)
 
     asset = Asset.new("btc", "bitcoin", :crypto, 66, 18.20)
-
     assert add(pid, asset) == :ok
 
-    assert get(pid).assets ==
+    assert {:ok, portfolio} = get(pid)
+
+    assert portfolio.assets ==
              %{
                "bitcoin" => %Asset{
                  id: "btc",
@@ -46,7 +47,7 @@ defmodule PortfolioTracker.TrackerTest do
     asset = add_crpto_asset(pid, {"avalanche", "avax", 66, 18.20})
 
     assert delete(pid, asset.name) == :ok
-    assert get(pid) == @portfolio
+    assert {:ok, @portfolio} = get(pid)
   end
 
   test "it should handle live message", %{pid: pid} do
@@ -70,7 +71,7 @@ defmodule PortfolioTracker.TrackerTest do
     assert add(pid, asset1) == :ok
     assert live(pid) == :ok
 
-    portfolio = get(pid)
+    assert {:ok, portfolio} = get(pid)
 
     assert portfolio.assets == %{
              "avalanche" => %Asset{
@@ -102,27 +103,28 @@ defmodule PortfolioTracker.TrackerTest do
 
   test "it should handle add_alert message", %{pid: pid} do
     alert = Alert.new(:lower_limit, "xrp", :crypto, 16.0)
-
     add_alert(pid, alert)
-    assert get_alerts(pid) == [alert]
+
+    assert get_alerts(pid) == {:ok, [alert]}
   end
 
   test "it should handle delete_alert message", %{pid: pid} do
     alert = Alert.new(:lower_limit, "eth", :crypto, 16.0)
-
     add_alert(pid, alert)
+
     assert remove_alert(pid, alert.asset_id) == :ok
-    assert get_alerts(pid) == []
+    assert get_alerts(pid) == {:ok, []}
   end
 
   test "it should handle check alerts message", %{pid: pid} do
-    [Alert.new(:lower_limit, "avax", :crypto, 100), Alert.new(:upper_limit, "btc", :crypto, 600)]
-    |> Enum.each(&add_alert(pid, &1))
-
-    not_hit_alerts =
+    alerts =
       [
+        # not hit alerrs
         Alert.new(:lower_limit, "xrp", :crypto, 190),
-        Alert.new(:upper_limit, "eth", :crypto, 20_000)
+        Alert.new(:upper_limit, "eth", :crypto, 20_000),
+        # hit alerts
+        Alert.new(:lower_limit, "avax", :crypto, 100),
+        Alert.new(:upper_limit, "btc", :crypto, 600)
       ]
       |> tap(fn alerts -> Enum.each(alerts, &add_alert(pid, &1)) end)
 
@@ -138,7 +140,7 @@ defmodule PortfolioTracker.TrackerTest do
     end)
 
     assert check_alerts(pid) == :ok
-    assert get_alerts(pid) == not_hit_alerts
+    assert get_alerts(pid) == {:ok, Enum.take(alerts, 2)}
   end
 
   defp get(pid), do: GenServer.call(pid, :get)
