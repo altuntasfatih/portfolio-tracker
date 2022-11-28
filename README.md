@@ -31,9 +31,9 @@ To fetch live price of Cryptocurrencies  [CoinGecko Api ](https://www.coingecko.
 | `/get_detail`     | It returns your portfolio with detail.                                           | `/get_detail`  |
 | `/live`           | It calculates your potfolio with live  prices.                                   | `/live`        |
 | `/get_asset_types`| It returns supported asset types                                                 | `/get_asset_types`  |
-| `/add_asset`      | It adds asset to your portfolio.                                                 | `/add_asset type name count price` (name must be same with exchange identifier)  |
+| `/add_asset`      | It adds asset to your portfolio.                                                 | `/add_asset asset_name asset_type count price` (name must be same with exchange identifier)  |
 | `/delete_asset`  | It deletes asset from portfolie.                                                 | `/delete_asset name`        |
-| `/set_alert`     | It creates a alert for a asset. When it hits target, it send notification to you.| `/set_alert type name target_price`  (type -> upper_limit or lower_limit)           |
+| `/set_alert`     | It creates a alert for a asset. When it hits target, it send notification to you.| `/set_alert type asset_name asset_type target_price`  (type -> upper_limit or lower_limit)           |
 | `/get_alerts`     | It returns active alerts for your portfolio.                                     | `/get_alerts`  |
 | `/start`          | Alias for `/help `                                                               | `/live`        |
 | `/help`           | Help()                                                                           | `/help`        |
