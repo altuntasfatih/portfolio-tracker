@@ -20,4 +20,7 @@ jobs:
           otp-version: '25'
           elixir-version: '1.14'
       - run: mix deps.get
+      - run: mix format
+      - run: mix compile
+      - run: mix credo
       - run: mix test

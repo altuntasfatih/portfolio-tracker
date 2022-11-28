@@ -64,7 +64,7 @@ defmodule PortfolioTracker.MessageHandlerTest do
 
     test "it should handle get message", _ do
       assert MessageHandler.handle(:get, [], @from) ==
-               "Your portfolio:\n\nValue: 0.0\nRate: 0.0 🟢 \nTime: "
+               "Your portfolio:\n\nTotal value: 0.0 USD\nRate: +% 0.0 🟢"
     end
 
     test "it should return portfolio not found error", _ do
