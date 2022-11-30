@@ -2,14 +2,14 @@ defmodule Asset do
   defstruct id: "",
             name: "",
             total: 0.0,
-            type: nil,
+            type: :crypto,
             cost_price: 0.0,
             cost: 0.0,
             price: 0.0,
             value: 0.0,
             rate: 0.0
 
-  @type type :: :crypto
+  @type type :: :crypto | atom()
   @type t :: %Asset{
           id: String.t(),
           name: String.t(),
@@ -25,18 +25,17 @@ defmodule Asset do
   @spec new(
           asset_id :: String.t(),
           asset_name :: String.t(),
-          assset_type :: type(),
           asset_count :: float(),
           asset_price :: float()
         ) :: Asset.t()
-  def new(id, name, type, total, price) when is_atom(type) do
+  def new(id, name, total, price) do
     value = (total * price) |> Util.round_ceil()
 
     %Asset{
       id: id,
       name: name,
       total: total,
-      type: type,
+      type: :crypto,
       cost_price: price,
       cost: value,
       price: price,
@@ -45,8 +44,8 @@ defmodule Asset do
     }
   end
 
-  def new(name, type, total, price) when is_atom(type) do
-    new(name, name, type, total, price)
+  def new(name, total, price) do
+    new(name, name, total, price)
   end
 
   @spec update(Asset.t(), float()) :: Asset.t()
@@ -60,10 +59,4 @@ defmodule Asset do
         rate: ((value - a.cost) / a.cost * 100) |> Util.round_ceil()
     }
   end
-
-  def get_asset_types(), do: [:crypto]
-
-  @spec parse_type(String.t()) :: {:ok, type()} | {:error, any()}
-  def parse_type("crypto"), do: {:ok, :crypto}
-  def parse_type(_), do: {:error, "invlaid asset type"}
 end

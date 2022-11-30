@@ -6,8 +6,6 @@ defmodule PortfolioTracker.Bot.MessageHandler do
           | :destroy
           | :get
           | :get_detail
-          | :live
-          | :get_asset_types
           | :add_asset
           | :delete_asset
           | :set_alert
@@ -60,15 +58,12 @@ defmodule PortfolioTracker.Bot.MessageHandler do
     end
   end
 
-  def handle(:live, _, from), do: Tracker.live(from)
   def handle(:destroy, _, from), do: Tracker.destroy(from)
-  def handle(:get_asset_types, _, _from), do: Asset.get_asset_types()
 
-  def handle(:add_asset, [name, type, count, price], from) do
+  def handle(:add_asset, [name, count, price], from) do
     with {count, _} <- Float.parse(count),
-         {price, _} <- Float.parse(price),
-         {:ok, type} <- Asset.parse_type(type) do
-      Asset.new(name, type, count, price)
+         {price, _} <- Float.parse(price) do
+      Asset.new(name, count, price)
       |> Tracker.add_asset(from)
     else
       _ -> {:error, :args_parse_error}
@@ -77,11 +72,10 @@ defmodule PortfolioTracker.Bot.MessageHandler do
 
   def handle(:add_asset, _, _), do: {:error, :missing_parameter}
 
-  def handle(:set_alert, [type, asset_name, asset_type, target_price], from) do
+  def handle(:set_alert, [type, asset_name, target_price], from) do
     with {target_price, _} <- Float.parse(target_price),
-         alert_type <- String.to_atom(type),
-         asset_type <- String.to_atom(asset_type) do
-      Alert.new(alert_type, asset_name, asset_type, target_price)
+         alert_type <- String.to_atom(type) do
+      Alert.new(alert_type, asset_name, target_price)
       |> Tracker.set_alert(from)
     else
       _ -> {:error, :args_parse_error}

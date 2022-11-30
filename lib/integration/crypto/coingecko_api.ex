@@ -3,14 +3,14 @@ defmodule PortfolioTracker.Crypto.CoinGeckoApi do
   alias PortfolioTracker.Crypto.Api.Models.CryptoPrice
   alias PortfolioTracker.Crypto.CoinGeckoCache
 
-  @currency "usd"
+  @default_currency "usd"
 
   @impl PortfolioTracker.Crypto.Api
   @spec get_price(maybe_improper_list) ::
           {:error, HTTPoison.Error.t()} | {:ok, %{String.t() => CryptoPrice.t()}}
   def get_price(coin_list) when is_list(coin_list) do
     coins = Enum.join(coin_list, ",")
-    url = base_url() <> "/simple/price?ids=#{coins}&vs_currencies=#{@currency}"
+    url = base_url() <> "/simple/price?ids=#{coins}&vs_currencies=#{@default_currency}"
 
     HTTPoison.get(url, headers())
     |> parse()
@@ -30,7 +30,7 @@ defmodule PortfolioTracker.Crypto.CoinGeckoApi do
         |> String.downcase()
         |> String.to_atom()
 
-      Map.put(acc, name, coin)
+      Map.put(acc, {name}, coin)
     end)
   end
 
@@ -38,7 +38,11 @@ defmodule PortfolioTracker.Crypto.CoinGeckoApi do
     {:ok,
      Jason.decode!(response.body)
      |> Enum.reduce(%{}, fn {name, value}, acc ->
-       Map.put(acc, name, %CryptoPrice{name: name, price: value[@currency], currency: @currency})
+       Map.put(acc, name, %CryptoPrice{
+         name: name,
+         price: value[@default_currency],
+         currency: @default_currency
+       })
      end)}
   end
 

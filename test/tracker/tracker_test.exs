@@ -19,10 +19,21 @@ defmodule PortfolioTracker.TrackerTest do
   end
 
   test "it should handle add_asset message with crypto asset", %{pid: pid} do
+    # given
     PortfolioTracker.CryptoMock
     |> expect(:look_up, fn "bitcoin" -> {:ok, "btc"} end)
 
-    asset = Asset.new("btc", "bitcoin", :crypto, 66, 18.20)
+    PortfolioTracker.CryptoMock
+    |> expect(:get_price, fn ["btc"] ->
+      {:ok,
+       %{
+         "btc" => %{name: "btc", currency: "usd", price: 50.5}
+       }}
+    end)
+
+    asset = Asset.new("btc", "bitcoin", 66, 18.20)
+
+    # then
     assert add(pid, asset) == :ok
 
     assert {:ok, portfolio} = get(pid)
@@ -30,15 +41,15 @@ defmodule PortfolioTracker.TrackerTest do
     assert portfolio.assets ==
              %{
                "bitcoin" => %Asset{
-                 id: "btc",
-                 name: "bitcoin",
                  cost: 1201.21,
                  cost_price: 18.2,
-                 price: 18.2,
-                 rate: 0.0,
+                 id: "btc",
+                 name: "bitcoin",
+                 price: 50.5,
+                 rate: 177.48,
                  total: 66,
                  type: :crypto,
-                 value: 1201.21
+                 value: 3333.0
                }
              }
   end
@@ -50,66 +61,15 @@ defmodule PortfolioTracker.TrackerTest do
     assert {:ok, @portfolio} = get(pid)
   end
 
-  test "it should handle live message", %{pid: pid} do
-    asset = add_crpto_asset(pid, {"avalanche", "avax", 5, 20})
-    asset1 = add_crpto_asset(pid, {"bitcoin", "btc", 10, 10_000})
-
-    PortfolioTracker.CryptoMock
-    |> expect(:look_up, fn "avalanche" -> {:ok, "avax"} end)
-    |> expect(:look_up, fn "bitcoin" -> {:ok, "btc"} end)
-
-    PortfolioTracker.CryptoMock
-    |> expect(:get_price, fn ["avax", "btc"] ->
-      {:ok,
-       %{
-         "btc" => %{name: "btc", currency: "usd", price: 40_000},
-         "avax" => %{name: "avax", currency: "usd", price: 85.00}
-       }}
-    end)
-
-    assert add(pid, asset) == :ok
-    assert add(pid, asset1) == :ok
-    assert live(pid) == :ok
-
-    assert {:ok, portfolio} = get(pid)
-
-    assert portfolio.assets == %{
-             "avalanche" => %Asset{
-               cost: 100.0,
-               cost_price: 20.0,
-               id: "avax",
-               name: "avalanche",
-               price: 85.0,
-               rate: 325.0,
-               total: 5,
-               type: :crypto,
-               value: 425.0
-             },
-             "bitcoin" => %Asset{
-               cost: 1.0e5,
-               cost_price: 1.0e4,
-               id: "btc",
-               name: "bitcoin",
-               price: 40_000,
-               rate: 300.0,
-               total: 10,
-               type: :crypto,
-               value: 4.0e5
-             }
-           }
-
-    assert portfolio.value == 400_425.0
-  end
-
   test "it should handle add_alert message", %{pid: pid} do
-    alert = Alert.new(:lower_limit, "xrp", :crypto, 16.0)
+    alert = Alert.new(:lower_limit, "xrp", 16.0)
     add_alert(pid, alert)
 
     assert get_alerts(pid) == {:ok, [alert]}
   end
 
   test "it should handle delete_alert message", %{pid: pid} do
-    alert = Alert.new(:lower_limit, "eth", :crypto, 16.0)
+    alert = Alert.new(:lower_limit, "eth", 16.0)
     add_alert(pid, alert)
 
     assert remove_alert(pid, alert.asset_id) == :ok
@@ -120,11 +80,11 @@ defmodule PortfolioTracker.TrackerTest do
     alerts =
       [
         # not hit alerrs
-        Alert.new(:lower_limit, "xrp", :crypto, 190),
-        Alert.new(:upper_limit, "eth", :crypto, 20_000),
+        Alert.new(:lower_limit, "xrp", 190),
+        Alert.new(:upper_limit, "eth", 20_000),
         # hit alerts
-        Alert.new(:lower_limit, "avax", :crypto, 100),
-        Alert.new(:upper_limit, "btc", :crypto, 600)
+        Alert.new(:lower_limit, "avax", 100),
+        Alert.new(:upper_limit, "btc", 600)
       ]
       |> tap(fn alerts -> Enum.each(alerts, &add_alert(pid, &1)) end)
 
@@ -145,7 +105,6 @@ defmodule PortfolioTracker.TrackerTest do
 
   defp get(pid), do: GenServer.call(pid, :get)
   defp add(pid, new_asset), do: GenServer.cast(pid, {:add_asset, new_asset})
-  defp live(pid), do: GenServer.cast(pid, :live)
 
   defp remove_alert(pid, asset_name), do: GenServer.cast(pid, {:remove_alert, asset_name})
   defp get_alerts(pid), do: GenServer.call(pid, :get_alerts)
@@ -156,7 +115,7 @@ defmodule PortfolioTracker.TrackerTest do
   end
 
   defp add_crpto_asset(pid, {name, id, count, price}) do
-    asset = Asset.new(name, :crypto, count, price)
+    asset = Asset.new(name, count, price)
 
     PortfolioTracker.CryptoMock
     |> expect(:look_up, fn ^name -> {:ok, id} end)

@@ -40,17 +40,13 @@ defmodule PortfolioTracker.MessageHandlerTest do
       assert MessageHandler.handle(:destroy, [], @from) == :ok
     end
 
-    test "it should handle get_asset_type message", _ do
-      assert MessageHandler.handle(:get_asset_types, [], @from) == Asset.get_asset_types()
-    end
-
     test "it should handle add_asset message", _ do
-      assert MessageHandler.handle(:add_asset, ["Ripple", "crypto", "250", "4.5"], @from) ==
+      assert MessageHandler.handle(:add_asset, ["Ripple", "250", "4.5"], @from) ==
                :ok
     end
 
     test "it should return args parse error", _ do
-      assert MessageHandler.handle(:add_asset, ["Ethereum", "crypto", "x", "x"], @from) ==
+      assert MessageHandler.handle(:add_asset, ["Ethereum", "x", "x"], @from) ==
                {:error, :args_parse_error}
     end
 
@@ -72,13 +68,13 @@ defmodule PortfolioTracker.MessageHandlerTest do
     end
 
     test "it should handle alert messages" do
-      assert MessageHandler.handle(:set_alert, ["upper_limit", "dot", "crppto", "42.67"], @from) ==
+      assert MessageHandler.handle(:set_alert, ["upper_limit", "dot", "42.67"], @from) ==
                :ok
 
       assert MessageHandler.handle(:remove_alert, ["dot"], @from) == :ok
       assert MessageHandler.handle(:get_alerts, [], @from) == {:ok, []}
 
-      assert MessageHandler.handle(:set_alert, ["lower_limit", "TEST", "crppto", "10.67"], @from) ==
+      assert MessageHandler.handle(:set_alert, ["lower_limit", "TEST", "10.67"], @from) ==
                :ok
 
       assert {:ok, [_ | _]} = MessageHandler.handle(:get_alerts, [], @from)

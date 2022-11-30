@@ -13,10 +13,10 @@ defmodule PortfolioTest do
   end
 
   test "it_should_calculate_portfolio" do
-    asset = Asset.new("A", :crypto, 66, 18.20) |> Asset.update(19.32)
-    asset2 = Asset.new("E", :crypto, 460, 14.47) |> Asset.update(14.60)
-    asset3 = Asset.new("S", :crypto, 84, 14.28) |> Asset.update(14.48)
-    asset4 = Asset.new("D", :crypto, 10, 110.22) |> Asset.update(100.70)
+    asset = Asset.new("A", 66, 18.20) |> Asset.update(19.32)
+    asset2 = Asset.new("E", 460, 14.47) |> Asset.update(14.60)
+    asset3 = Asset.new("S", 84, 14.28) |> Asset.update(14.48)
+    asset4 = Asset.new("D", 10, 110.22) |> Asset.update(100.70)
 
     portfolio =
       Portfolio.new(@id)
@@ -31,10 +31,10 @@ defmodule PortfolioTest do
   end
 
   test "it_should_sort_assets_by_rate" do
-    asset = Map.put(Asset.new("A", :crypto, 66, 18.20), :rate, 3.0)
-    asset2 = Map.put(Asset.new("E", :crypto, 460, 14.47), :rate, 0.0)
-    asset3 = Map.put(Asset.new("S", :crypto, 84, 14.28), :rate, -10.0)
-    asset4 = Map.put(Asset.new("D", :crypto, 84, 14.28), :rate, 7.0)
+    asset = Map.put(Asset.new("A", 66, 18.20), :rate, 3.0)
+    asset2 = Map.put(Asset.new("E", 460, 14.47), :rate, 0.0)
+    asset3 = Map.put(Asset.new("S", 84, 14.28), :rate, -10.0)
+    asset4 = Map.put(Asset.new("D", 84, 14.28), :rate, 7.0)
 
     portfolio =
       Portfolio.new(@id)
@@ -47,14 +47,14 @@ defmodule PortfolioTest do
   end
 
   test "it_should_add_alert_for_asset" do
-    alert = Alert.new(:upper_limit, "A", :crypto, 20.0)
+    alert = Alert.new(:upper_limit, "A", 20.0)
     portfolio = Portfolio.new(@id)
 
     assert Portfolio.add_alert(portfolio, alert).alerts == [alert]
   end
 
   test "it_should_remove_alert" do
-    alert = Alert.new(:upper_limit, "A", :crypto, 20.0)
+    alert = Alert.new(:upper_limit, "A", 20.0)
     portfolio = Portfolio.new(@id) |> Portfolio.add_alert(alert)
 
     assert Portfolio.remove_alert(portfolio, alert.asset_id).alerts == []

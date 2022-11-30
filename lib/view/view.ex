@@ -30,8 +30,7 @@ defmodule PortfolioTracker.View do
     File.read!(@messages_path <> "/portfolio_short.mustache")
     |> Mustache.render(%{
       value: p.value,
-      rate: Util.rate(p.rate),
-      time: p.time
+      rate: Util.rate(p.rate)
     })
   end
 
@@ -41,7 +40,6 @@ defmodule PortfolioTracker.View do
       value: p.value,
       cost: p.cost,
       rate: Util.rate(p.rate),
-      time: p.time,
       assets:
         Enum.reduce(get_assets(p), "", fn alert, acc ->
           acc <> to_str(alert, :long) <> "\n\n"
@@ -100,7 +98,7 @@ defmodule PortfolioTracker.View do
 
   def to_str({:error, :coin_not_found}),
     do:
-      "Coin name is not found in list, look up -> check it from https://api.coingecko.com/api/v3/coins/list"
+      "Asset name is not found in list, look up -> check it from https://api.coingecko.com/api/v3/coins/list"
 
   def to_str({:error, any}), do: Atom.to_string(any)
 

@@ -19,7 +19,10 @@ defmodule PortfolioTracker.Tracker do
   def init(%Portfolio{} = p), do: {:ok, p}
 
   @impl true
-  def handle_call(:get, _from, %Portfolio{} = p), do: {:reply, {:ok, p}, p}
+  def handle_call(:get, _from, %Portfolio{} = p) do
+    new_portfolio = update_portfolio_with_live(p)
+    {:reply, {:ok, new_portfolio}, new_portfolio}
+  end
 
   @impl true
   def handle_call(:get_alerts, _from, %Portfolio{} = p), do: {:reply, {:ok, p.alerts}, p}
@@ -28,14 +31,6 @@ defmodule PortfolioTracker.Tracker do
   def handle_call(:destroy, _from, %Portfolio{} = p) do
     # remove from backup
     {:stop, :normal, :ok, p}
-  end
-
-  @impl true
-  def handle_cast(:live, %Portfolio{} = p) do
-    new_portfolio = update_portfolio_with_live(p)
-    send_message(new_portfolio, new_portfolio.id)
-
-    {:noreply, new_portfolio}
   end
 
   @impl true
@@ -161,8 +156,6 @@ defmodule PortfolioTracker.Tracker do
     do: via_tuple(id, &GenServer.cast(&1, {:set_alert, alert}))
 
   def get_alerts(id), do: via_tuple(id, &GenServer.call(&1, :get_alerts))
-
-  def live(id), do: via_tuple(id, &GenServer.cast(&1, :live))
 
   def remove_alert(id, asset_name),
     do: via_tuple(id, &GenServer.cast(&1, {:remove_alert, asset_name}))

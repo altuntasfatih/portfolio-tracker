@@ -8,7 +8,7 @@ defmodule AssetTest do
   @cost_price 10.0
 
   test "it_should_create_asset" do
-    assert Asset.new(@name, @asset_type, @total, @cost_price) == %Asset{
+    assert Asset.new(@name, @total, @cost_price) == %Asset{
              id: @name,
              name: @name,
              type: @asset_type,
@@ -24,7 +24,7 @@ defmodule AssetTest do
   test "it_should_calculate_asset_value, " do
     new_price = 13.41
 
-    assert Asset.new(@id, @name, @asset_type, @total, @cost_price) |> Asset.update(new_price) ==
+    assert Asset.new(@id, @name, @total, @cost_price) |> Asset.update(new_price) ==
              %Asset{
                id: @id,
                name: @name,
@@ -41,7 +41,7 @@ defmodule AssetTest do
   test "it_should_calculate_asset_value_when_rate_is_negative " do
     new_price = 8.57
 
-    assert Asset.new(@name, @asset_type, @total, @cost_price) |> Asset.update(new_price) ==
+    assert Asset.new(@name, @total, @cost_price) |> Asset.update(new_price) ==
              %Asset{
                id: @name,
                name: @name,

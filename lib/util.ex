@@ -15,11 +15,6 @@ defmodule Util do
     Float.round(number, 2)
   end
 
-  def current_time() do
-    {:ok, date} = DateTime.now("Etc/UTC")
-    Calendar.strftime(date, "%H:%M:%S - %d/%m/%y")
-  end
-
   def rate(r) when r < 0, do: "-% #{r} 🔴"
   def rate(r) when r >= 0, do: "+% #{r} 🟢"
 end
